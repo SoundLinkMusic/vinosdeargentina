@@ -13,27 +13,27 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Configuración del Sistema de Diseño (Design Tokens) -->
+    <!-- Configuración del Sistema de Diseño -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         wine: {
-                            900: '#360914', // Borgoña muy oscuro
-                            800: '#54101d', // Granate profundo
-                            700: '#7a182a', // Rojo vino
-                            600: '#9e1f36', // Acento primario
+                            900: '#360914',
+                            800: '#54101d',
+                            700: '#7a182a',
+                            600: '#9e1f36',
                         },
                         gold: {
-                            500: '#C89F5D', // Oro envejecido
-                            600: '#A67F43', // Oro oscuro
+                            500: '#C89F5D',
+                            600: '#A67F43',
                         },
                         stone: {
-                            50: '#FAF9F7',  // Fondo principal (blanco roto)
-                            100: '#F2F0EB', // Fondos secundarios
-                            800: '#2D2B2A', // Textos principales
-                            900: '#1A1918', // Footer
+                            50: '#FAF9F7',
+                            100: '#F2F0EB',
+                            800: '#2D2B2A',
+                            900: '#1A1918',
                         }
                     },
                     fontFamily: {
@@ -49,26 +49,28 @@
         }
     </script>
 
-    <!-- CSS Personalizado -->
+    <!-- CSS Personalizado y Sistema Multiidioma -->
     <style>
         body { background-color: theme('colors.stone.50'); color: theme('colors.stone.800'); }
+        
+        /* Sistema de Idiomas (Oculta el idioma no seleccionado de forma instantánea) */
+        body.lang-en [lang="es"] { display: none !important; }
+        body.lang-es [lang="en"] { display: none !important; }
         
         /* Acento de Canarias */
         .canary-stripe {
             background: linear-gradient(90deg, #ffffff 0%, #ffffff 33.33%, #00a1e4 33.33%, #00a1e4 66.66%, #fcd116 66.66%, #fcd116 100%);
         }
         
-        /* Animaciones del Carrito */
+        /* Animaciones */
         #cart-drawer { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .drawer-open { transform: translateX(0) !important; }
         #cart-overlay { transition: opacity 0.3s ease; }
         
-        /* Estilo de fila de catálogo (Carta Premium) */
         .wine-row { transition: all 0.3s ease; }
         .wine-row:hover { background-color: white; transform: translateY(-2px); box-shadow: theme('boxShadow.premium'); border-color: transparent; z-index: 10; position: relative; border-radius: 0.5rem; }
         .wine-row.in-cart { background-color: theme('colors.stone.100'); border-left: 4px solid theme('colors.wine.700'); }
         
-        /* Efectos de botón interactivo */
         .btn-pop:active { transform: scale(0.95); }
         @keyframes pop {
             0% { transform: scale(1); }
@@ -77,30 +79,33 @@
         }
         .animate-pop { animation: pop 0.3s ease-out forwards; }
         
-        /* Clases dinámicas de filtro */
+        /* Clases de filtro dinámicas gestionadas por JS */
         .filter-btn { transition: all 0.3s ease; }
-        
-        input[type="number"]::-webkit-inner-spin-button, 
-        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
-<body class="antialiased relative">
+<body class="antialiased relative lang-es">
 
     <!-- Franja Canarias -->
     <div class="canary-stripe h-2.5 w-full fixed top-0 z-[100] shadow-md"></div>
 
+    <!-- Selector de Idiomas -->
+    <div class="fixed top-6 right-6 z-[110] flex bg-white/90 backdrop-blur-md p-1 rounded-full shadow-lg border border-stone-200 transition-all hover:shadow-xl">
+        <button id="btn-lang-es" onclick="setLanguage('es')" class="px-4 py-1.5 text-xs font-bold rounded-full bg-wine-900 text-white transition-all shadow-sm">ES</button>
+        <button id="btn-lang-en" onclick="setLanguage('en')" class="px-4 py-1.5 text-xs font-bold rounded-full text-stone-500 hover:text-wine-900 transition-all">EN</button>
+    </div>
+
     <!-- H E R O   S E C T I O N -->
     <header class="relative bg-wine-900 pt-32 pb-24 px-6 lg:pt-40 lg:pb-32 overflow-hidden">
         <div class="absolute inset-0 z-0">
-            <!-- Textura de fondo sutil (Viñedos) -->
-            <img src="https://images.unsplash.com/photo-1506377247377-2a5b3b0ca7df?auto=format&fit=crop&q=80&w=2070" alt="Viñedos de los Andes" class="w-full h-full object-cover object-center opacity-[0.15] mix-blend-luminosity">
+            <img src="https://images.unsplash.com/photo-1506377247377-2a5b3b0ca7df?auto=format&fit=crop&q=80&w=2070" alt="Viñedos" class="w-full h-full object-cover object-center opacity-[0.15] mix-blend-luminosity">
             <div class="absolute inset-0 bg-gradient-to-t from-wine-900 via-wine-900/90 to-transparent"></div>
         </div>
 
-        <div class="max-w-5xl mx-auto relative z-10 text-center flex flex-col items-center">
+        <div class="max-w-5xl mx-auto relative z-10 text-center flex flex-col items-center mt-6">
             <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 shadow-lg">
                 <span class="w-2 h-2 rounded-full bg-gold-500 animate-pulse"></span>
-                <span class="text-[10px] font-bold text-gold-500 tracking-[0.2em] uppercase">Venta Directa · Islas Canarias</span>
+                <span lang="es" class="text-[10px] font-bold text-gold-500 tracking-[0.2em] uppercase">Venta Directa · Islas Canarias</span>
+                <span lang="en" class="text-[10px] font-bold text-gold-500 tracking-[0.2em] uppercase">Direct Sales · Canary Islands</span>
             </div>
             
             <h1 class="text-6xl md:text-7xl lg:text-8xl font-serif text-white mb-6 tracking-tight drop-shadow-lg">
@@ -110,15 +115,18 @@
             <div class="w-16 h-px bg-gold-500/50 mb-8"></div>
             
             <p class="text-2xl md:text-3xl text-stone-100 font-light max-w-3xl mx-auto leading-relaxed mb-10 italic drop-shadow-md">
-                Desde los terruños más extremos de los Andes,<br> directo a Canarias.
+                <span lang="es">Desde los terruños más extremos de los Andes,<br> directo a Canarias.</span>
+                <span lang="en">From the most extreme terroirs of the Andes,<br> directly to the Canary Islands.</span>
             </p>
             
             <p class="text-sm md:text-base text-stone-300 font-light max-w-2xl mx-auto leading-relaxed mb-12">
-                Un catálogo diseñado para llevar la máxima calidad y autenticidad del vino argentino a <strong class="text-white font-semibold">compradores directos</strong> y profesionales <strong class="text-white font-semibold">HORECA</strong> en todo el archipiélago, sin intermediarios.
+                <span lang="es">Un catálogo diseñado para llevar la máxima calidad y autenticidad del vino argentino a <strong class="text-white font-semibold">compradores directos</strong> y profesionales <strong class="text-white font-semibold">HORECA</strong> en todo el archipiélago, sin intermediarios.</span>
+                <span lang="en">A catalog designed to bring the highest quality and authenticity of Argentine wine to <strong class="text-white font-semibold">direct buyers</strong> and <strong class="text-white font-semibold">HORECA</strong> professionals throughout the archipelago, without intermediaries.</span>
             </p>
             
             <a href="#catalog" class="bg-gold-500 hover:bg-gold-600 text-wine-900 font-bold px-10 py-5 rounded-sm transition-colors duration-300 uppercase tracking-widest text-xs shadow-xl">
-                Acceder al Catálogo
+                <span lang="es">Acceder al Catálogo</span>
+                <span lang="en">Access Catalog</span>
             </a>
         </div>
     </header>
@@ -127,270 +135,188 @@
     <section class="py-12 bg-white border-b border-stone-100 relative z-20 shadow-sm">
         <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left divide-y md:divide-y-0 md:divide-x divide-stone-100">
             <div class="py-4 md:py-0 md:px-8">
-                <h3 class="text-wine-800 font-serif text-2xl mb-2">Importación Directa</h3>
-                <p class="text-sm text-stone-500 leading-relaxed">Sin intermediarios. Del viñedo argentino a su restaurante, hotel o domicilio en Canarias.</p>
+                <h3 class="text-wine-800 font-serif text-2xl mb-2">
+                    <span lang="es">Importación Directa</span><span lang="en">Direct Import</span>
+                </h3>
+                <p class="text-sm text-stone-500 leading-relaxed">
+                    <span lang="es">Sin intermediarios. Del viñedo argentino a su restaurante, hotel o domicilio en Canarias.</span>
+                    <span lang="en">No intermediaries. From the Argentine vineyard to your restaurant, hotel, or home in the Canary Islands.</span>
+                </p>
             </div>
             <div class="py-4 md:py-0 md:px-8">
-                <h3 class="text-wine-800 font-serif text-2xl mb-2">Logística Interinsular</h3>
-                <p class="text-sm text-stone-500 leading-relaxed">Operamos en las 8 islas garantizando transporte seguro y tarifas unificadas.</p>
+                <h3 class="text-wine-800 font-serif text-2xl mb-2">
+                    <span lang="es">Logística Interinsular</span><span lang="en">Inter-island Logistics</span>
+                </h3>
+                <p class="text-sm text-stone-500 leading-relaxed">
+                    <span lang="es">Operamos en las 8 islas garantizando transporte seguro y tarifas unificadas.</span>
+                    <span lang="en">We operate across all 8 islands ensuring safe transport and unified rates.</span>
+                </p>
             </div>
             <div class="py-4 md:py-0 md:px-8">
-                <h3 class="text-wine-800 font-serif text-2xl mb-2">Colección Exclusiva</h3>
-                <p class="text-sm text-stone-500 leading-relaxed">44 referencias rigurosamente seleccionadas, desde la extrema altitud de Salta hasta la Patagonia.</p>
+                <h3 class="text-wine-800 font-serif text-2xl mb-2">
+                    <span lang="es">Colección Exclusiva</span><span lang="en">Exclusive Collection</span>
+                </h3>
+                <p class="text-sm text-stone-500 leading-relaxed">
+                    <span lang="es">44 referencias rigurosamente seleccionadas, desde la extrema altitud de Salta hasta la Patagonia.</span>
+                    <span lang="en">44 rigorously selected references, from the extreme altitude of Salta to Patagonia.</span>
+                </p>
             </div>
         </div>
     </section>
 
     <!-- C A T A L O G O   M A E S T R O -->
-    <main id="catalog" class="max-w-6xl mx-auto px-4 py-24 space-y-24">
+    <main id="catalog" class="max-w-6xl mx-auto px-4 py-24 space-y-16">
         
         <!-- Cabecera del Tarifario -->
-        <div class="flex flex-col md:flex-row justify-between items-end mb-12 pb-6 border-b border-stone-200">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-10 pb-6 border-b border-stone-200">
             <div>
-                <h2 class="text-4xl font-serif text-wine-900">Catálogo 2026</h2>
-                <p class="text-stone-500 mt-2 font-medium">Tarifas para compradores directos. Venta por cajas completas.</p>
+                <h2 class="text-4xl font-serif text-wine-900">
+                    <span lang="es">Catálogo 2026</span><span lang="en">2026 Catalog</span>
+                </h2>
+                <p class="text-stone-500 mt-2 font-medium">
+                    <span lang="es">Tarifas para compradores directos. Venta por cajas completas.</span>
+                    <span lang="en">Rates for direct buyers. Sales by full boxes only.</span>
+                </p>
             </div>
             <div class="mt-4 md:mt-0 text-right">
                 <span class="inline-block bg-wine-50 text-wine-800 text-[10px] font-bold px-3 py-1.5 rounded uppercase tracking-widest border border-wine-100">
-                    * Precios Netos (IGIC/AIEM no incl.)
+                    <span lang="es">* Precios Netos (IGIC/AIEM no incl.)</span>
+                    <span lang="en">* Net Prices (IGIC/AIEM not incl.)</span>
                 </span>
             </div>
         </div>
 
-        <!-- F I L T R O S   D E L   C A T Á L O G O -->
-        <div class="flex flex-wrap gap-3 mb-12">
-            <button onclick="toggleFilter('all')" data-value="all" data-category="all" class="filter-btn bg-wine-900 text-white border-wine-900 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm transition-colors">Todos</button>
-            <button onclick="toggleFilter('tinto', 'type')" data-value="tinto" data-category="type" class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Tintos</button>
-            <button onclick="toggleFilter('blanco', 'type')" data-value="blanco" data-category="type" class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Blancos</button>
-            <button onclick="toggleFilter('rosado', 'type')" data-value="rosado" data-category="type" class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Rosados</button>
-            
-            <div class="w-px h-8 bg-stone-200 mx-2 hidden sm:block self-center"></div>
-            
-            <button onclick="toggleFilter('norte', 'region')" data-value="norte" data-category="region" class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Norte Argentino</button>
-            <button onclick="toggleFilter('cuyo', 'region')" data-value="cuyo" data-category="region" class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Cuyo</button>
-            <button onclick="toggleFilter('patagonia', 'region')" data-value="patagonia" data-category="region" class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Patagonia</button>
+        <!-- F I L T R O S   Y   O R D E N A C I Ó N -->
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
+            <!-- Filtros Múltiples -->
+            <div class="flex flex-wrap gap-2 md:gap-3">
+                <button onclick="toggleFilter('all')" data-value="all" data-category="all" class="filter-btn bg-wine-900 text-white border-wine-900 border px-4 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm transition-colors">
+                    <span lang="es">Todos</span><span lang="en">All</span>
+                </button>
+                
+                <div class="w-px h-6 bg-stone-200 mx-1 hidden sm:block self-center"></div>
+                
+                <button onclick="toggleFilter('tinto', 'type')" data-value="tinto" data-category="type" class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">
+                    <span lang="es">Tintos</span><span lang="en">Reds</span>
+                </button>
+                <button onclick="toggleFilter('blanco', 'type')" data-value="blanco" data-category="type" class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">
+                    <span lang="es">Blancos</span><span lang="en">Whites</span>
+                </button>
+                <button onclick="toggleFilter('rosado', 'type')" data-value="rosado" data-category="type" class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">
+                    <span lang="es">Rosados</span><span lang="en">Rosés</span>
+                </button>
+                
+                <div class="w-px h-6 bg-stone-200 mx-1 hidden sm:block self-center"></div>
+                
+                <button onclick="toggleFilter('6', 'box')" data-value="6" data-category="box" class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">
+                    <span lang="es">Caja de 6</span><span lang="en">6-Pack</span>
+                </button>
+                <button onclick="toggleFilter('12', 'box')" data-value="12" data-category="box" class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">
+                    <span lang="es">Caja de 12</span><span lang="en">12-Pack</span>
+                </button>
+            </div>
+
+            <!-- Ordenación por Precio -->
+            <div class="flex items-center gap-3 w-full lg:w-auto bg-white p-2 border border-stone-200 rounded-lg shadow-sm">
+                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest pl-2">
+                    <span lang="es">Precio:</span><span lang="en">Price:</span>
+                </span>
+                <div class="flex bg-stone-100 rounded p-1 w-full lg:w-auto gap-1">
+                    <button onclick="setSort('default')" id="sort-default" class="sort-btn flex-1 lg:flex-none px-3 py-1.5 text-[10px] font-bold uppercase rounded text-wine-900 bg-white shadow-sm transition-colors">
+                        <span lang="es">Defecto</span><span lang="en">Default</span>
+                    </button>
+                    <button onclick="setSort('asc')" id="sort-asc" class="sort-btn flex-1 lg:flex-none px-3 py-1.5 text-[10px] font-bold uppercase rounded text-stone-500 hover:bg-white hover:text-wine-900 transition-colors">
+                        <span lang="es">Menor</span><span lang="en">Lowest</span> ⬆
+                    </button>
+                    <button onclick="setSort('desc')" id="sort-desc" class="sort-btn flex-1 lg:flex-none px-3 py-1.5 text-[10px] font-bold uppercase rounded text-stone-500 hover:bg-white hover:text-wine-900 transition-colors">
+                        <span lang="es">Mayor</span><span lang="en">Highest</span> ⬇
+                    </button>
+                </div>
+            </div>
         </div>
 
+        <!-- C O N T E N E D O R E S   D I N Á M I C O S -->
+        
         <!-- SECCIÓN 1: NORTE ARGENTINO -->
-        <section class="region-section">
-            <div class="mb-8">
-                <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]">Altitud Extrema</span>
-                <h3 class="text-3xl font-serif text-stone-900 mt-1">Norte Argentino</h3>
-                <p class="text-sm text-stone-500 mt-2 italic">Valles Calchaquíes y Quebrada de Humahuaca (1.700m - 2.800m)</p>
+        <section id="section-norte" class="region-section">
+            <div class="mb-6">
+                <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]">
+                    <span lang="es">Altitud Extrema</span><span lang="en">Extreme Altitude</span>
+                </span>
+                <h3 class="text-3xl font-serif text-stone-900 mt-1">
+                    <span lang="es">Norte Argentino</span><span lang="en">Northern Argentina</span>
+                </h3>
+                <p class="text-sm text-stone-500 mt-2 italic">
+                    <span lang="es">Valles Calchaquíes y Quebrada de Humahuaca (1.700m - 2.800m)</span>
+                    <span lang="en">Calchaquí Valleys and Humahuaca Gorge (1,700m - 2,800m)</span>
+                </p>
             </div>
-
-            <div class="flex flex-col gap-2">
-                <div class="hidden md:grid grid-cols-12 gap-4 px-6 pb-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest border-b border-stone-200">
-                    <div class="col-span-5">Bodega / Vino</div>
-                    <div class="col-span-2 text-center">Formato</div>
-                    <div class="col-span-2 text-right">Precio Bot.</div>
-                    <div class="col-span-3 text-right">Añadir Cajas</div>
-                </div>
-
-                <!-- Viñas en Flor -->
-                <script>
-                    // Generador de filas para mantener el HTML limpio y estructurado (Usado internamente para listar rápido los 44 vinos)
-                    const winesNorte = [
-                        { id: 'llama-malbec', type: 'tinto', region: 'norte', bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Malbec 2025', notes: 'Fruta roja y pimienta negra. Taninos sedosos de arena profunda.', box: 6, price: 11.48 },
-                        { id: 'llama-torrontes', type: 'blanco', region: 'norte', bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Torrontés 2025', notes: 'Luz de montaña. Frescura vibrante y perfil floral.', box: 6, price: 11.48 },
-                        { id: 'llama-rose', type: 'rosado', region: 'norte', bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Rosé 2025', notes: 'Rosado de Syrah. Expresivo y vibrante.', box: 6, price: 11.48 },
-                        { id: 'dupont-punta', type: 'tinto', region: 'norte', bodega: 'Fernando Dupont · Maimará', name: 'Punta Corral 2022', notes: 'Blend de altura extrema. Malbec, Syrah y Cab Franc. 10 meses en roble.', box: 6, price: 20.25 },
-                        { id: 'dupont-franc', type: 'tinto', region: 'norte', bodega: 'Fernando Dupont · Maimará', name: 'Franc Dupont 2022', notes: 'Pioneros en Jujuy. Frescura y complejidad aromática.', box: 6, price: 25.65 },
-                        { id: 'dupont-sikuri', type: 'tinto', region: 'norte', bodega: 'Fernando Dupont · Maimará', name: 'Sikuri Syrah 2022', notes: 'Gran frescura, notas de carnes ahumadas y pimienta negra.', box: 6, price: 25.65 },
-                        { id: 'yaco-pasacana', type: 'tinto', region: 'norte', bodega: 'Bodega Yacochuya · Cafayate', name: 'Pasacana 2021', notes: 'Creación de Michel Rolland & Flia Etchart. 18 meses de barrica.', box: 6, price: 37.80 },
-                        { id: 'yaco-coquena', type: 'tinto', region: 'norte', bodega: 'Bodega Yacochuya · Cafayate', name: 'Coquena Tannat 2025', notes: 'Potencia y frescura. Aromas de fruta negra y taninos firmes.', box: 6, price: 13.50 },
-                        { id: 'yaco-malbec', type: 'tinto', region: 'norte', bodega: 'Bodega Yacochuya · Cafayate', name: 'Yacochuya Malbec 2021', notes: 'Vino icónico de la bodega, estructurado y de gran guarda.', box: 6, price: 37.80 },
-                        { id: 'yaco-sanpedro', type: 'tinto', region: 'norte', bodega: 'Bodega Yacochuya · Cafayate', name: 'San Pedro de Yacochuya', notes: 'Elegancia clásica del valle Calchaquí.', box: 6, price: 24.30 },
-                        { id: 'lanus-ilogico-malbec', type: 'tinto', region: 'norte', bodega: 'Agustín Lanús · Calchaquí', name: 'Ilógico Malbec 2020', notes: '50% roble, 50% huevos de hormigón. Fruta oscura y pimienta.', box: 6, price: 22.95 },
-                        { id: 'lanus-ilogico-criolla', type: 'tinto', region: 'norte', bodega: 'Agustín Lanús · Calchaquí', name: 'Ilógico Criolla 2022', notes: 'Aromas balsámicos y cereza. Frescura y elegancia de extrema altura.', box: 6, price: 20.25 },
-                        { id: 'lanus-atypico', type: 'tinto', region: 'norte', bodega: 'Agustín Lanús · Calchaquí', name: 'Atypico Blend 2018', notes: 'Malbec y Cabernet Sauvignon de Tolombón. Complejidad brutal.', box: 6, price: 37.80 },
-                        { id: 'lanus-sunal-malbec', type: 'tinto', region: 'norte', bodega: 'Agustín Lanús · Calchaquí', name: 'Sunal Extreme Altitude Malbec', notes: 'El límite de la viticultura en Argentina. Precisión extrema.', box: 6, price: 47.25 },
-                        { id: 'lanus-sunal-criolla', type: 'tinto', region: 'norte', bodega: 'Agustín Lanús · Calchaquí', name: 'Sunal Ilógico Criolla Chica 2021', notes: 'Cepas centenarias recuperadas. Pura identidad.', box: 6, price: 20.25 }
-                    ];
-
-                    winesNorte.forEach(w => {
-                        const total = (w.price * w.box).toFixed(2).replace('.', ',');
-                        const price = w.price.toFixed(2).replace('.', ',');
-                        document.write(`
-                            <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50" data-id="${w.id}" data-name="${w.name}" data-price="${(w.price * w.box).toFixed(2)}" data-box="${w.box}" data-type="${w.type}" data-region="${w.region}">
-                                <div class="col-span-5 flex flex-col">
-                                    <span class="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-1">${w.bodega}</span>
-                                    <h4 class="text-lg font-serif text-wine-900 font-bold leading-tight">${w.name}</h4>
-                                    <p class="text-xs text-stone-500 mt-1 line-clamp-2">${w.notes}</p>
-                                    <a href="docs/catalogo-dealtura.pdf" target="_blank" class="inline-flex items-center text-[10px] font-bold uppercase tracking-widest text-gold-600 hover:text-wine-700 transition-colors mt-2 w-fit">
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                        Ficha Técnica
-                                    </a>
-                                </div>
-                                <div class="col-span-2 text-left md:text-center mt-2 md:mt-0">
-                                    <span class="md:hidden text-xs text-stone-400 uppercase tracking-wider mr-2">Formato:</span>
-                                    <span class="text-sm text-stone-600 font-semibold">Caja de ${w.box}</span>
-                                </div>
-                                <div class="col-span-2 text-left md:text-right mt-1 md:mt-0">
-                                    <span class="md:hidden text-xs text-stone-400 uppercase tracking-wider mr-2">Botella:</span>
-                                    <span class="text-sm text-stone-500">${price} €</span>
-                                </div>
-                                <div class="col-span-3 flex justify-between md:justify-end items-center mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-stone-100">
-                                    <div class="text-lg font-serif font-bold text-wine-900 mr-4">${total} €</div>
-                                    <div class="flex items-center bg-stone-100 rounded-sm border border-stone-200">
-                                        <button onclick="updateQty(this, -1)" class="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-wine-700 hover:bg-stone-200 transition-colors btn-pop font-bold">−</button>
-                                        <span class="qty-display w-6 text-center text-sm font-bold text-stone-800">0</span>
-                                        <button onclick="updateQty(this, 1)" class="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-wine-700 hover:bg-stone-200 transition-colors btn-pop font-bold">+</button>
-                                    </div>
-                                </div>
-                            </article>
-                        `);
-                    });
-                </script>
+            <!-- Tabla Header -->
+            <div class="hidden md:grid grid-cols-12 gap-4 px-6 pb-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest border-b border-stone-200">
+                <div class="col-span-5"><span lang="es">Bodega / Vino</span><span lang="en">Winery / Wine</span></div>
+                <div class="col-span-2 text-center"><span lang="es">Formato</span><span lang="en">Format</span></div>
+                <div class="col-span-2 text-right"><span lang="es">Precio Bot.</span><span lang="en">Bot. Price</span></div>
+                <div class="col-span-3 text-right"><span lang="es">Añadir Cajas</span><span lang="en">Add Boxes</span></div>
             </div>
+            <!-- Inyección JS -->
+            <div id="container-norte" class="flex flex-col gap-2"></div>
         </section>
 
         <!-- SECCIÓN 2: REGIÓN CUYO -->
-        <section class="region-section">
-            <div class="mb-8">
-                <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]">Corazón Enológico</span>
-                <h3 class="text-3xl font-serif text-stone-900 mt-1">Región de Cuyo</h3>
-                <p class="text-sm text-stone-500 mt-2 italic">Mendoza, Valle de Uco y San Juan (900m - 1.500m)</p>
+        <section id="section-cuyo" class="region-section mt-16">
+            <div class="mb-6">
+                <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]">
+                    <span lang="es">Corazón Enológico</span><span lang="en">Oenological Heart</span>
+                </span>
+                <h3 class="text-3xl font-serif text-stone-900 mt-1">
+                    <span lang="es">Región de Cuyo</span><span lang="en">Cuyo Region</span>
+                </h3>
+                <p class="text-sm text-stone-500 mt-2 italic">
+                    <span lang="es">Mendoza, Valle de Uco y San Juan (900m - 1.500m)</span>
+                    <span lang="en">Mendoza, Uco Valley and San Juan (900m - 1,500m)</span>
+                </p>
             </div>
-
-            <div class="flex flex-col gap-2">
-                <div class="hidden md:grid grid-cols-12 gap-4 px-6 pb-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest border-b border-stone-200">
-                    <div class="col-span-5">Bodega / Vino</div>
-                    <div class="col-span-2 text-center">Formato</div>
-                    <div class="col-span-2 text-right">Precio Bot.</div>
-                    <div class="col-span-3 text-right">Añadir Cajas</div>
-                </div>
-
-                <script>
-                    const winesCuyo = [
-                        { id: 'nido-franc', type: 'tinto', region: 'cuyo', bodega: 'Nido del Tigre · San Juan', name: 'Cabernet Franc 2024', notes: 'Huevos de concreto, levaduras indígenas. Pimiento rojo y ciruelas.', box: 6, price: 14.18 },
-                        { id: 'nido-alcaparrosa', type: 'tinto', region: 'cuyo', bodega: 'Nido del Tigre · San Juan', name: 'Alcaparrosa Ancellotta 2023', notes: 'Tinto fermentado sin pieles, vinificación de blanco.', box: 6, price: 14.18 },
-                        { id: 'nido-ripasso', type: 'tinto', region: 'cuyo', bodega: 'Nido del Tigre · San Juan', name: 'Ripasso del Giardino 2024', notes: 'Pieles recuperadas y fermentadas con Malbec. Color vivo y elegante.', box: 6, price: 14.18 },
-                        { id: 'paso-orange', type: 'blanco', region: 'cuyo', bodega: 'Paso a Paso · Valle de Uco', name: 'Orange Field Blend 2024 (Orgánico)', notes: 'Vino de garage. Criollas argentinas co-fermentadas 90 días.', box: 12, price: 14.85 },
-                        { id: 'paso-semillon', type: 'blanco', region: 'cuyo', bodega: 'Paso a Paso · Valle de Uco', name: 'Abandonados Semillón 2022', notes: 'Vino blanco de excepción. Maloláctica y crianza 8 meses en barrica.', box: 6, price: 22.95 },
-                        { id: 'paso-clarete', type: 'rosado', region: 'cuyo', bodega: 'Paso a Paso · Valle de Uco', name: 'Criolla Clarete 2025', notes: 'Rescate de viñedos clásicos, mínima intervención.', box: 12, price: 12.83 },
-                        { id: 'paso-blanca', type: 'blanco', region: 'cuyo', bodega: 'Paso a Paso · Valle de Uco', name: 'Criolla Blanca 2025', notes: 'Frescura notable, pura expresión de uva criolla.', box: 12, price: 12.83 },
-                        { id: 'paso-bonarda', type: 'tinto', region: 'cuyo', bodega: 'Paso a Paso · Valle de Uco', name: 'Bonarda Vino de Garage 2023', notes: 'Textura aterciopelada y acidez equilibrada.', box: 12, price: 14.85 },
-                        { id: 'paso-don-graciano', type: 'tinto', region: 'cuyo', bodega: 'Paso a Paso · Valle de Uco', name: 'Las Criollas de Don Graciano', notes: 'Elaboración artesanal extrema. Edición limitada.', box: 12, price: 14.85 },
-                        { id: 'huentala-malbec', type: 'tinto', region: 'cuyo', bodega: 'Huentala Wines · Gualtallary', name: 'Gran Sombrerero Malbec 2023', notes: 'Micro-terroirs exclusivos de suelo calcáreo. Estructura y tensión.', box: 6, price: 17.55 },
-                        { id: 'huentala-chard', type: 'blanco', region: 'cuyo', bodega: 'Huentala Wines · Gualtallary', name: 'Gran Sombrerero Chardonnay', notes: 'Elegante y fresco, altitud pura.', box: 6, price: 16.20 },
-                        { id: 'huentala-verde', type: 'tinto', region: 'cuyo', bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec Mevushal Verde', notes: 'Línea Kosher certificada. Calidad excepcional.', box: 6, price: 14.85 },
-                        { id: 'huentala-azul', type: 'tinto', region: 'cuyo', bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec No-Mevushal Azul', notes: 'Línea Kosher. Gran intensidad aromática.', box: 6, price: 18.90 },
-                        { id: 'huentala-negro', type: 'tinto', region: 'cuyo', bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec No-Mevushal Negro', notes: 'El tope de gama Kosher. Complejo y de larga guarda.', box: 6, price: 29.70 },
-                        { id: 'coloso-blanc', type: 'blanco', region: 'cuyo', bodega: 'Coloso Wines · Agrelo', name: 'Indomable Blanc de Malbec 2023', notes: 'Blanc de Noir. Fresco, floral, acidez viva. Cosecha nocturna.', box: 6, price: 12.83 },
-                        { id: 'coloso-malbec', type: 'tinto', region: 'cuyo', bodega: 'Coloso Wines · Agrelo', name: 'Indomable Malbec Clásico', notes: 'Pura expresión de Agrelo.', box: 6, price: 12.83 },
-                        { id: 'ba-malbec', type: 'tinto', region: 'cuyo', bodega: 'Buenos Aires · Mendoza', name: 'Malbec 2024 (Oro G&G)', notes: 'Sumamente afrutado, cerezas y ciruelas. Fácil de beber.', box: 12, price: 6.75 },
-                        { id: 'ba-chard', type: 'blanco', region: 'cuyo', bodega: 'Buenos Aires · Mendoza', name: 'Chardonnay 2024', notes: 'Fresco y vibrante, ideal para el canal HORECA.', box: 12, price: 6.75 },
-                        { id: 'ba-reserva', type: 'tinto', region: 'cuyo', bodega: 'Buenos Aires · Mendoza', name: 'Malbec Reserva 2022', notes: 'Paso por madera, estructura definida.', box: 12, price: 8.78 },
-                        { id: 'ba-rose', type: 'rosado', region: 'cuyo', bodega: 'Buenos Aires · Mendoza', name: 'Rosé of Malbec', notes: 'Delicado, fresco y con mucha fruta roja.', box: 12, price: 6.75 },
-                        { id: 'ba-cab', type: 'tinto', region: 'cuyo', bodega: 'Buenos Aires · Mendoza', name: 'Cabernet Sauvignon 2020', notes: 'Oro Gilbert & Gaillard. Estructura y tipicidad.', box: 12, price: 6.75 },
-                        { id: 'ba-blend', type: 'tinto', region: 'cuyo', bodega: 'Buenos Aires · Mendoza', name: 'Red Blend 2020', notes: 'El corte perfecto de la casa. Equilibrado y goloso.', box: 12, price: 6.75 }
-                    ];
-
-                    winesCuyo.forEach(w => {
-                        const total = (w.price * w.box).toFixed(2).replace('.', ',');
-                        const price = w.price.toFixed(2).replace('.', ',');
-                        let extraTag = '';
-                        if(w.name.includes('(Orgánico)')) extraTag = '<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-800 text-[9px] font-bold uppercase rounded-sm">Orgánico</span>';
-                        if(w.name.includes('Oro')) extraTag = '<span class="ml-2 px-1.5 py-0.5 bg-yellow-100 text-yellow-800 text-[9px] font-bold uppercase rounded-sm">Oro</span>';
-                        
-                        document.write(`
-                            <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50" data-id="${w.id}" data-name="${w.name.replace(' (Orgánico)','').replace(' (Oro G&G)','')}" data-price="${(w.price * w.box).toFixed(2)}" data-box="${w.box}" data-type="${w.type}" data-region="${w.region}">
-                                <div class="col-span-5 flex flex-col">
-                                    <span class="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-1">${w.bodega}</span>
-                                    <h4 class="text-lg font-serif text-wine-900 font-bold leading-tight flex items-center flex-wrap gap-1">${w.name.replace(' (Orgánico)','').replace(' (Oro G&G)','')} ${extraTag}</h4>
-                                    <p class="text-xs text-stone-500 mt-1 line-clamp-2">${w.notes}</p>
-                                    <a href="docs/catalogo-dealtura.pdf" target="_blank" class="inline-flex items-center text-[10px] font-bold uppercase tracking-widest text-gold-600 hover:text-wine-700 transition-colors mt-2 w-fit">
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                        Ficha Técnica
-                                    </a>
-                                </div>
-                                <div class="col-span-2 text-left md:text-center mt-2 md:mt-0">
-                                    <span class="md:hidden text-xs text-stone-400 uppercase tracking-wider mr-2">Formato:</span>
-                                    <span class="text-sm text-stone-600 font-semibold">Caja de ${w.box}</span>
-                                </div>
-                                <div class="col-span-2 text-left md:text-right mt-1 md:mt-0">
-                                    <span class="md:hidden text-xs text-stone-400 uppercase tracking-wider mr-2">Botella:</span>
-                                    <span class="text-sm text-stone-500">${price} €</span>
-                                </div>
-                                <div class="col-span-3 flex justify-between md:justify-end items-center mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-stone-100">
-                                    <div class="text-lg font-serif font-bold text-wine-900 mr-4">${total} €</div>
-                                    <div class="flex items-center bg-stone-100 rounded-sm border border-stone-200">
-                                        <button onclick="updateQty(this, -1)" class="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-wine-700 hover:bg-stone-200 transition-colors btn-pop font-bold">−</button>
-                                        <span class="qty-display w-6 text-center text-sm font-bold text-stone-800">0</span>
-                                        <button onclick="updateQty(this, 1)" class="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-wine-700 hover:bg-stone-200 transition-colors btn-pop font-bold">+</button>
-                                    </div>
-                                </div>
-                            </article>
-                        `);
-                    });
-                </script>
+            <!-- Tabla Header -->
+            <div class="hidden md:grid grid-cols-12 gap-4 px-6 pb-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest border-b border-stone-200">
+                <div class="col-span-5"><span lang="es">Bodega / Vino</span><span lang="en">Winery / Wine</span></div>
+                <div class="col-span-2 text-center"><span lang="es">Formato</span><span lang="en">Format</span></div>
+                <div class="col-span-2 text-right"><span lang="es">Precio Bot.</span><span lang="en">Bot. Price</span></div>
+                <div class="col-span-3 text-right"><span lang="es">Añadir Cajas</span><span lang="en">Add Boxes</span></div>
             </div>
+            <!-- Inyección JS -->
+            <div id="container-cuyo" class="flex flex-col gap-2"></div>
         </section>
 
         <!-- SECCIÓN 3: PATAGONIA -->
-        <section class="region-section">
-            <div class="mb-8">
-                <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]">El Sur Extremo</span>
-                <h3 class="text-3xl font-serif text-stone-900 mt-1">Patagonia Argentina</h3>
-                <p class="text-sm text-stone-500 mt-2 italic">Alto Valle del Río Colorado, La Pampa (300m)</p>
+        <section id="section-patagonia" class="region-section mt-16">
+            <div class="mb-6">
+                <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]">
+                    <span lang="es">El Sur Extremo</span><span lang="en">The Extreme South</span>
+                </span>
+                <h3 class="text-3xl font-serif text-stone-900 mt-1">
+                    <span lang="es">Patagonia Argentina</span><span lang="en">Argentine Patagonia</span>
+                </h3>
+                <p class="text-sm text-stone-500 mt-2 italic">
+                    <span lang="es">Alto Valle del Río Colorado, La Pampa (300m)</span>
+                    <span lang="en">Colorado River High Valley, La Pampa (300m)</span>
+                </p>
             </div>
-
-            <div class="flex flex-col gap-2">
-                <div class="hidden md:grid grid-cols-12 gap-4 px-6 pb-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest border-b border-stone-200">
-                    <div class="col-span-5">Bodega / Vino</div>
-                    <div class="col-span-2 text-center">Formato</div>
-                    <div class="col-span-2 text-right">Precio Bot.</div>
-                    <div class="col-span-3 text-right">Añadir Cajas</div>
-                </div>
-
-                <script>
-                    const winesPatagonia = [
-                        { id: 'desierto-merlot', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Merlot 2020', notes: 'Crianza de 9 meses en roble. Aromas maduros con personalidad patagónica.', box: 6, price: 16.20 },
-                        { id: 'desierto-cabfranc', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Cabernet Franc 2019', notes: 'Suelos áridos y aluviales, rico en minerales.', box: 6, price: 16.20 },
-                        { id: 'desierto-pinot', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Pinot Noir 2021', notes: 'Elegancia y frescura extrema del desierto.', box: 6, price: 16.20 },
-                        { id: 'desierto-pampeano', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Pampeano Pinot Noir 2024', notes: 'Sin madera. Pura frescura, fruta roja y flores blancas.', box: 6, price: 13.50 },
-                        { id: 'desierto-25malbec', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto 25 Malbec', notes: 'El clásico patagónico de estructura plena.', box: 6, price: 16.20 },
-                        { id: 'desierto-25syrah', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto 25 Syrah', notes: 'Especiado, potente y de gran carácter.', box: 6, price: 16.20 },
-                        { id: 'desierto-pampa-blend', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto Pampa Blend', notes: 'El corte insignia de la bodega pampeana.', box: 6, price: 21.60 }
-                    ];
-
-                    winesPatagonia.forEach(w => {
-                        const total = (w.price * w.box).toFixed(2).replace('.', ',');
-                        const price = w.price.toFixed(2).replace('.', ',');
-                        document.write(`
-                            <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50" data-id="${w.id}" data-name="${w.name}" data-price="${(w.price * w.box).toFixed(2)}" data-box="${w.box}" data-type="${w.type}" data-region="${w.region}">
-                                <div class="col-span-5 flex flex-col">
-                                    <span class="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-1">${w.bodega}</span>
-                                    <h4 class="text-lg font-serif text-wine-900 font-bold leading-tight">${w.name}</h4>
-                                    <p class="text-xs text-stone-500 mt-1 line-clamp-2">${w.notes}</p>
-                                    <a href="docs/catalogo-dealtura.pdf" target="_blank" class="inline-flex items-center text-[10px] font-bold uppercase tracking-widest text-gold-600 hover:text-wine-700 transition-colors mt-2 w-fit">
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                        Ficha Técnica
-                                    </a>
-                                </div>
-                                <div class="col-span-2 text-left md:text-center mt-2 md:mt-0">
-                                    <span class="md:hidden text-xs text-stone-400 uppercase tracking-wider mr-2">Formato:</span>
-                                    <span class="text-sm text-stone-600 font-semibold">Caja de ${w.box}</span>
-                                </div>
-                                <div class="col-span-2 text-left md:text-right mt-1 md:mt-0">
-                                    <span class="md:hidden text-xs text-stone-400 uppercase tracking-wider mr-2">Botella:</span>
-                                    <span class="text-sm text-stone-500">${price} €</span>
-                                </div>
-                                <div class="col-span-3 flex justify-between md:justify-end items-center mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-stone-100">
-                                    <div class="text-lg font-serif font-bold text-wine-900 mr-4">${total} €</div>
-                                    <div class="flex items-center bg-stone-100 rounded-sm border border-stone-200">
-                                        <button onclick="updateQty(this, -1)" class="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-wine-700 hover:bg-stone-200 transition-colors btn-pop font-bold">−</button>
-                                        <span class="qty-display w-6 text-center text-sm font-bold text-stone-800">0</span>
-                                        <button onclick="updateQty(this, 1)" class="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-wine-700 hover:bg-stone-200 transition-colors btn-pop font-bold">+</button>
-                                    </div>
-                                </div>
-                            </article>
-                        `);
-                    });
-                </script>
+            <!-- Tabla Header -->
+            <div class="hidden md:grid grid-cols-12 gap-4 px-6 pb-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest border-b border-stone-200">
+                <div class="col-span-5"><span lang="es">Bodega / Vino</span><span lang="en">Winery / Wine</span></div>
+                <div class="col-span-2 text-center"><span lang="es">Formato</span><span lang="en">Format</span></div>
+                <div class="col-span-2 text-right"><span lang="es">Precio Bot.</span><span lang="en">Bot. Price</span></div>
+                <div class="col-span-3 text-right"><span lang="es">Añadir Cajas</span><span lang="en">Add Boxes</span></div>
             </div>
+            <!-- Inyección JS -->
+            <div id="container-patagonia" class="flex flex-col gap-2"></div>
         </section>
+
+        <!-- Mensaje sin resultados -->
+        <div id="no-results" class="hidden py-16 text-center text-stone-400 italic">
+            <span lang="es">No se encontraron vinos con los filtros seleccionados.</span>
+            <span lang="en">No wines found matching the selected filters.</span>
+        </div>
 
     </main>
 
@@ -398,13 +324,16 @@
     <section class="bg-stone-900 text-stone-300 py-20 px-6 border-t-4 border-wine-800">
         <div class="max-w-4xl mx-auto text-center">
             <svg class="w-12 h-12 mx-auto text-gold-500 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-            <h2 class="text-3xl md:text-4xl font-serif text-white mb-6">Atención HORECA en Canarias</h2>
+            <h2 class="text-3xl md:text-4xl font-serif text-white mb-6">
+                <span lang="es">Atención HORECA en Canarias</span><span lang="en">HORECA Services in the Canary Islands</span>
+            </h2>
             <p class="text-lg font-light leading-relaxed max-w-2xl mx-auto mb-10">
-                Diseñamos propuestas a medida para hoteles, restaurantes y empresas. Ofrecemos condiciones exclusivas y asesoría especializada para la confección de su carta.
+                <span lang="es">Diseñamos propuestas a medida para hoteles, restaurantes y empresas. Ofrecemos condiciones exclusivas y asesoría especializada para la confección de su carta.</span>
+                <span lang="en">We design tailored proposals for hotels, restaurants, and companies. We offer exclusive conditions and specialized advice for crafting your wine list.</span>
             </p>
             <a href="https://wa.me/34633706676?text=Hola%20asesor,%20deseo%20informaci%C3%B3n%20para%20canal%20HORECA" target="_blank" class="inline-flex items-center gap-3 px-8 py-4 border border-stone-600 hover:border-gold-500 hover:text-white rounded-sm transition-colors uppercase tracking-widest text-xs font-bold shadow-lg bg-white/5">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.588-5.946 0-6.556 5.332-11.888 11.888-11.888 3.176 0 6.164 1.236 8.41 3.483 2.247 2.247 3.483 5.234 3.483 8.41 0 6.556-5.332 11.888-11.888 11.888-2.007 0-3.974-.509-5.714-1.472l-6.098 1.602zm5.714-2.825c1.642.973 3.398 1.488 5.217 1.488 5.503 0 9.977-4.474 9.977-9.977 0-2.664-1.037-5.168-2.92-7.051-1.883-1.883-4.387-2.92-7.051-2.92-5.503 0-9.977 4.474-9.977 9.977 0 2.062.632 4.041 1.82 5.711l-1.01 3.692 3.864-1.016zm9.516-11.305c-.279-.139-1.647-.812-1.903-.905-.256-.092-.442-.139-.628.139-.186.279-.721.905-.884 1.091-.163.186-.326.209-.605.07-.279-.139-1.177-.433-2.242-1.383-.829-.739-1.388-1.652-1.551-1.93-.163-.279-.017-.43.121-.568.125-.125.279-.326.418-.488.139-.163.186-.279.279-.465.092-.186.046-.349-.023-.488-.069-.139-.628-1.511-.861-2.07-.226-.549-.456-.475-.628-.484-.163-.008-.349-.01-.535-.01s-.488.07-.744.349c-.256.279-.977.954-.977 2.326s1.001 2.701 1.139 2.887c.139.186 1.97 3.008 4.773 4.218.667.288 1.188.459 1.594.587.67.213 1.279.183 1.761.11.539-.081 1.647-.674 1.881-1.324.233-.651.233-1.21.163-1.324-.069-.114-.256-.186-.535-.326z"/></svg>
-                Contacta un asesor
+                <span lang="es">Contacta un asesor</span><span lang="en">Contact an Advisor</span>
             </a>
         </div>
     </section>
@@ -412,7 +341,10 @@
     <!-- F O O T E R -->
     <footer class="bg-stone-950 text-stone-500 py-10 px-6 text-center text-xs border-t border-stone-800">
         <p class="uppercase tracking-[0.2em] mb-3 text-stone-400 font-semibold">© 2026 De Altura - Altitude Wines</p>
-        <p class="mb-4">Importación y Distribución Exclusiva · Islas Canarias</p>
+        <p class="mb-4">
+            <span lang="es">Importación y Distribución Exclusiva · Islas Canarias</span>
+            <span lang="en">Exclusive Import and Distribution · Canary Islands</span>
+        </p>
         <p><a href="https://dealturawines.com" target="_blank" class="hover:text-gold-500 transition-colors border-b border-stone-700 pb-1">www.dealturawines.com</a></p>
         
         <div class="mt-8">
@@ -436,29 +368,32 @@
     <!-- Drawer Lateral -->
     <aside id="cart-drawer" class="fixed top-0 right-0 w-full max-w-md h-full bg-stone-50 z-[70] shadow-2xl flex flex-col translate-x-full">
         <div class="px-6 py-5 border-b border-stone-200 bg-white flex justify-between items-center">
-            <h2 class="text-2xl font-serif text-wine-900">Pedido Actual</h2>
+            <h2 class="text-2xl font-serif text-wine-900">
+                <span lang="es">Pedido Actual</span><span lang="en">Current Order</span>
+            </h2>
             <button onclick="toggleCart()" class="text-stone-400 hover:text-wine-900 transition-colors p-2 bg-stone-100 rounded-full">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
 
         <div id="cart-items" class="flex-1 overflow-y-auto px-6 py-6 space-y-4">
-            <div class="h-full flex flex-col items-center justify-center text-stone-400 italic opacity-60">
-                <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                <p>Su carrito está vacío.</p>
-            </div>
+            <!-- Renderizado por JS -->
         </div>
 
         <div class="px-6 py-6 bg-white border-t border-stone-200 shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
             <div class="flex justify-between items-end mb-6">
                 <div>
-                    <span class="block text-xs uppercase tracking-widest text-stone-400 font-bold mb-1">Subtotal Neto</span>
-                    <span class="text-[10px] text-stone-400">IGIC/AIEM e isla de destino a calcular</span>
+                    <span class="block text-xs uppercase tracking-widest text-stone-400 font-bold mb-1">
+                        <span lang="es">Subtotal Neto</span><span lang="en">Net Subtotal</span>
+                    </span>
+                    <span class="text-[10px] text-stone-400">
+                        <span lang="es">IGIC/AIEM a calcular</span><span lang="en">Taxes calculated at checkout</span>
+                    </span>
                 </div>
                 <div class="text-3xl font-serif text-wine-900 font-bold" id="cart-total">0,00 €</div>
             </div>
             <button onclick="processCheckout()" class="w-full bg-wine-900 hover:bg-wine-800 text-white font-bold py-4 rounded-sm transition-colors flex items-center justify-center gap-2 uppercase tracking-widest text-xs shadow-lg">
-                Proceder al Pago
+                <span lang="es">Proceder al Pago</span><span lang="en">Proceed to Checkout</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
             </button>
         </div>
@@ -466,103 +401,215 @@
 
     <!-- S C R I P T S -->
     <script>
-        const cart = {};
+        // BASE DE DATOS DEL CATÁLOGO (44 Vinos)
+        const catalogData = [
+            // NORTE ARGENTINO
+            { id: 'llama-malbec', type: 'tinto', region: 'norte', box: 6, price: 11.48, bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Malbec 2025', notes_es: 'Fruta roja y pimienta negra. Taninos sedosos de arena profunda.', notes_en: 'Red fruit and black pepper. Silky tannins from deep sand.' },
+            { id: 'llama-torrontes', type: 'blanco', region: 'norte', box: 6, price: 11.48, bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Torrontés 2025', notes_es: 'Luz de montaña. Frescura vibrante y perfil floral.', notes_en: 'Mountain light. Vibrant freshness and floral profile.' },
+            { id: 'llama-rose', type: 'rosado', region: 'norte', box: 6, price: 11.48, bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Rosé 2025', notes_es: 'Rosado de Syrah. Expresivo y vibrante.', notes_en: 'Syrah Rosé. Expressive and vibrant.' },
+            { id: 'dupont-punta', type: 'tinto', region: 'norte', box: 6, price: 20.25, bodega: 'Fernando Dupont · Maimará', name: 'Punta Corral 2022', notes_es: 'Blend de altura extrema. Malbec, Syrah y Cab Franc. 10 meses en roble.', notes_en: 'Extreme altitude blend. Malbec, Syrah, Cab Franc. 10 months oak.' },
+            { id: 'dupont-franc', type: 'tinto', region: 'norte', box: 6, price: 25.65, bodega: 'Fernando Dupont · Maimará', name: 'Franc Dupont 2022', notes_es: 'Pioneros en Jujuy. Frescura y complejidad aromática.', notes_en: 'Pioneers in Jujuy. Freshness and aromatic complexity.' },
+            { id: 'dupont-sikuri', type: 'tinto', region: 'norte', box: 6, price: 25.65, bodega: 'Fernando Dupont · Maimará', name: 'Sikuri Syrah 2022', notes_es: 'Gran frescura, notas de carnes ahumadas y pimienta negra.', notes_en: 'Great freshness, hints of smoked meats and black pepper.' },
+            { id: 'yaco-pasacana', type: 'tinto', region: 'norte', box: 6, price: 37.80, bodega: 'Bodega Yacochuya · Cafayate', name: 'Pasacana 2021', notes_es: 'Creación de Michel Rolland & Flia Etchart. 18 meses de barrica.', notes_en: 'Creation of Michel Rolland & Etchart Family. 18 months in barrel.' },
+            { id: 'yaco-coquena', type: 'tinto', region: 'norte', box: 6, price: 13.50, bodega: 'Bodega Yacochuya · Cafayate', name: 'Coquena Tannat 2025', notes_es: 'Potencia y frescura. Aromas de fruta negra y taninos firmes.', notes_en: 'Power and freshness. Dark fruit aromas and firm tannins.' },
+            { id: 'yaco-malbec', type: 'tinto', region: 'norte', box: 6, price: 37.80, bodega: 'Bodega Yacochuya · Cafayate', name: 'Yacochuya Malbec 2021', notes_es: 'Vino icónico de la bodega, estructurado y de gran guarda.', notes_en: 'Iconic wine of the winery, structured and for long aging.' },
+            { id: 'yaco-sanpedro', type: 'tinto', region: 'norte', box: 6, price: 24.30, bodega: 'Bodega Yacochuya · Cafayate', name: 'San Pedro de Yacochuya', notes_es: 'Elegancia clásica del valle Calchaquí.', notes_en: 'Classic elegance of the Calchaquí Valley.' },
+            { id: 'lanus-ilogico-malbec', type: 'tinto', region: 'norte', box: 6, price: 22.95, bodega: 'Agustín Lanús · Calchaquí', name: 'Ilógico Malbec 2020', notes_es: '50% roble, 50% huevos de hormigón. Fruta oscura y pimienta.', notes_en: '50% oak, 50% concrete eggs. Dark fruit and pepper.' },
+            { id: 'lanus-ilogico-criolla', type: 'tinto', region: 'norte', box: 6, price: 20.25, bodega: 'Agustín Lanús · Calchaquí', name: 'Ilógico Criolla 2022', notes_es: 'Aromas balsámicos y cereza. Frescura de extrema altura.', notes_en: 'Balsamic and cherry aromas. Extreme altitude freshness.' },
+            { id: 'lanus-atypico', type: 'tinto', region: 'norte', box: 6, price: 37.80, bodega: 'Agustín Lanús · Calchaquí', name: 'Atypico Blend 2018', notes_es: 'Malbec y Cabernet Sauvignon. Complejidad brutal.', notes_en: 'Malbec and Cabernet Sauvignon. Brutal complexity.' },
+            { id: 'lanus-sunal-malbec', type: 'tinto', region: 'norte', box: 6, price: 47.25, bodega: 'Agustín Lanús · Calchaquí', name: 'Sunal Extreme Altitude Malbec', notes_es: 'El límite de la viticultura en Argentina. Precisión extrema.', notes_en: 'The limit of viticulture in Argentina. Extreme precision.' },
+            { id: 'lanus-sunal-criolla', type: 'tinto', region: 'norte', box: 6, price: 20.25, bodega: 'Agustín Lanús · Calchaquí', name: 'Sunal Ilógico Criolla Chica 2021', notes_es: 'Cepas centenarias recuperadas. Pura identidad.', notes_en: 'Recovered century-old vines. Pure identity.' },
 
-        // Lógica Avanzada de Filtrado (Múltiples opciones cruzadas)
-        let activeTypes = new Set();
-        let activeRegions = new Set();
+            // REGIÓN DE CUYO
+            { id: 'nido-franc', type: 'tinto', region: 'cuyo', box: 6, price: 14.18, bodega: 'Nido del Tigre · San Juan', name: 'Cabernet Franc 2024', notes_es: 'Huevos de concreto, levaduras indígenas. Pimiento rojo y ciruelas.', notes_en: 'Concrete eggs, indigenous yeasts. Red bell pepper and plums.' },
+            { id: 'nido-alcaparrosa', type: 'tinto', region: 'cuyo', box: 6, price: 14.18, bodega: 'Nido del Tigre · San Juan', name: 'Alcaparrosa Ancellotta 2023', notes_es: 'Tinto fermentado sin pieles, vinificación de blanco.', notes_en: 'Red fermented without skins, white vinification.' },
+            { id: 'nido-ripasso', type: 'tinto', region: 'cuyo', box: 6, price: 14.18, bodega: 'Nido del Tigre · San Juan', name: 'Ripasso del Giardino 2024', notes_es: 'Pieles recuperadas y fermentadas con Malbec. Elegante.', notes_en: 'Recovered skins fermented with Malbec. Elegant.' },
+            { id: 'paso-orange', type: 'blanco', region: 'cuyo', box: 12, price: 14.85, bodega: 'Paso a Paso · Valle de Uco', name: 'Orange Field Blend (Orgánico)', notes_es: 'Vino de garage. Criollas co-fermentadas 90 días.', notes_en: 'Garage wine. Criollas co-fermented for 90 days.' },
+            { id: 'paso-semillon', type: 'blanco', region: 'cuyo', box: 6, price: 22.95, bodega: 'Paso a Paso · Valle de Uco', name: 'Abandonados Semillón 2022', notes_es: 'Maloláctica y crianza 8 meses en barrica. Excepcional.', notes_en: 'Malolactic and aged 8 months in barrel. Exceptional.' },
+            { id: 'paso-clarete', type: 'rosado', region: 'cuyo', box: 12, price: 12.83, bodega: 'Paso a Paso · Valle de Uco', name: 'Criolla Clarete 2025', notes_es: 'Rescate de viñedos clásicos, mínima intervención.', notes_en: 'Rescue of classic vineyards, minimal intervention.' },
+            { id: 'paso-blanca', type: 'blanco', region: 'cuyo', box: 12, price: 12.83, bodega: 'Paso a Paso · Valle de Uco', name: 'Criolla Blanca 2025', notes_es: 'Frescura notable, pura expresión de uva criolla.', notes_en: 'Notable freshness, pure expression of criolla grape.' },
+            { id: 'paso-bonarda', type: 'tinto', region: 'cuyo', box: 12, price: 14.85, bodega: 'Paso a Paso · Valle de Uco', name: 'Bonarda Vino de Garage 2023', notes_es: 'Textura aterciopelada y acidez equilibrada.', notes_en: 'Velvety texture and balanced acidity.' },
+            { id: 'paso-don-graciano', type: 'tinto', region: 'cuyo', box: 12, price: 14.85, bodega: 'Paso a Paso · Valle de Uco', name: 'Las Criollas de Don Graciano', notes_es: 'Elaboración artesanal extrema. Edición limitada.', notes_en: 'Extreme artisanal production. Limited edition.' },
+            { id: 'huentala-malbec', type: 'tinto', region: 'cuyo', box: 6, price: 17.55, bodega: 'Huentala Wines · Gualtallary', name: 'Gran Sombrerero Malbec 2023', notes_es: 'Suelo calcáreo. Estructura y tensión.', notes_en: 'Calcareous soil. Structure and tension.' },
+            { id: 'huentala-chard', type: 'blanco', region: 'cuyo', box: 6, price: 16.20, bodega: 'Huentala Wines · Gualtallary', name: 'Gran Sombrerero Chardonnay', notes_es: 'Elegante y fresco, altitud pura.', notes_en: 'Elegant and fresh, pure altitude.' },
+            { id: 'huentala-verde', type: 'tinto', region: 'cuyo', box: 6, price: 14.85, bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec Mevushal Verde', notes_es: 'Línea Kosher certificada. Calidad excepcional.', notes_en: 'Certified Kosher line. Exceptional quality.' },
+            { id: 'huentala-azul', type: 'tinto', region: 'cuyo', box: 6, price: 18.90, bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec No-Mevushal Azul', notes_es: 'Línea Kosher. Gran intensidad aromática.', notes_en: 'Kosher line. Great aromatic intensity.' },
+            { id: 'huentala-negro', type: 'tinto', region: 'cuyo', box: 6, price: 29.70, bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec No-Mevushal Negro', notes_es: 'El tope de gama Kosher. Complejo y de larga guarda.', notes_en: 'Top of the Kosher line. Complex and for long aging.' },
+            { id: 'coloso-blanc', type: 'blanco', region: 'cuyo', box: 6, price: 12.83, bodega: 'Coloso Wines · Agrelo', name: 'Indomable Blanc de Malbec 2023', notes_es: 'Blanc de Noir. Cosecha nocturna. Floral y vivo.', notes_en: 'Blanc de Noir. Night harvest. Floral and lively.' },
+            { id: 'coloso-malbec', type: 'tinto', region: 'cuyo', box: 6, price: 12.83, bodega: 'Coloso Wines · Agrelo', name: 'Indomable Malbec Clásico', notes_es: 'Pura expresión del terruño de Agrelo.', notes_en: 'Pure expression of the Agrelo terroir.' },
+            { id: 'ba-malbec', type: 'tinto', region: 'cuyo', box: 12, price: 6.75, bodega: 'Buenos Aires · Mendoza', name: 'Malbec 2024 (Oro G&G)', notes_es: 'Sumamente afrutado, cerezas y ciruelas. Fácil de beber.', notes_en: 'Extremely fruity, cherries and plums. Easy to drink.' },
+            { id: 'ba-chard', type: 'blanco', region: 'cuyo', box: 12, price: 6.75, bodega: 'Buenos Aires · Mendoza', name: 'Chardonnay 2024', notes_es: 'Fresco y vibrante, ideal para el canal HORECA.', notes_en: 'Fresh and vibrant, ideal for the HORECA channel.' },
+            { id: 'ba-reserva', type: 'tinto', region: 'cuyo', box: 12, price: 8.78, bodega: 'Buenos Aires · Mendoza', name: 'Malbec Reserva 2022', notes_es: 'Paso por madera, estructura definida.', notes_en: 'Aged in wood, defined structure.' },
+            { id: 'ba-rose', type: 'rosado', region: 'cuyo', box: 12, price: 6.75, bodega: 'Buenos Aires · Mendoza', name: 'Rosé of Malbec', notes_es: 'Delicado, fresco y con mucha fruta roja.', notes_en: 'Delicate, fresh with lots of red fruit.' },
+            { id: 'ba-cab', type: 'tinto', region: 'cuyo', box: 12, price: 6.75, bodega: 'Buenos Aires · Mendoza', name: 'Cabernet Sauvignon 2020', notes_es: 'Oro Gilbert & Gaillard. Estructura y tipicidad.', notes_en: 'Gilbert & Gaillard Gold. Structure and typicity.' },
+            { id: 'ba-blend', type: 'tinto', region: 'cuyo', box: 12, price: 6.75, bodega: 'Buenos Aires · Mendoza', name: 'Red Blend 2020', notes_es: 'El corte perfecto de la casa. Equilibrado y goloso.', notes_en: 'The perfect house blend. Balanced and sweet.' },
 
-        function toggleFilter(value, category) {
-            if (value === 'all') {
-                activeTypes.clear();
-                activeRegions.clear();
-            } else if (category === 'type') {
-                activeTypes.has(value) ? activeTypes.delete(value) : activeTypes.add(value);
-            } else if (category === 'region') {
-                activeRegions.has(value) ? activeRegions.delete(value) : activeRegions.add(value);
-            }
-            applyFilters();
+            // PATAGONIA
+            { id: 'desierto-merlot', type: 'tinto', region: 'patagonia', box: 6, price: 16.20, bodega: 'Bodega del Desierto · La Pampa', name: 'Merlot 2020', notes_es: 'Crianza de 9 meses en roble. Personalidad patagónica.', notes_en: '9 months in oak. Patagonian personality.' },
+            { id: 'desierto-cabfranc', type: 'tinto', region: 'patagonia', box: 6, price: 16.20, bodega: 'Bodega del Desierto · La Pampa', name: 'Cabernet Franc 2019', notes_es: 'Suelos áridos y aluviales, rico en minerales.', notes_en: 'Arid and alluvial soils, rich in minerals.' },
+            { id: 'desierto-pinot', type: 'tinto', region: 'patagonia', box: 6, price: 16.20, bodega: 'Bodega del Desierto · La Pampa', name: 'Pinot Noir 2021', notes_es: 'Elegancia y frescura extrema del desierto.', notes_en: 'Extreme elegance and freshness of the desert.' },
+            { id: 'desierto-pampeano', type: 'tinto', region: 'patagonia', box: 6, price: 13.50, bodega: 'Bodega del Desierto · La Pampa', name: 'Pampeano Pinot Noir 2024', notes_es: 'Sin madera. Frescura, fruta roja y flores blancas.', notes_en: 'No wood. Freshness, red fruit and white flowers.' },
+            { id: 'desierto-25malbec', type: 'tinto', region: 'patagonia', box: 6, price: 16.20, bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto 25 Malbec', notes_es: 'El clásico patagónico de estructura plena.', notes_en: 'The Patagonian classic with full structure.' },
+            { id: 'desierto-25syrah', type: 'tinto', region: 'patagonia', box: 6, price: 16.20, bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto 25 Syrah', notes_es: 'Especiado, potente y de gran carácter.', notes_en: 'Spicy, powerful and of great character.' },
+            { id: 'desierto-pampa-blend', type: 'tinto', region: 'patagonia', box: 6, price: 21.60, bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto Pampa Blend', notes_es: 'El corte insignia de la bodega pampeana.', notes_en: 'The flagship blend of the Pampean winery.' }
+        ];
+
+        // LÓGICA DE ESTADO (Estado, Filtros, Ordenación y Carrito)
+        let cart = {};
+        let activeFilters = { type: new Set(), region: new Set(), box: new Set() };
+        let currentSort = 'default';
+
+        // LENGUAJE (Multiidioma)
+        function setLanguage(lang) {
+            document.body.className = `antialiased relative lang-${lang}`;
+            document.getElementById('btn-lang-es').className = lang === 'es' ? 'px-4 py-1.5 text-xs font-bold rounded-full bg-wine-900 text-white shadow-sm' : 'px-4 py-1.5 text-xs font-bold rounded-full text-stone-500 hover:text-wine-900';
+            document.getElementById('btn-lang-en').className = lang === 'en' ? 'px-4 py-1.5 text-xs font-bold rounded-full bg-wine-900 text-white shadow-sm' : 'px-4 py-1.5 text-xs font-bold rounded-full text-stone-500 hover:text-wine-900';
+            renderCart(); // Para actualizar textos del carrito
         }
 
-        function applyFilters() {
-            // 1. Actualizar apariencia de los botones (Solucionado problema de lectura en hover)
+        // MOTOR DE RENDERIZADO DEL CATÁLOGO
+        function renderCatalog() {
+            // 1. Filtrar
+            let filtered = catalogData.filter(w => {
+                if (activeFilters.type.size > 0 && !activeFilters.type.has(w.type)) return false;
+                if (activeFilters.region.size > 0 && !activeFilters.region.has(w.region)) return false;
+                if (activeFilters.box.size > 0 && !activeFilters.box.has(w.box.toString())) return false;
+                return true;
+            });
+
+            // 2. Ordenar
+            if (currentSort === 'asc') {
+                filtered.sort((a, b) => (a.price * a.box) - (b.price * b.box));
+            } else if (currentSort === 'desc') {
+                filtered.sort((a, b) => (b.price * b.box) - (a.price * a.box));
+            }
+
+            // 3. Agrupar
+            const norte = filtered.filter(w => w.region === 'norte');
+            const cuyo = filtered.filter(w => w.region === 'cuyo');
+            const patagonia = filtered.filter(w => w.region === 'patagonia');
+
+            // 4. Función generadora de HTML
+            const generateHtml = (wines) => {
+                return wines.map(w => {
+                    const total = (w.price * w.box).toFixed(2).replace('.', ',');
+                    const price = w.price.toFixed(2).replace('.', ',');
+                    const inCartCls = cart[w.id] ? 'in-cart' : '';
+                    const cartQty = cart[w.id] ? cart[w.id].qty : 0;
+                    
+                    let extraTag = '';
+                    if(w.name.includes('(Orgánico)')) extraTag = '<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-800 text-[9px] font-bold uppercase rounded-sm"><span lang="es">Orgánico</span><span lang="en">Organic</span></span>';
+                    if(w.name.includes('(Oro G&G)')) extraTag = '<span class="ml-2 px-1.5 py-0.5 bg-yellow-100 text-yellow-800 text-[9px] font-bold uppercase rounded-sm"><span lang="es">Oro</span><span lang="en">Gold</span></span>';
+
+                    return `
+                        <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50 ${inCartCls}">
+                            <div class="col-span-5 flex flex-col">
+                                <span class="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-1">${w.bodega}</span>
+                                <h4 class="text-lg font-serif text-wine-900 font-bold leading-tight flex items-center flex-wrap gap-1">${w.name.replace(' (Orgánico)','').replace(' (Oro G&G)','')} ${extraTag}</h4>
+                                <p class="text-xs text-stone-500 mt-1 line-clamp-2">
+                                    <span lang="es">${w.notes_es}</span><span lang="en">${w.notes_en}</span>
+                                </p>
+                                <a href="https://dealturawines.com/es/" target="_blank" class="inline-flex items-center text-[10px] font-bold uppercase tracking-widest text-gold-600 hover:text-wine-700 transition-colors mt-2 w-fit">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    <span lang="es">Más Info</span><span lang="en">More Info</span>
+                                </a>
+                            </div>
+                            <div class="col-span-2 text-left md:text-center mt-2 md:mt-0">
+                                <span class="md:hidden text-xs text-stone-400 uppercase tracking-wider mr-2"><span lang="es">Formato:</span><span lang="en">Format:</span></span>
+                                <span class="text-sm text-stone-600 font-semibold"><span lang="es">Caja de</span><span lang="en">Box of</span> ${w.box}</span>
+                            </div>
+                            <div class="col-span-2 text-left md:text-right mt-1 md:mt-0">
+                                <span class="md:hidden text-xs text-stone-400 uppercase tracking-wider mr-2"><span lang="es">Botella:</span><span lang="en">Bottle:</span></span>
+                                <span class="text-sm text-stone-500">${price} €</span>
+                            </div>
+                            <div class="col-span-3 flex justify-between md:justify-end items-center mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-stone-100">
+                                <div class="text-lg font-serif font-bold text-wine-900 mr-4">${total} €</div>
+                                <div class="flex items-center bg-stone-100 rounded-sm border border-stone-200">
+                                    <button onclick="updateQty('${w.id}', -1)" class="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-wine-700 hover:bg-stone-200 transition-colors btn-pop font-bold">−</button>
+                                    <span class="qty-display w-6 text-center text-sm font-bold text-stone-800">${cartQty}</span>
+                                    <button onclick="updateQty('${w.id}', 1)" class="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-wine-700 hover:bg-stone-200 transition-colors btn-pop font-bold">+</button>
+                                </div>
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+            };
+
+            // 5. Inyectar en DOM
+            document.getElementById('container-norte').innerHTML = generateHtml(norte);
+            document.getElementById('container-cuyo').innerHTML = generateHtml(cuyo);
+            document.getElementById('container-patagonia').innerHTML = generateHtml(patagonia);
+
+            // 6. Gestionar visibilidad de Secciones
+            document.getElementById('section-norte').style.display = norte.length ? 'block' : 'none';
+            document.getElementById('section-cuyo').style.display = cuyo.length ? 'block' : 'none';
+            document.getElementById('section-patagonia').style.display = patagonia.length ? 'block' : 'none';
+            document.getElementById('no-results').style.display = filtered.length === 0 ? 'block' : 'none';
+        }
+
+        // LÓGICA DE FILTRADO
+        function toggleFilter(value, category) {
+            if (value === 'all') {
+                activeFilters.type.clear();
+                activeFilters.region.clear();
+                activeFilters.box.clear();
+            } else {
+                const targetSet = activeFilters[category];
+                targetSet.has(value) ? targetSet.delete(value) : targetSet.add(value);
+            }
+            
+            // UI Botones Filtros
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 const val = btn.dataset.value;
                 const cat = btn.dataset.category;
-                let isActive = false;
-                
-                if (val === 'all' && activeTypes.size === 0 && activeRegions.size === 0) {
-                    isActive = true;
-                } else if (cat === 'type' && activeTypes.has(val)) {
-                    isActive = true;
-                } else if (cat === 'region' && activeRegions.has(val)) {
-                    isActive = true;
-                }
+                let isActive = (val === 'all' && activeFilters.type.size===0 && activeFilters.region.size===0 && activeFilters.box.size===0) ||
+                               (cat === 'type' && activeFilters.type.has(val)) ||
+                               (cat === 'region' && activeFilters.region.has(val)) ||
+                               (cat === 'box' && activeFilters.box.has(val));
 
                 if (isActive) {
-                    // Botón Activo: Fondo oscuro sólido, sin hover que rompa el contraste
-                    btn.className = "filter-btn bg-wine-900 text-white border-wine-900 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm transition-colors";
+                    btn.className = "filter-btn bg-wine-900 text-white border-wine-900 border px-4 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm transition-colors";
                 } else {
-                    // Botón Inactivo: Fondo blanco, se vuelve rojo al pasar el ratón
-                    btn.className = "filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors";
+                    btn.className = "filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors";
                 }
             });
-
-            // 2. Filtrar las filas de vinos (Lógica AND/OR)
-            document.querySelectorAll('.region-section').forEach(section => {
-                let visibleCount = 0;
-                section.querySelectorAll('.wine-row').forEach(row => {
-                    const wType = row.dataset.type;
-                    const wReg = row.dataset.region;
-                    
-                    // Comprobar si coincide el tipo Y la región
-                    const matchType = activeTypes.size === 0 || activeTypes.has(wType);
-                    const matchReg = activeRegions.size === 0 || activeRegions.has(wReg);
-                    
-                    if (matchType && matchReg) {
-                        row.style.display = '';
-                        visibleCount++;
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-
-                // 3. Ocultar la sección entera (ej. "Norte Argentino") si no quedan vinos visibles
-                if (visibleCount > 0) {
-                    section.style.display = '';
-                } else {
-                    section.style.display = 'none';
-                }
-            });
+            renderCatalog();
         }
 
-        function updateQty(btn, change) {
-            const row = btn.closest('.wine-row');
-            const id = row.getAttribute('data-id');
-            const name = row.getAttribute('data-name');
-            const price = parseFloat(row.getAttribute('data-price'));
-            const boxSize = parseInt(row.getAttribute('data-box'));
-            const display = row.querySelector('.qty-display');
-            
-            let currentQty = parseInt(display.innerText) || 0;
+        // LÓGICA DE ORDENACIÓN
+        function setSort(val) {
+            currentSort = val;
+            ['default', 'asc', 'desc'].forEach(s => {
+                const btn = document.getElementById('sort-' + s);
+                if(s === val) {
+                    btn.className = "sort-btn flex-1 lg:flex-none px-3 py-1.5 text-[10px] font-bold uppercase rounded text-wine-900 bg-white shadow-sm transition-colors";
+                } else {
+                    btn.className = "sort-btn flex-1 lg:flex-none px-3 py-1.5 text-[10px] font-bold uppercase rounded text-stone-500 hover:bg-white hover:text-wine-900 transition-colors";
+                }
+            });
+            renderCatalog();
+        }
+
+        // LÓGICA DE CARRITO
+        function updateQty(id, change) {
+            const wine = catalogData.find(w => w.id === id);
+            let currentQty = cart[id] ? cart[id].qty : 0;
             let newQty = Math.max(0, currentQty + change);
             
-            display.innerText = newQty;
-            
             if (newQty > 0) {
-                cart[id] = { name, price, qty: newQty, boxSize };
-                row.classList.add('in-cart');
+                cart[id] = { ...wine, qty: newQty };
             } else {
                 delete cart[id];
-                row.classList.remove('in-cart');
             }
             
+            // Animar botón flotante
             const badge = document.getElementById('cart-badge');
             badge.classList.remove('animate-pop');
             void badge.offsetWidth;
             badge.classList.add('animate-pop');
 
-            renderCart();
+            renderCatalog(); // Refresca las filas para añadir estilo .in-cart
+            renderCart();    // Refresca el panel lateral
         }
 
         function renderCart() {
@@ -570,35 +617,38 @@
             const totalEl = document.getElementById('cart-total');
             const badge = document.getElementById('cart-badge');
             
-            itemsContainer.innerHTML = '';
+            const isEs = document.body.classList.contains('lang-es');
+            const langEmpty = isEs ? 'Su carrito está vacío.' : 'Your cart is empty.';
+            const langBox = isEs ? 'Caja(s)' : 'Box(es)';
+            const langBot = isEs ? 'botellas' : 'bottles';
+
             let total = 0;
             let count = 0;
-            
             const keys = Object.keys(cart);
             
             if (keys.length === 0) {
                 itemsContainer.innerHTML = `
                     <div class="h-full flex flex-col items-center justify-center text-stone-400 italic opacity-60 mt-10">
                         <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                        <p>Su carrito está vacío.</p>
+                        <p>${langEmpty}</p>
                     </div>`;
                 badge.style.display = 'none';
                 totalEl.innerText = '0,00 €';
                 return;
             }
 
-            keys.forEach(id => {
+            itemsContainer.innerHTML = keys.map(id => {
                 const item = cart[id];
-                const itemTotal = item.qty * item.price;
+                const itemTotal = item.qty * item.price * item.box;
                 total += itemTotal;
                 count += item.qty;
                 
-                itemsContainer.innerHTML += `
+                return `
                     <div class="flex justify-between items-start p-4 bg-white border border-stone-100 rounded-sm shadow-sm mb-3">
                         <div class="pr-3">
                             <h5 class="text-sm font-bold text-wine-900 leading-tight mb-1">${item.name}</h5>
                             <div class="text-xs text-stone-500 font-medium">
-                                <span class="text-gold-600 font-bold">${item.qty} Caja(s)</span> · ${item.qty * item.boxSize} botellas
+                                <span class="text-gold-600 font-bold">${item.qty} ${langBox}</span> · ${item.qty * item.box} ${langBot}
                             </div>
                         </div>
                         <div class="text-right">
@@ -606,7 +656,7 @@
                         </div>
                     </div>
                 `;
-            });
+            }).join('');
             
             totalEl.innerText = total.toFixed(2).replace('.', ',') + ' €';
             badge.innerText = count;
@@ -640,9 +690,20 @@
         }
 
         function processCheckout() {
-            alert('Conectando con plataforma de pago seguro (Stripe). \\n\\nLos impuestos correspondientes a Canarias (IGIC/AIEM) se calcularán en el siguiente paso.');
+            const isEs = document.body.classList.contains('lang-es');
+            if(isEs) {
+                alert('Conectando con plataforma de pago seguro (Stripe). \\n\\nLos impuestos correspondientes a Canarias (IGIC/AIEM) se calcularán en el siguiente paso.');
+            } else {
+                alert('Connecting with secure payment platform (Stripe). \\n\\nCanary Islands taxes (IGIC/AIEM) will be calculated at checkout.');
+            }
             console.log("Cesta de la compra a enviar al procesador de pagos:", cart);
         }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCatalog();
+            renderCart();
+        });
     </script>
 </body>
 </html>
