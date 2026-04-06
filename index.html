@@ -55,7 +55,7 @@
         
         /* Acento de Canarias */
         .canary-stripe {
-            background: linear-gradient(90deg, #ffffff 0%, #ffffff 25%, #00a1e4 25%, #00a1e4 50%, #fcd116 50%, #fcd116 100%);
+            background: linear-gradient(90deg, #ffffff 0%, #ffffff 33.33%, #00a1e4 33.33%, #00a1e4 66.66%, #fcd116 66.66%, #fcd116 100%);
         }
         
         /* Animaciones del Carrito */
@@ -87,7 +87,7 @@
 <body class="antialiased relative">
 
     <!-- Franja Canarias -->
-    <div class="canary-stripe h-1.5 w-full fixed top-0 z-[100] shadow-sm"></div>
+    <div class="canary-stripe h-2.5 w-full fixed top-0 z-[100] shadow-md"></div>
 
     <!-- H E R O   S E C T I O N -->
     <header class="relative bg-wine-900 pt-32 pb-24 px-6 lg:pt-40 lg:pb-32 overflow-hidden">
@@ -159,16 +159,16 @@
 
         <!-- F I L T R O S   D E L   C A T Á L O G O -->
         <div class="flex flex-wrap gap-3 mb-12">
-            <button onclick="filterCatalog('all')" data-filter="all" class="filter-btn bg-wine-900 text-white border-wine-900 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:shadow-md">Todos</button>
-            <button onclick="filterCatalog('tinto')" data-filter="tinto" class="filter-btn bg-white text-stone-500 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-900 hover:text-wine-900">Tintos</button>
-            <button onclick="filterCatalog('blanco')" data-filter="blanco" class="filter-btn bg-white text-stone-500 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-900 hover:text-wine-900">Blancos</button>
-            <button onclick="filterCatalog('rosado')" data-filter="rosado" class="filter-btn bg-white text-stone-500 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-900 hover:text-wine-900">Rosados</button>
+            <button onclick="toggleFilter('all')" data-value="all" data-category="all" class="filter-btn bg-wine-900 text-white border-wine-900 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm transition-colors">Todos</button>
+            <button onclick="toggleFilter('tinto', 'type')" data-value="tinto" data-category="type" class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Tintos</button>
+            <button onclick="toggleFilter('blanco', 'type')" data-value="blanco" data-category="type" class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Blancos</button>
+            <button onclick="toggleFilter('rosado', 'type')" data-value="rosado" data-category="type" class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Rosados</button>
             
             <div class="w-px h-8 bg-stone-200 mx-2 hidden sm:block self-center"></div>
             
-            <button onclick="filterCatalog('norte')" data-filter="norte" class="filter-btn bg-white text-stone-500 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-900 hover:text-wine-900">Norte Argentino</button>
-            <button onclick="filterCatalog('cuyo')" data-filter="cuyo" class="filter-btn bg-white text-stone-500 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-900 hover:text-wine-900">Cuyo</button>
-            <button onclick="filterCatalog('patagonia')" data-filter="patagonia" class="filter-btn bg-white text-stone-500 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-900 hover:text-wine-900">Patagonia</button>
+            <button onclick="toggleFilter('norte', 'region')" data-value="norte" data-category="region" class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Norte Argentino</button>
+            <button onclick="toggleFilter('cuyo', 'region')" data-value="cuyo" data-category="region" class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Cuyo</button>
+            <button onclick="toggleFilter('patagonia', 'region')" data-value="patagonia" data-category="region" class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Patagonia</button>
         </div>
 
         <!-- SECCIÓN 1: NORTE ARGENTINO -->
@@ -468,27 +468,58 @@
     <script>
         const cart = {};
 
-        // Lógica de Filtrado del Catálogo
-        function filterCatalog(filterType) {
-            // 1. Actualizar apariencia de los botones
+        // Lógica Avanzada de Filtrado (Múltiples opciones cruzadas)
+        let activeTypes = new Set();
+        let activeRegions = new Set();
+
+        function toggleFilter(value, category) {
+            if (value === 'all') {
+                activeTypes.clear();
+                activeRegions.clear();
+            } else if (category === 'type') {
+                activeTypes.has(value) ? activeTypes.delete(value) : activeTypes.add(value);
+            } else if (category === 'region') {
+                activeRegions.has(value) ? activeRegions.delete(value) : activeRegions.add(value);
+            }
+            applyFilters();
+        }
+
+        function applyFilters() {
+            // 1. Actualizar apariencia de los botones (Solucionado problema de lectura en hover)
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                if (btn.dataset.filter === filterType) {
-                    btn.classList.add('bg-wine-900', 'text-white', 'border-wine-900');
-                    btn.classList.remove('bg-white', 'text-stone-500', 'border-stone-200');
+                const val = btn.dataset.value;
+                const cat = btn.dataset.category;
+                let isActive = false;
+                
+                if (val === 'all' && activeTypes.size === 0 && activeRegions.size === 0) {
+                    isActive = true;
+                } else if (cat === 'type' && activeTypes.has(val)) {
+                    isActive = true;
+                } else if (cat === 'region' && activeRegions.has(val)) {
+                    isActive = true;
+                }
+
+                if (isActive) {
+                    // Botón Activo: Fondo oscuro sólido, sin hover que rompa el contraste
+                    btn.className = "filter-btn bg-wine-900 text-white border-wine-900 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm transition-colors";
                 } else {
-                    btn.classList.remove('bg-wine-900', 'text-white', 'border-wine-900');
-                    btn.classList.add('bg-white', 'text-stone-500', 'border-stone-200');
+                    // Botón Inactivo: Fondo blanco, se vuelve rojo al pasar el ratón
+                    btn.className = "filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors";
                 }
             });
 
-            // 2. Filtrar las filas de vinos
+            // 2. Filtrar las filas de vinos (Lógica AND/OR)
             document.querySelectorAll('.region-section').forEach(section => {
                 let visibleCount = 0;
                 section.querySelectorAll('.wine-row').forEach(row => {
                     const wType = row.dataset.type;
                     const wReg = row.dataset.region;
                     
-                    if (filterType === 'all' || filterType === wType || filterType === wReg) {
+                    // Comprobar si coincide el tipo Y la región
+                    const matchType = activeTypes.size === 0 || activeTypes.has(wType);
+                    const matchReg = activeRegions.size === 0 || activeRegions.has(wReg);
+                    
+                    if (matchType && matchReg) {
                         row.style.display = '';
                         visibleCount++;
                     } else {
@@ -496,7 +527,7 @@
                     }
                 });
 
-                // 3. Ocultar la sección entera (Norte, Cuyo, Patagonia) si no le quedan vinos visibles
+                // 3. Ocultar la sección entera (ej. "Norte Argentino") si no quedan vinos visibles
                 if (visibleCount > 0) {
                     section.style.display = '';
                 } else {
