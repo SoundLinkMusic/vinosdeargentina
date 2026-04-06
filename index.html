@@ -77,6 +77,9 @@
         }
         .animate-pop { animation: pop 0.3s ease-out forwards; }
         
+        /* Clases dinámicas de filtro */
+        .filter-btn { transition: all 0.3s ease; }
+        
         input[type="number"]::-webkit-inner-spin-button, 
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
@@ -154,8 +157,22 @@
             </div>
         </div>
 
+        <!-- F I L T R O S   D E L   C A T Á L O G O -->
+        <div class="flex flex-wrap gap-3 mb-12">
+            <button onclick="filterCatalog('all')" data-filter="all" class="filter-btn bg-wine-900 text-white border-wine-900 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:shadow-md">Todos</button>
+            <button onclick="filterCatalog('tinto')" data-filter="tinto" class="filter-btn bg-white text-stone-500 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-900 hover:text-wine-900">Tintos</button>
+            <button onclick="filterCatalog('blanco')" data-filter="blanco" class="filter-btn bg-white text-stone-500 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-900 hover:text-wine-900">Blancos</button>
+            <button onclick="filterCatalog('rosado')" data-filter="rosado" class="filter-btn bg-white text-stone-500 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-900 hover:text-wine-900">Rosados</button>
+            
+            <div class="w-px h-8 bg-stone-200 mx-2 hidden sm:block self-center"></div>
+            
+            <button onclick="filterCatalog('norte')" data-filter="norte" class="filter-btn bg-white text-stone-500 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-900 hover:text-wine-900">Norte Argentino</button>
+            <button onclick="filterCatalog('cuyo')" data-filter="cuyo" class="filter-btn bg-white text-stone-500 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-900 hover:text-wine-900">Cuyo</button>
+            <button onclick="filterCatalog('patagonia')" data-filter="patagonia" class="filter-btn bg-white text-stone-500 border-stone-200 border px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-900 hover:text-wine-900">Patagonia</button>
+        </div>
+
         <!-- SECCIÓN 1: NORTE ARGENTINO -->
-        <section>
+        <section class="region-section">
             <div class="mb-8">
                 <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]">Altitud Extrema</span>
                 <h3 class="text-3xl font-serif text-stone-900 mt-1">Norte Argentino</h3>
@@ -174,28 +191,28 @@
                 <script>
                     // Generador de filas para mantener el HTML limpio y estructurado (Usado internamente para listar rápido los 44 vinos)
                     const winesNorte = [
-                        { id: 'llama-malbec', bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Malbec 2025', notes: 'Fruta roja y pimienta negra. Taninos sedosos de arena profunda.', box: 6, price: 11.48 },
-                        { id: 'llama-torrontes', bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Torrontés 2025', notes: 'Luz de montaña. Frescura vibrante y perfil floral.', box: 6, price: 11.48 },
-                        { id: 'llama-rose', bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Rosé 2025', notes: 'Rosado de Syrah. Expresivo y vibrante.', box: 6, price: 11.48 },
-                        { id: 'dupont-punta', bodega: 'Fernando Dupont · Maimará', name: 'Punta Corral 2022', notes: 'Blend de altura extrema. Malbec, Syrah y Cab Franc. 10 meses en roble.', box: 6, price: 20.25 },
-                        { id: 'dupont-franc', bodega: 'Fernando Dupont · Maimará', name: 'Franc Dupont 2022', notes: 'Pioneros en Jujuy. Frescura y complejidad aromática.', box: 6, price: 25.65 },
-                        { id: 'dupont-sikuri', bodega: 'Fernando Dupont · Maimará', name: 'Sikuri Syrah 2022', notes: 'Gran frescura, notas de carnes ahumadas y pimienta negra.', box: 6, price: 25.65 },
-                        { id: 'yaco-pasacana', bodega: 'Bodega Yacochuya · Cafayate', name: 'Pasacana 2021', notes: 'Creación de Michel Rolland & Flia Etchart. 18 meses de barrica.', box: 6, price: 37.80 },
-                        { id: 'yaco-coquena', bodega: 'Bodega Yacochuya · Cafayate', name: 'Coquena Tannat 2025', notes: 'Potencia y frescura. Aromas de fruta negra y taninos firmes.', box: 6, price: 13.50 },
-                        { id: 'yaco-malbec', bodega: 'Bodega Yacochuya · Cafayate', name: 'Yacochuya Malbec 2021', notes: 'Vino icónico de la bodega, estructurado y de gran guarda.', box: 6, price: 37.80 },
-                        { id: 'yaco-sanpedro', bodega: 'Bodega Yacochuya · Cafayate', name: 'San Pedro de Yacochuya', notes: 'Elegancia clásica del valle Calchaquí.', box: 6, price: 24.30 },
-                        { id: 'lanus-ilogico-malbec', bodega: 'Agustín Lanús · Calchaquí', name: 'Ilógico Malbec 2020', notes: '50% roble, 50% huevos de hormigón. Fruta oscura y pimienta.', box: 6, price: 22.95 },
-                        { id: 'lanus-ilogico-criolla', bodega: 'Agustín Lanús · Calchaquí', name: 'Ilógico Criolla 2022', notes: 'Aromas balsámicos y cereza. Frescura y elegancia de extrema altura.', box: 6, price: 20.25 },
-                        { id: 'lanus-atypico', bodega: 'Agustín Lanús · Calchaquí', name: 'Atypico Blend 2018', notes: 'Malbec y Cabernet Sauvignon de Tolombón. Complejidad brutal.', box: 6, price: 37.80 },
-                        { id: 'lanus-sunal-malbec', bodega: 'Agustín Lanús · Calchaquí', name: 'Sunal Extreme Altitude Malbec', notes: 'El límite de la viticultura en Argentina. Precisión extrema.', box: 6, price: 47.25 },
-                        { id: 'lanus-sunal-criolla', bodega: 'Agustín Lanús · Calchaquí', name: 'Sunal Ilógico Criolla Chica 2021', notes: 'Cepas centenarias recuperadas. Pura identidad.', box: 6, price: 20.25 }
+                        { id: 'llama-malbec', type: 'tinto', region: 'norte', bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Malbec 2025', notes: 'Fruta roja y pimienta negra. Taninos sedosos de arena profunda.', box: 6, price: 11.48 },
+                        { id: 'llama-torrontes', type: 'blanco', region: 'norte', bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Torrontés 2025', notes: 'Luz de montaña. Frescura vibrante y perfil floral.', box: 6, price: 11.48 },
+                        { id: 'llama-rose', type: 'rosado', region: 'norte', bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Rosé 2025', notes: 'Rosado de Syrah. Expresivo y vibrante.', box: 6, price: 11.48 },
+                        { id: 'dupont-punta', type: 'tinto', region: 'norte', bodega: 'Fernando Dupont · Maimará', name: 'Punta Corral 2022', notes: 'Blend de altura extrema. Malbec, Syrah y Cab Franc. 10 meses en roble.', box: 6, price: 20.25 },
+                        { id: 'dupont-franc', type: 'tinto', region: 'norte', bodega: 'Fernando Dupont · Maimará', name: 'Franc Dupont 2022', notes: 'Pioneros en Jujuy. Frescura y complejidad aromática.', box: 6, price: 25.65 },
+                        { id: 'dupont-sikuri', type: 'tinto', region: 'norte', bodega: 'Fernando Dupont · Maimará', name: 'Sikuri Syrah 2022', notes: 'Gran frescura, notas de carnes ahumadas y pimienta negra.', box: 6, price: 25.65 },
+                        { id: 'yaco-pasacana', type: 'tinto', region: 'norte', bodega: 'Bodega Yacochuya · Cafayate', name: 'Pasacana 2021', notes: 'Creación de Michel Rolland & Flia Etchart. 18 meses de barrica.', box: 6, price: 37.80 },
+                        { id: 'yaco-coquena', type: 'tinto', region: 'norte', bodega: 'Bodega Yacochuya · Cafayate', name: 'Coquena Tannat 2025', notes: 'Potencia y frescura. Aromas de fruta negra y taninos firmes.', box: 6, price: 13.50 },
+                        { id: 'yaco-malbec', type: 'tinto', region: 'norte', bodega: 'Bodega Yacochuya · Cafayate', name: 'Yacochuya Malbec 2021', notes: 'Vino icónico de la bodega, estructurado y de gran guarda.', box: 6, price: 37.80 },
+                        { id: 'yaco-sanpedro', type: 'tinto', region: 'norte', bodega: 'Bodega Yacochuya · Cafayate', name: 'San Pedro de Yacochuya', notes: 'Elegancia clásica del valle Calchaquí.', box: 6, price: 24.30 },
+                        { id: 'lanus-ilogico-malbec', type: 'tinto', region: 'norte', bodega: 'Agustín Lanús · Calchaquí', name: 'Ilógico Malbec 2020', notes: '50% roble, 50% huevos de hormigón. Fruta oscura y pimienta.', box: 6, price: 22.95 },
+                        { id: 'lanus-ilogico-criolla', type: 'tinto', region: 'norte', bodega: 'Agustín Lanús · Calchaquí', name: 'Ilógico Criolla 2022', notes: 'Aromas balsámicos y cereza. Frescura y elegancia de extrema altura.', box: 6, price: 20.25 },
+                        { id: 'lanus-atypico', type: 'tinto', region: 'norte', bodega: 'Agustín Lanús · Calchaquí', name: 'Atypico Blend 2018', notes: 'Malbec y Cabernet Sauvignon de Tolombón. Complejidad brutal.', box: 6, price: 37.80 },
+                        { id: 'lanus-sunal-malbec', type: 'tinto', region: 'norte', bodega: 'Agustín Lanús · Calchaquí', name: 'Sunal Extreme Altitude Malbec', notes: 'El límite de la viticultura en Argentina. Precisión extrema.', box: 6, price: 47.25 },
+                        { id: 'lanus-sunal-criolla', type: 'tinto', region: 'norte', bodega: 'Agustín Lanús · Calchaquí', name: 'Sunal Ilógico Criolla Chica 2021', notes: 'Cepas centenarias recuperadas. Pura identidad.', box: 6, price: 20.25 }
                     ];
 
                     winesNorte.forEach(w => {
                         const total = (w.price * w.box).toFixed(2).replace('.', ',');
                         const price = w.price.toFixed(2).replace('.', ',');
                         document.write(`
-                            <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50" data-id="${w.id}" data-name="${w.name}" data-price="${(w.price * w.box).toFixed(2)}" data-box="${w.box}">
+                            <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50" data-id="${w.id}" data-name="${w.name}" data-price="${(w.price * w.box).toFixed(2)}" data-box="${w.box}" data-type="${w.type}" data-region="${w.region}">
                                 <div class="col-span-5 flex flex-col">
                                     <span class="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-1">${w.bodega}</span>
                                     <h4 class="text-lg font-serif text-wine-900 font-bold leading-tight">${w.name}</h4>
@@ -229,7 +246,7 @@
         </section>
 
         <!-- SECCIÓN 2: REGIÓN CUYO -->
-        <section>
+        <section class="region-section">
             <div class="mb-8">
                 <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]">Corazón Enológico</span>
                 <h3 class="text-3xl font-serif text-stone-900 mt-1">Región de Cuyo</h3>
@@ -246,28 +263,28 @@
 
                 <script>
                     const winesCuyo = [
-                        { id: 'nido-franc', bodega: 'Nido del Tigre · San Juan', name: 'Cabernet Franc 2024', notes: 'Huevos de concreto, levaduras indígenas. Pimiento rojo y ciruelas.', box: 6, price: 14.18 },
-                        { id: 'nido-alcaparrosa', bodega: 'Nido del Tigre · San Juan', name: 'Alcaparrosa Ancellotta 2023', notes: 'Tinto fermentado sin pieles, vinificación de blanco.', box: 6, price: 14.18 },
-                        { id: 'nido-ripasso', bodega: 'Nido del Tigre · San Juan', name: 'Ripasso del Giardino 2024', notes: 'Pieles recuperadas y fermentadas con Malbec. Color vivo y elegante.', box: 6, price: 14.18 },
-                        { id: 'paso-orange', bodega: 'Paso a Paso · Valle de Uco', name: 'Orange Field Blend 2024 (Orgánico)', notes: 'Vino de garage. Criollas argentinas co-fermentadas 90 días.', box: 12, price: 14.85 },
-                        { id: 'paso-semillon', bodega: 'Paso a Paso · Valle de Uco', name: 'Abandonados Semillón 2022', notes: 'Vino blanco de excepción. Maloláctica y crianza 8 meses en barrica.', box: 6, price: 22.95 },
-                        { id: 'paso-clarete', bodega: 'Paso a Paso · Valle de Uco', name: 'Criolla Clarete 2025', notes: 'Rescate de viñedos clásicos, mínima intervención.', box: 12, price: 12.83 },
-                        { id: 'paso-blanca', bodega: 'Paso a Paso · Valle de Uco', name: 'Criolla Blanca 2025', notes: 'Frescura notable, pura expresión de uva criolla.', box: 12, price: 12.83 },
-                        { id: 'paso-bonarda', bodega: 'Paso a Paso · Valle de Uco', name: 'Bonarda Vino de Garage 2023', notes: 'Textura aterciopelada y acidez equilibrada.', box: 12, price: 14.85 },
-                        { id: 'paso-don-graciano', bodega: 'Paso a Paso · Valle de Uco', name: 'Las Criollas de Don Graciano', notes: 'Elaboración artesanal extrema. Edición limitada.', box: 12, price: 14.85 },
-                        { id: 'huentala-malbec', bodega: 'Huentala Wines · Gualtallary', name: 'Gran Sombrerero Malbec 2023', notes: 'Micro-terroirs exclusivos de suelo calcáreo. Estructura y tensión.', box: 6, price: 17.55 },
-                        { id: 'huentala-chard', bodega: 'Huentala Wines · Gualtallary', name: 'Gran Sombrerero Chardonnay', notes: 'Elegante y fresco, altitud pura.', box: 6, price: 16.20 },
-                        { id: 'huentala-verde', bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec Mevushal Verde', notes: 'Línea Kosher certificada. Calidad excepcional.', box: 6, price: 14.85 },
-                        { id: 'huentala-azul', bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec No-Mevushal Azul', notes: 'Línea Kosher. Gran intensidad aromática.', box: 6, price: 18.90 },
-                        { id: 'huentala-negro', bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec No-Mevushal Negro', notes: 'El tope de gama Kosher. Complejo y de larga guarda.', box: 6, price: 29.70 },
-                        { id: 'coloso-blanc', bodega: 'Coloso Wines · Agrelo', name: 'Indomable Blanc de Malbec 2023', notes: 'Blanc de Noir. Fresco, floral, acidez viva. Cosecha nocturna.', box: 6, price: 12.83 },
-                        { id: 'coloso-malbec', bodega: 'Coloso Wines · Agrelo', name: 'Indomable Malbec Clásico', notes: 'Pura expresión de Agrelo.', box: 6, price: 12.83 },
-                        { id: 'ba-malbec', bodega: 'Buenos Aires · Mendoza', name: 'Malbec 2024 (Oro G&G)', notes: 'Sumamente afrutado, cerezas y ciruelas. Fácil de beber.', box: 12, price: 6.75 },
-                        { id: 'ba-chard', bodega: 'Buenos Aires · Mendoza', name: 'Chardonnay 2024', notes: 'Fresco y vibrante, ideal para el canal HORECA.', box: 12, price: 6.75 },
-                        { id: 'ba-reserva', bodega: 'Buenos Aires · Mendoza', name: 'Malbec Reserva 2022', notes: 'Paso por madera, estructura definida.', box: 12, price: 8.78 },
-                        { id: 'ba-rose', bodega: 'Buenos Aires · Mendoza', name: 'Rosé of Malbec', notes: 'Delicado, fresco y con mucha fruta roja.', box: 12, price: 6.75 },
-                        { id: 'ba-cab', bodega: 'Buenos Aires · Mendoza', name: 'Cabernet Sauvignon 2020', notes: 'Oro Gilbert & Gaillard. Estructura y tipicidad.', box: 12, price: 6.75 },
-                        { id: 'ba-blend', bodega: 'Buenos Aires · Mendoza', name: 'Red Blend 2020', notes: 'El corte perfecto de la casa. Equilibrado y goloso.', box: 12, price: 6.75 }
+                        { id: 'nido-franc', type: 'tinto', region: 'cuyo', bodega: 'Nido del Tigre · San Juan', name: 'Cabernet Franc 2024', notes: 'Huevos de concreto, levaduras indígenas. Pimiento rojo y ciruelas.', box: 6, price: 14.18 },
+                        { id: 'nido-alcaparrosa', type: 'tinto', region: 'cuyo', bodega: 'Nido del Tigre · San Juan', name: 'Alcaparrosa Ancellotta 2023', notes: 'Tinto fermentado sin pieles, vinificación de blanco.', box: 6, price: 14.18 },
+                        { id: 'nido-ripasso', type: 'tinto', region: 'cuyo', bodega: 'Nido del Tigre · San Juan', name: 'Ripasso del Giardino 2024', notes: 'Pieles recuperadas y fermentadas con Malbec. Color vivo y elegante.', box: 6, price: 14.18 },
+                        { id: 'paso-orange', type: 'blanco', region: 'cuyo', bodega: 'Paso a Paso · Valle de Uco', name: 'Orange Field Blend 2024 (Orgánico)', notes: 'Vino de garage. Criollas argentinas co-fermentadas 90 días.', box: 12, price: 14.85 },
+                        { id: 'paso-semillon', type: 'blanco', region: 'cuyo', bodega: 'Paso a Paso · Valle de Uco', name: 'Abandonados Semillón 2022', notes: 'Vino blanco de excepción. Maloláctica y crianza 8 meses en barrica.', box: 6, price: 22.95 },
+                        { id: 'paso-clarete', type: 'rosado', region: 'cuyo', bodega: 'Paso a Paso · Valle de Uco', name: 'Criolla Clarete 2025', notes: 'Rescate de viñedos clásicos, mínima intervención.', box: 12, price: 12.83 },
+                        { id: 'paso-blanca', type: 'blanco', region: 'cuyo', bodega: 'Paso a Paso · Valle de Uco', name: 'Criolla Blanca 2025', notes: 'Frescura notable, pura expresión de uva criolla.', box: 12, price: 12.83 },
+                        { id: 'paso-bonarda', type: 'tinto', region: 'cuyo', bodega: 'Paso a Paso · Valle de Uco', name: 'Bonarda Vino de Garage 2023', notes: 'Textura aterciopelada y acidez equilibrada.', box: 12, price: 14.85 },
+                        { id: 'paso-don-graciano', type: 'tinto', region: 'cuyo', bodega: 'Paso a Paso · Valle de Uco', name: 'Las Criollas de Don Graciano', notes: 'Elaboración artesanal extrema. Edición limitada.', box: 12, price: 14.85 },
+                        { id: 'huentala-malbec', type: 'tinto', region: 'cuyo', bodega: 'Huentala Wines · Gualtallary', name: 'Gran Sombrerero Malbec 2023', notes: 'Micro-terroirs exclusivos de suelo calcáreo. Estructura y tensión.', box: 6, price: 17.55 },
+                        { id: 'huentala-chard', type: 'blanco', region: 'cuyo', bodega: 'Huentala Wines · Gualtallary', name: 'Gran Sombrerero Chardonnay', notes: 'Elegante y fresco, altitud pura.', box: 6, price: 16.20 },
+                        { id: 'huentala-verde', type: 'tinto', region: 'cuyo', bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec Mevushal Verde', notes: 'Línea Kosher certificada. Calidad excepcional.', box: 6, price: 14.85 },
+                        { id: 'huentala-azul', type: 'tinto', region: 'cuyo', bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec No-Mevushal Azul', notes: 'Línea Kosher. Gran intensidad aromática.', box: 6, price: 18.90 },
+                        { id: 'huentala-negro', type: 'tinto', region: 'cuyo', bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec No-Mevushal Negro', notes: 'El tope de gama Kosher. Complejo y de larga guarda.', box: 6, price: 29.70 },
+                        { id: 'coloso-blanc', type: 'blanco', region: 'cuyo', bodega: 'Coloso Wines · Agrelo', name: 'Indomable Blanc de Malbec 2023', notes: 'Blanc de Noir. Fresco, floral, acidez viva. Cosecha nocturna.', box: 6, price: 12.83 },
+                        { id: 'coloso-malbec', type: 'tinto', region: 'cuyo', bodega: 'Coloso Wines · Agrelo', name: 'Indomable Malbec Clásico', notes: 'Pura expresión de Agrelo.', box: 6, price: 12.83 },
+                        { id: 'ba-malbec', type: 'tinto', region: 'cuyo', bodega: 'Buenos Aires · Mendoza', name: 'Malbec 2024 (Oro G&G)', notes: 'Sumamente afrutado, cerezas y ciruelas. Fácil de beber.', box: 12, price: 6.75 },
+                        { id: 'ba-chard', type: 'blanco', region: 'cuyo', bodega: 'Buenos Aires · Mendoza', name: 'Chardonnay 2024', notes: 'Fresco y vibrante, ideal para el canal HORECA.', box: 12, price: 6.75 },
+                        { id: 'ba-reserva', type: 'tinto', region: 'cuyo', bodega: 'Buenos Aires · Mendoza', name: 'Malbec Reserva 2022', notes: 'Paso por madera, estructura definida.', box: 12, price: 8.78 },
+                        { id: 'ba-rose', type: 'rosado', region: 'cuyo', bodega: 'Buenos Aires · Mendoza', name: 'Rosé of Malbec', notes: 'Delicado, fresco y con mucha fruta roja.', box: 12, price: 6.75 },
+                        { id: 'ba-cab', type: 'tinto', region: 'cuyo', bodega: 'Buenos Aires · Mendoza', name: 'Cabernet Sauvignon 2020', notes: 'Oro Gilbert & Gaillard. Estructura y tipicidad.', box: 12, price: 6.75 },
+                        { id: 'ba-blend', type: 'tinto', region: 'cuyo', bodega: 'Buenos Aires · Mendoza', name: 'Red Blend 2020', notes: 'El corte perfecto de la casa. Equilibrado y goloso.', box: 12, price: 6.75 }
                     ];
 
                     winesCuyo.forEach(w => {
@@ -278,7 +295,7 @@
                         if(w.name.includes('Oro')) extraTag = '<span class="ml-2 px-1.5 py-0.5 bg-yellow-100 text-yellow-800 text-[9px] font-bold uppercase rounded-sm">Oro</span>';
                         
                         document.write(`
-                            <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50" data-id="${w.id}" data-name="${w.name.replace(' (Orgánico)','').replace(' (Oro G&G)','')}" data-price="${(w.price * w.box).toFixed(2)}" data-box="${w.box}">
+                            <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50" data-id="${w.id}" data-name="${w.name.replace(' (Orgánico)','').replace(' (Oro G&G)','')}" data-price="${(w.price * w.box).toFixed(2)}" data-box="${w.box}" data-type="${w.type}" data-region="${w.region}">
                                 <div class="col-span-5 flex flex-col">
                                     <span class="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-1">${w.bodega}</span>
                                     <h4 class="text-lg font-serif text-wine-900 font-bold leading-tight flex items-center flex-wrap gap-1">${w.name.replace(' (Orgánico)','').replace(' (Oro G&G)','')} ${extraTag}</h4>
@@ -312,7 +329,7 @@
         </section>
 
         <!-- SECCIÓN 3: PATAGONIA -->
-        <section>
+        <section class="region-section">
             <div class="mb-8">
                 <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]">El Sur Extremo</span>
                 <h3 class="text-3xl font-serif text-stone-900 mt-1">Patagonia Argentina</h3>
@@ -329,20 +346,20 @@
 
                 <script>
                     const winesPatagonia = [
-                        { id: 'desierto-merlot', bodega: 'Bodega del Desierto · La Pampa', name: 'Merlot 2020', notes: 'Crianza de 9 meses en roble. Aromas maduros con personalidad patagónica.', box: 6, price: 16.20 },
-                        { id: 'desierto-cabfranc', bodega: 'Bodega del Desierto · La Pampa', name: 'Cabernet Franc 2019', notes: 'Suelos áridos y aluviales, rico en minerales.', box: 6, price: 16.20 },
-                        { id: 'desierto-pinot', bodega: 'Bodega del Desierto · La Pampa', name: 'Pinot Noir 2021', notes: 'Elegancia y frescura extrema del desierto.', box: 6, price: 16.20 },
-                        { id: 'desierto-pampeano', bodega: 'Bodega del Desierto · La Pampa', name: 'Pampeano Pinot Noir 2024', notes: 'Sin madera. Pura frescura, fruta roja y flores blancas.', box: 6, price: 13.50 },
-                        { id: 'desierto-25malbec', bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto 25 Malbec', notes: 'El clásico patagónico de estructura plena.', box: 6, price: 16.20 },
-                        { id: 'desierto-25syrah', bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto 25 Syrah', notes: 'Especiado, potente y de gran carácter.', box: 6, price: 16.20 },
-                        { id: 'desierto-pampa-blend', bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto Pampa Blend', notes: 'El corte insignia de la bodega pampeana.', box: 6, price: 21.60 }
+                        { id: 'desierto-merlot', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Merlot 2020', notes: 'Crianza de 9 meses en roble. Aromas maduros con personalidad patagónica.', box: 6, price: 16.20 },
+                        { id: 'desierto-cabfranc', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Cabernet Franc 2019', notes: 'Suelos áridos y aluviales, rico en minerales.', box: 6, price: 16.20 },
+                        { id: 'desierto-pinot', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Pinot Noir 2021', notes: 'Elegancia y frescura extrema del desierto.', box: 6, price: 16.20 },
+                        { id: 'desierto-pampeano', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Pampeano Pinot Noir 2024', notes: 'Sin madera. Pura frescura, fruta roja y flores blancas.', box: 6, price: 13.50 },
+                        { id: 'desierto-25malbec', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto 25 Malbec', notes: 'El clásico patagónico de estructura plena.', box: 6, price: 16.20 },
+                        { id: 'desierto-25syrah', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto 25 Syrah', notes: 'Especiado, potente y de gran carácter.', box: 6, price: 16.20 },
+                        { id: 'desierto-pampa-blend', type: 'tinto', region: 'patagonia', bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto Pampa Blend', notes: 'El corte insignia de la bodega pampeana.', box: 6, price: 21.60 }
                     ];
 
                     winesPatagonia.forEach(w => {
                         const total = (w.price * w.box).toFixed(2).replace('.', ',');
                         const price = w.price.toFixed(2).replace('.', ',');
                         document.write(`
-                            <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50" data-id="${w.id}" data-name="${w.name}" data-price="${(w.price * w.box).toFixed(2)}" data-box="${w.box}">
+                            <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50" data-id="${w.id}" data-name="${w.name}" data-price="${(w.price * w.box).toFixed(2)}" data-box="${w.box}" data-type="${w.type}" data-region="${w.region}">
                                 <div class="col-span-5 flex flex-col">
                                     <span class="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-1">${w.bodega}</span>
                                     <h4 class="text-lg font-serif text-wine-900 font-bold leading-tight">${w.name}</h4>
@@ -443,6 +460,43 @@
     <!-- S C R I P T S -->
     <script>
         const cart = {};
+
+        // Lógica de Filtrado del Catálogo
+        function filterCatalog(filterType) {
+            // 1. Actualizar apariencia de los botones
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.filter === filterType) {
+                    btn.classList.add('bg-wine-900', 'text-white', 'border-wine-900');
+                    btn.classList.remove('bg-white', 'text-stone-500', 'border-stone-200');
+                } else {
+                    btn.classList.remove('bg-wine-900', 'text-white', 'border-wine-900');
+                    btn.classList.add('bg-white', 'text-stone-500', 'border-stone-200');
+                }
+            });
+
+            // 2. Filtrar las filas de vinos
+            document.querySelectorAll('.region-section').forEach(section => {
+                let visibleCount = 0;
+                section.querySelectorAll('.wine-row').forEach(row => {
+                    const wType = row.dataset.type;
+                    const wReg = row.dataset.region;
+                    
+                    if (filterType === 'all' || filterType === wType || filterType === wReg) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                // 3. Ocultar la sección entera (Norte, Cuyo, Patagonia) si no le quedan vinos visibles
+                if (visibleCount > 0) {
+                    section.style.display = '';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
 
         function updateQty(btn, change) {
             const row = btn.closest('.wine-row');
