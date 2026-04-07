@@ -10,9 +10,164 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="/assets/js/config.js"></script>
-    <script src="/assets/js/auth.js"></script>
-    <script src="/assets/js/api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Config Module -->
+    <script>
+        const API_CONFIG = {
+            SUPABASE_URL: 'https://pzzbvinbyzaxrshlmlcn.supabase.co',
+            SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6emJ2aW5ieXpheHJzaGxtbGNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTI5NDYsImV4cCI6MjA5MTEyODk0Nn0.YgeGDVZfyqI-nv7iAhROMsBfZbIK7BGUDyU1ERE-SFA',
+            STRIPE_PUBLIC: '',
+            WINES_DATA: '/assets/data/wines.json',
+            PATHS: {
+                WINES: '/assets/data/wines.json',
+                LOGIN: '/public/login.html',
+                MARKETPLACE: '/public/marketplace.html',
+                CHECKOUT: '/public/checkout.html',
+                CRM: '/public/crm.html'
+            },
+            TAXES: {
+                AIEM_DEFAULT: 0.15,
+                IGIC_CANARIAS: 0.07,
+                HORECA_DISCOUNT: 0.20
+            }
+        };
+    </script>
+
+    <!-- API Module (Supabase) -->
+    <script>
+        const APIModule = (() => {
+            const config = API_CONFIG;
+            const supabase = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+
+            const getWines = async () => {
+                try {
+                    const { data, error } = await supabase
+                        .from('wines')
+                        .select('*')
+                        .order('region', { ascending: true });
+                    if (error) throw error;
+                    return data || [];
+                } catch (error) {
+                    console.error('Error en getWines:', error);
+                    return [];
+                }
+            };
+
+            const getWineById = async (id) => {
+                const wines = await getWines();
+                return wines.find(w => w.id === id) || null;
+            };
+
+            const filterWines = async (filters) => {
+                let wines = await getWines();
+                if (filters.type) wines = wines.filter(w => filters.type.includes(w.type));
+                if (filters.region) wines = wines.filter(w => filters.region.includes(w.region));
+                if (filters.box) wines = wines.filter(w => filters.box.includes(w.box));
+                if (filters.priceMax) wines = wines.filter(w => w.price <= filters.priceMax);
+                return wines;
+            };
+
+            const createOrder = async (orderData) => {
+                try {
+                    const { data, error } = await supabase
+                        .from('orders')
+                        .insert([{
+                            customer_name: orderData.customer_name,
+                            customer_email: orderData.customer_email,
+                            customer_phone: orderData.customer_phone || '',
+                            island: orderData.island,
+                            address: orderData.address,
+                            postal_code: orderData.postal_code || '',
+                            subtotal_amount: orderData.subtotal_amount || 0,
+                            tax_amount: orderData.tax_amount || 0,
+                            total_amount: orderData.total_amount,
+                            items: orderData.items,
+                            payment_method: orderData.payment_method,
+                            payment_status: orderData.payment_status || 'pending',
+                            shipping_status: orderData.shipping_status || 'new',
+                            notes: orderData.notes || ''
+                        }])
+                        .select();
+                    if (error) throw error;
+                    return { order: data ? data[0] : null };
+                } catch (error) {
+                    console.error('Error creando orden:', error);
+                    return { error: error.message || 'No se pudo crear la orden' };
+                }
+            };
+
+            const createPaymentIntent = async (amount, currency = 'EUR') => {
+                try {
+                    console.log('PaymentIntent creado (mock):', { amount, currency });
+                    return { clientSecret: 'pi_mock_' + Math.random() };
+                } catch (error) {
+                    console.error('Error en pago:', error);
+                    return { error: 'No se pudo procesar el pago' };
+                }
+            };
+
+            const getUserOrders = async (userId) => {
+                try {
+                    const { data, error } = await supabase
+                        .from('orders')
+                        .select('*')
+                        .eq('user_id', userId)
+                        .order('created_at', { ascending: false });
+                    if (error) throw error;
+                    return { orders: data || [] };
+                } catch (error) {
+                    console.error('Error obteniendo órdenes:', error);
+                    return { error: 'No se pudieron obtener las órdenes' };
+                }
+            };
+
+            const getAllOrders = async () => {
+                try {
+                    const { data, error } = await supabase
+                        .from('orders')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    if (error) throw error;
+                    return { orders: data || [] };
+                } catch (error) {
+                    console.error('Error obteniendo todas las órdenes:', error);
+                    return { error: 'No se pudieron obtener las órdenes' };
+                }
+            };
+
+            const calculateTotal = (items, userDiscountPercent = 0) => {
+                let subtotal = 0;
+                items.forEach(item => {
+                    const pricePerUnit = item.price || 0;
+                    const quantity = item.quantity || 1;
+                    subtotal += pricePerUnit * quantity;
+                });
+                if (userDiscountPercent > 0) {
+                    subtotal *= (1 - userDiscountPercent / 100);
+                }
+                const igic = subtotal * config.TAXES.IGIC_CANARIAS;
+                const total = subtotal + igic;
+                return {
+                    subtotal: parseFloat(subtotal.toFixed(2)),
+                    igic: parseFloat(igic.toFixed(2)),
+                    total: parseFloat(total.toFixed(2))
+                };
+            };
+
+            return {
+                getWines,
+                getWineById,
+                filterWines,
+                createOrder,
+                createPaymentIntent,
+                getUserOrders,
+                getAllOrders,
+                calculateTotal,
+                supabase
+            };
+        })();
+    </script>
 
     <script>
         tailwind.config = {
