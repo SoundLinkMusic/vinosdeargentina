@@ -454,6 +454,9 @@
             <div id="container-patagonia" class="flex flex-col gap-2"></div>
         </section>
 
+        <!-- Fallback para renderizado unificado -->
+        <div id="catalog-grid" class="wine-grid hidden"></div>
+
         <div id="no-results" class="hidden py-16 text-center text-stone-400 italic">
             <span lang="es">No se encontraron vinos con los filtros seleccionados.</span>
             <span lang="en">No wines found matching the selected filters.</span>
@@ -583,7 +586,13 @@
 
         // MOTOR DE RENDERIZADO DEL CATÁLOGO
         function renderCatalog() {
-            // 1. Filtrar
+            // 1. Validar que catalogData existe
+            if (!catalogData || catalogData.length === 0) {
+                console.error('catalogData está vacío o no definido');
+                return;
+            }
+
+            // 2. Filtrar
             let filtered = catalogData.filter(w => {
                 if (activeFilters.type.size > 0 && !activeFilters.type.has(w.type)) return false;
                 if (activeFilters.region.size > 0 && !activeFilters.region.has(w.region)) return false;
@@ -591,37 +600,37 @@
                 return true;
             });
 
-            // 2. Ordenar
+            // 3. Ordenar
             if (currentSort === 'asc') {
                 filtered.sort((a, b) => (a.price * a.box) - (b.price * b.box));
             } else if (currentSort === 'desc') {
                 filtered.sort((a, b) => (b.price * b.box) - (a.price * a.box));
             }
 
-            // 3. Agrupar
+            // 4. Agrupar
             const norte = filtered.filter(w => w.region === 'norte');
             const cuyo = filtered.filter(w => w.region === 'cuyo');
             const patagonia = filtered.filter(w => w.region === 'patagonia');
 
-            // 4. Función generadora de HTML
+            // 5. Función generadora de HTML
             const generateHtml = (wines) => {
                 return wines.map(w => {
                     const total = (w.price * w.box).toFixed(2).replace('.', ',');
                     const price = w.price.toFixed(2).replace('.', ',');
                     const inCartCls = cart[w.id] ? 'in-cart' : '';
                     const cartQty = cart[w.id] ? cart[w.id].qty : 0;
-                    
+
                     let extraTag = '';
-                    if(w.name.includes('(Orgánico)')) extraTag = '<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-800 text-[9px] font-bold uppercase rounded-sm"><span lang="es">Orgánico</span><span lang="en">Organic</span></span>';
-                    if(w.name.includes('(Oro G&G)')) extraTag = '<span class="ml-2 px-1.5 py-0.5 bg-yellow-100 text-yellow-800 text-[9px] font-bold uppercase rounded-sm"><span lang="es">Oro</span><span lang="en">Gold</span></span>';
+                    if(w.name && w.name.includes('(Orgánico)')) extraTag = '<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-800 text-[9px] font-bold uppercase rounded-sm"><span lang="es">Orgánico</span><span lang="en">Organic</span></span>';
+                    if(w.name && w.name.includes('(Oro G&G)')) extraTag = '<span class="ml-2 px-1.5 py-0.5 bg-yellow-100 text-yellow-800 text-[9px] font-bold uppercase rounded-sm"><span lang="es">Oro</span><span lang="en">Gold</span></span>';
 
                     return `
-                        <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50 ${inCartCls}">
+                        <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50 ${inCartCls}" data-wine-id="${w.id}">
                             <div class="col-span-5 flex flex-col">
-                                <span class="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-1">${w.bodega}</span>
-                                <h4 class="text-lg font-serif text-wine-900 font-bold leading-tight flex items-center flex-wrap gap-1">${w.name.replace(' (Orgánico)','').replace(' (Oro G&G)','')} ${extraTag}</h4>
+                                <span class="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-1">${w.bodega || ''}</span>
+                                <h4 class="text-lg font-serif text-wine-900 font-bold leading-tight flex items-center flex-wrap gap-1">${(w.name || '').replace(' (Orgánico)','').replace(' (Oro G&G)','')} ${extraTag}</h4>
                                 <p class="text-xs text-stone-500 mt-1 line-clamp-2">
-                                    <span lang="es">${w.notes_es}</span><span lang="en">${w.notes_en}</span>
+                                    <span lang="es">${w.notes_es || ''}</span><span lang="en">${w.notes_en || ''}</span>
                                 </p>
                                 <a href="https://dealturawines.com/es/" target="_blank" class="inline-flex items-center text-[10px] font-bold uppercase tracking-widest text-gold-600 hover:text-wine-700 transition-colors mt-2 w-fit">
                                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -649,16 +658,46 @@
                 }).join('');
             };
 
-            // 5. Inyectar en DOM
-            document.getElementById('container-norte').innerHTML = generateHtml(norte);
-            document.getElementById('container-cuyo').innerHTML = generateHtml(cuyo);
-            document.getElementById('container-patagonia').innerHTML = generateHtml(patagonia);
+            // 6. Inyectar en DOM por región
+            try {
+                const containerNorte = document.getElementById('container-norte');
+                const containerCuyo = document.getElementById('container-cuyo');
+                const containerPatagonia = document.getElementById('container-patagonia');
 
-            // 6. Gestionar visibilidad de Secciones
-            document.getElementById('section-norte').style.display = norte.length ? 'block' : 'none';
-            document.getElementById('section-cuyo').style.display = cuyo.length ? 'block' : 'none';
-            document.getElementById('section-patagonia').style.display = patagonia.length ? 'block' : 'none';
-            document.getElementById('no-results').style.display = filtered.length === 0 ? 'block' : 'none';
+                if (containerNorte) containerNorte.innerHTML = generateHtml(norte);
+                if (containerCuyo) containerCuyo.innerHTML = generateHtml(cuyo);
+                if (containerPatagonia) containerPatagonia.innerHTML = generateHtml(patagonia);
+            } catch (e) {
+                console.error('Error inyectando en contenedores regionales:', e);
+            }
+
+            // 7. Fallback: inyectar en catalog-grid unificado
+            try {
+                const catalogGrid = document.getElementById('catalog-grid');
+                if (catalogGrid) {
+                    catalogGrid.innerHTML = generateHtml(filtered);
+                    catalogGrid.classList.toggle('hidden', filtered.length === 0);
+                }
+            } catch (e) {
+                console.error('Error inyectando en catalog-grid:', e);
+            }
+
+            // 8. Gestionar visibilidad de Secciones
+            try {
+                const sectionNorte = document.getElementById('section-norte');
+                const sectionCuyo = document.getElementById('section-cuyo');
+                const sectionPatagonia = document.getElementById('section-patagonia');
+                const noResults = document.getElementById('no-results');
+
+                if (sectionNorte) sectionNorte.style.display = norte.length ? 'block' : 'none';
+                if (sectionCuyo) sectionCuyo.style.display = cuyo.length ? 'block' : 'none';
+                if (sectionPatagonia) sectionPatagonia.style.display = patagonia.length ? 'block' : 'none';
+                if (noResults) noResults.style.display = filtered.length === 0 ? 'block' : 'none';
+            } catch (e) {
+                console.error('Error gestionando visibilidad:', e);
+            }
+
+            console.log(`✓ renderCatalog() completado: ${filtered.length} vinos mostrados`);
         }
 
         // LÓGICA DE FILTRADO
