@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>De Altura Wines | Desde los Andes a Canarias</title>
     
-    <!-- Tipografías Premium -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Configuración del Sistema de Diseño -->
     <script>
         tailwind.config = {
             theme: {
@@ -49,11 +46,10 @@
         }
     </script>
 
-    <!-- CSS Personalizado y Sistema Multiidioma -->
     <style>
         body { background-color: theme('colors.stone.50'); color: theme('colors.stone.800'); }
         
-        /* Sistema de Idiomas (Oculta el idioma no seleccionado de forma instantánea) */
+        /* Sistema de Idiomas */
         body.lang-en [lang="es"] { display: none !important; }
         body.lang-es [lang="en"] { display: none !important; }
         
@@ -79,22 +75,21 @@
         }
         .animate-pop { animation: pop 0.3s ease-out forwards; }
         
-        /* Clases de filtro dinámicas gestionadas por JS */
         .filter-btn { transition: all 0.3s ease; }
+        
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="antialiased relative lang-es">
 
-    <!-- Franja Canarias -->
     <div class="canary-stripe h-2.5 w-full fixed top-0 z-[100] shadow-md"></div>
 
-    <!-- Selector de Idiomas -->
     <div class="fixed top-6 right-6 z-[110] flex bg-white/90 backdrop-blur-md p-1 rounded-full shadow-lg border border-stone-200 transition-all hover:shadow-xl">
         <button id="btn-lang-es" onclick="setLanguage('es')" class="px-4 py-1.5 text-xs font-bold rounded-full bg-wine-900 text-white transition-all shadow-sm">ES</button>
         <button id="btn-lang-en" onclick="setLanguage('en')" class="px-4 py-1.5 text-xs font-bold rounded-full text-stone-500 hover:text-wine-900 transition-all">EN</button>
     </div>
 
-    <!-- H E R O   S E C T I O N -->
     <header class="relative bg-wine-900 pt-32 pb-24 px-6 lg:pt-40 lg:pb-32 overflow-hidden">
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1506377247377-2a5b3b0ca7df?auto=format&fit=crop&q=80&w=2070" alt="Viñedos" class="w-full h-full object-cover object-center opacity-[0.15] mix-blend-luminosity">
@@ -103,7 +98,6 @@
 
         <div class="max-w-5xl mx-auto relative z-10 text-center flex flex-col items-center mt-6">
             <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-gold-500/30 backdrop-blur-md mb-8 shadow-[0_0_15px_rgba(200,159,93,0.2)]">
-                <!-- Icono SVG del Sol Argentino -->
                 <svg class="w-4 h-4 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 <span lang="es" class="text-[10px] font-bold text-gold-500 tracking-[0.2em] uppercase">100% Vino Argentino · Exportación a Canarias</span>
                 <span lang="en" class="text-[10px] font-bold text-gold-500 tracking-[0.2em] uppercase">100% Argentine Wine · Export to Canary Islands</span>
@@ -113,7 +107,6 @@
                 De Altura Wines
             </h1>
             
-            <!-- Acento Bandera Argentina (Redimensionado al doble) -->
             <div class="flex flex-col w-56 md:w-64 h-3 md:h-4 mb-10 rounded-sm overflow-hidden opacity-100 shadow-[0_4px_14px_rgba(0,0,0,0.3)] border border-white/10">
                 <div class="h-1/3 w-full bg-[#74ACDF]"></div>
                 <div class="h-1/3 w-full bg-white"></div>
@@ -137,7 +130,6 @@
         </div>
     </header>
 
-    <!-- B E N E F I C I O S -->
     <section class="py-12 bg-white border-b border-stone-100 relative z-20 shadow-sm">
         <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left divide-y md:divide-y-0 md:divide-x divide-stone-100">
             <div class="py-4 md:py-0 md:px-8">
@@ -170,10 +162,8 @@
         </div>
     </section>
 
-    <!-- C A T A L O G O   M A E S T R O -->
     <main id="catalog" class="max-w-6xl mx-auto px-4 py-24 space-y-16">
         
-        <!-- Cabecera del Tarifario -->
         <div class="flex flex-col md:flex-row justify-between items-end mb-10 pb-6 border-b border-stone-200">
             <div>
                 <h2 class="text-4xl font-serif text-wine-900">
@@ -192,9 +182,7 @@
             </div>
         </div>
 
-        <!-- F I L T R O S   Y   O R D E N A C I Ó N -->
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
-            <!-- Filtros Múltiples -->
             <div class="flex flex-wrap gap-2 md:gap-3">
                 <button onclick="toggleFilter('all')" data-value="all" data-category="all" class="filter-btn bg-wine-900 text-white border-wine-900 border px-4 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-widest rounded-full shadow-sm transition-colors">
                     <span lang="es">Todos</span><span lang="en">All</span>
@@ -222,7 +210,6 @@
                 </button>
             </div>
 
-            <!-- Ordenación por Precio -->
             <div class="flex items-center gap-3 w-full lg:w-auto bg-white p-2 border border-stone-200 rounded-lg shadow-sm">
                 <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest pl-2">
                     <span lang="es">Precio:</span><span lang="en">Price:</span>
@@ -231,7 +218,6 @@
                     <button onclick="setSort('default')" id="sort-default" class="sort-btn flex-1 lg:flex-none px-3 py-1.5 text-[10px] font-bold uppercase rounded text-wine-900 bg-white shadow-sm transition-colors">
                         <span lang="es">Defecto</span><span lang="en">Default</span>
                     </button>
-                    <!-- Eliminados los emojis y reemplazados por SVGs profesionales -->
                     <button onclick="setSort('asc')" id="sort-asc" class="sort-btn flex-1 lg:flex-none flex items-center justify-center gap-1 px-3 py-1.5 text-[10px] font-bold uppercase rounded text-stone-500 hover:bg-white hover:text-wine-900 transition-colors">
                         <span lang="es">Menor</span><span lang="en">Lowest</span>
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
@@ -244,9 +230,6 @@
             </div>
         </div>
 
-        <!-- C O N T E N E D O R E S   D I N Á M I C O S -->
-        
-        <!-- SECCIÓN 1: NORTE ARGENTINO -->
         <section id="section-norte" class="region-section">
             <div class="mb-6">
                 <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]">
@@ -260,18 +243,15 @@
                     <span lang="en">Calchaquí Valleys and Humahuaca Gorge (1,700m - 2,800m)</span>
                 </p>
             </div>
-            <!-- Tabla Header -->
             <div class="hidden md:grid grid-cols-12 gap-4 px-6 pb-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest border-b border-stone-200">
                 <div class="col-span-5"><span lang="es">Bodega / Vino</span><span lang="en">Winery / Wine</span></div>
                 <div class="col-span-2 text-center"><span lang="es">Formato</span><span lang="en">Format</span></div>
                 <div class="col-span-2 text-right"><span lang="es">Precio Bot.</span><span lang="en">Bot. Price</span></div>
                 <div class="col-span-3 text-right"><span lang="es">Añadir Cajas</span><span lang="en">Add Boxes</span></div>
             </div>
-            <!-- Inyección JS -->
             <div id="container-norte" class="flex flex-col gap-2"></div>
         </section>
 
-        <!-- SECCIÓN 2: REGIÓN CUYO -->
         <section id="section-cuyo" class="region-section mt-16">
             <div class="mb-6">
                 <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]">
@@ -285,18 +265,15 @@
                     <span lang="en">Mendoza, Uco Valley and San Juan (900m - 1,500m)</span>
                 </p>
             </div>
-            <!-- Tabla Header -->
             <div class="hidden md:grid grid-cols-12 gap-4 px-6 pb-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest border-b border-stone-200">
                 <div class="col-span-5"><span lang="es">Bodega / Vino</span><span lang="en">Winery / Wine</span></div>
                 <div class="col-span-2 text-center"><span lang="es">Formato</span><span lang="en">Format</span></div>
                 <div class="col-span-2 text-right"><span lang="es">Precio Bot.</span><span lang="en">Bot. Price</span></div>
                 <div class="col-span-3 text-right"><span lang="es">Añadir Cajas</span><span lang="en">Add Boxes</span></div>
             </div>
-            <!-- Inyección JS -->
             <div id="container-cuyo" class="flex flex-col gap-2"></div>
         </section>
 
-        <!-- SECCIÓN 3: PATAGONIA -->
         <section id="section-patagonia" class="region-section mt-16">
             <div class="mb-6">
                 <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]">
@@ -310,18 +287,15 @@
                     <span lang="en">Colorado River High Valley, La Pampa (300m)</span>
                 </p>
             </div>
-            <!-- Tabla Header -->
             <div class="hidden md:grid grid-cols-12 gap-4 px-6 pb-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest border-b border-stone-200">
                 <div class="col-span-5"><span lang="es">Bodega / Vino</span><span lang="en">Winery / Wine</span></div>
                 <div class="col-span-2 text-center"><span lang="es">Formato</span><span lang="en">Format</span></div>
                 <div class="col-span-2 text-right"><span lang="es">Precio Bot.</span><span lang="en">Bot. Price</span></div>
                 <div class="col-span-3 text-right"><span lang="es">Añadir Cajas</span><span lang="en">Add Boxes</span></div>
             </div>
-            <!-- Inyección JS -->
             <div id="container-patagonia" class="flex flex-col gap-2"></div>
         </section>
 
-        <!-- Mensaje sin resultados -->
         <div id="no-results" class="hidden py-16 text-center text-stone-400 italic">
             <span lang="es">No se encontraron vinos con los filtros seleccionados.</span>
             <span lang="en">No wines found matching the selected filters.</span>
@@ -329,7 +303,6 @@
 
     </main>
 
-    <!-- B A N N E R   H O R E C A -->
     <section class="bg-stone-900 text-stone-300 py-20 px-6 border-t-4 border-wine-800">
         <div class="max-w-4xl mx-auto text-center">
             <svg class="w-12 h-12 mx-auto text-gold-500 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
@@ -347,7 +320,6 @@
         </div>
     </section>
 
-    <!-- F O O T E R -->
     <footer class="bg-stone-950 text-stone-500 py-10 px-6 text-center text-xs border-t border-stone-800">
         <p class="uppercase tracking-[0.2em] mb-3 text-stone-400 font-semibold">© 2026 De Altura - Altitude Wines</p>
         <p class="mb-4">
@@ -359,11 +331,10 @@
         <div class="mt-8">
              <a href="https://wa.me/34633706676" target="_blank" class="inline-flex items-center text-stone-400 hover:text-white transition-colors text-sm">
                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.588-5.946 0-6.556 5.332-11.888 11.888-11.888 3.176 0 6.164 1.236 8.41 3.483 2.247 2.247 3.483 5.234 3.483 8.41 0 6.556-5.332 11.888-11.888 11.888-2.007 0-3.974-.509-5.714-1.472l-6.098 1.602zm5.714-2.825c1.642.973 3.398 1.488 5.217 1.488 5.503 0 9.977-4.474 9.977-9.977 0-2.664-1.037-5.168-2.92-7.051-1.883-1.883-4.387-2.92-7.051-2.92-5.503 0-9.977 4.474-9.977 9.977 0 2.062.632 4.041 1.82 5.711l-1.01 3.692 3.864-1.016zm9.516-11.305c-.279-.139-1.647-.812-1.903-.905-.256-.092-.442-.139-.628.139-.186.279-.721.905-.884 1.091-.163.186-.326.209-.605.07-.279-.139-1.177-.433-2.242-1.383-.829-.739-1.388-1.652-1.551-1.93-.163-.279-.017-.43.121-.568.125-.125.279-.326.418-.488.139-.163.186-.279.279-.465.092-.186.046-.349-.023-.488-.069-.139-.628-1.511-.861-2.07-.226-.549-.456-.475-.628-.484-.163-.008-.349-.01-.535-.01s-.488.07-.744.349c-.256.279-.977.954-.977 2.326s1.001 2.701 1.139 2.887c.139.186 1.97 3.008 4.773 4.218.667.288 1.188.459 1.594.587.67.213 1.279.183 1.761.11.539-.081 1.647-.674 1.881-1.324.233-.651.233-1.21.163-1.324-.069-.114-.256-.186-.535-.326z"/></svg>
-                <span lang="es">Contacta un asesor</span><span lang="en">Contact an Advisor</span>
+                +34 633 706 676 (WhatsApp)
             </a>
         </div>
 
-        <!-- DOYO PRO Partner Signature -->
         <div class="mt-12 pt-6 border-t border-stone-800/60 flex flex-col md:flex-row items-center justify-center gap-2 text-[10px] text-stone-500">
             <span>Digital & Dev Partner:</span>
             <a href="https://www.doyo.pro/" target="_blank" class="font-bold tracking-widest text-stone-400 hover:text-gold-500 transition-colors uppercase flex items-center gap-1 group">
@@ -373,17 +344,13 @@
         </div>
     </footer>
 
-    <!-- C A R T   U I -->
-    <!-- Botón Flotante -->
     <button onclick="toggleCart()" class="fixed bottom-6 right-6 z-50 bg-wine-800 hover:bg-wine-900 text-white w-16 h-16 rounded-full shadow-float flex items-center justify-center transition-transform duration-300 hover:scale-105 border border-wine-600/30 group">
         <svg class="w-6 h-6 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
         <span id="cart-badge" class="absolute -top-1 -right-1 bg-gold-500 text-wine-900 text-[10px] font-bold w-6 h-6 flex items-center justify-center rounded-full border-2 border-wine-800 hidden">0</span>
     </button>
 
-    <!-- Overlay oscuro -->
     <div id="cart-overlay" onclick="toggleCart()" class="fixed inset-0 bg-stone-900/70 backdrop-blur-sm z-[60] opacity-0 pointer-events-none"></div>
 
-    <!-- Drawer Lateral -->
     <aside id="cart-drawer" class="fixed top-0 right-0 w-full max-w-md h-full bg-stone-50 z-[70] shadow-2xl flex flex-col translate-x-full">
         <div class="px-6 py-5 border-b border-stone-200 bg-white flex justify-between items-center">
             <h2 class="text-2xl font-serif text-wine-900">
@@ -395,8 +362,7 @@
         </div>
 
         <div id="cart-items" class="flex-1 overflow-y-auto px-6 py-6 space-y-4">
-            <!-- Renderizado por JS -->
-        </div>
+            </div>
 
         <div class="px-6 py-6 bg-white border-t border-stone-200 shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
             <div class="flex justify-between items-end mb-6">
@@ -417,7 +383,6 @@
         </div>
     </aside>
 
-    <!-- S C R I P T S -->
     <script>
         // BASE DE DATOS DEL CATÁLOGO (44 Vinos)
         const catalogData = [
@@ -602,7 +567,7 @@
                 if(s === val) {
                     btn.className = "sort-btn flex-1 lg:flex-none px-3 py-1.5 text-[10px] font-bold uppercase rounded text-wine-900 bg-white shadow-sm transition-colors";
                 } else {
-                    btn.className = "sort-btn flex-1 lg:flex-none px-3 py-1.5 text-[10px] font-bold uppercase rounded text-stone-500 hover:bg-white hover:text-wine-900 transition-colors";
+                    btn.className = "sort-btn flex-1 lg:flex-none flex items-center justify-center gap-1 px-3 py-1.5 text-[10px] font-bold uppercase rounded text-stone-500 hover:bg-white hover:text-wine-900 transition-colors";
                 }
             });
             renderCatalog();
@@ -707,18 +672,25 @@
             }
         }
 
+        // REDIRECCIÓN A LA PÁGINA DE CHECKOUT 
         function processCheckout() {
-            const isEs = document.body.classList.contains('lang-es');
-            if(isEs) {
-                alert('Conectando con plataforma de pago seguro (Stripe). \\n\\nLos impuestos correspondientes a Canarias (IGIC/AIEM) se calcularán en el siguiente paso.');
-            } else {
-                alert('Connecting with secure payment platform (Stripe). \\n\\nCanary Islands taxes (IGIC/AIEM) will be calculated at checkout.');
-            }
-            console.log("Cesta de la compra a enviar al procesador de pagos:", cart);
+            // 1. Guardamos el carrito en la memoria del navegador
+            localStorage.setItem('deAlturaCart', JSON.stringify(cart));
+            // 2. Redirigimos al archivo de checkout exacto que tienes
+            window.location.href = 'checkoutvinos.html';
         }
 
         // Init
         document.addEventListener('DOMContentLoaded', () => {
+            // Al cargar la página de nuevo, intentamos recuperar el carrito anterior si el usuario navegó hacia atrás
+            const savedCart = localStorage.getItem('deAlturaCart');
+            if(savedCart) {
+                try {
+                    cart = JSON.parse(savedCart);
+                } catch(e) {
+                    cart = {};
+                }
+            }
             renderCatalog();
             renderCart();
         });
