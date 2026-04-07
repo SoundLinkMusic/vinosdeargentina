@@ -213,7 +213,7 @@
         const SUPABASE_URL = 'https://pzzbvinbyzaxrshlmlcn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6emJ2aW5ieXpheHJzaGxtbGNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTI5NDYsImV4cCI6MjA5MTEyODk0Nn0.YgeGDVZfyqI-nv7iAhROMsBfZbIK7BGUDyU1ERE-SFA';
         const STRIPE_PUBLISHABLE_KEY = 'pk_test_51TJUdsQ1h6OCxVbfV0s4K3e8Ef7YxoXiKIK92Woj9NfVgJbGkKgBvKWVHuiLFPrZsEAY1auG9so9ilKGYPvcKH6300FWxEsAe5';
-        const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/create-payment-intent`;
+        const EDGE_FUNCTION_URL = 'https://pzzbvinbyzaxrshlmlcn.supabase.co/functions/v1/create-payment-intent';
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
@@ -252,14 +252,16 @@
 
             items.forEach(item => {
                 if (!item.id) return;
-                const itemTotal = (item.price || 0) * (item.qty || 1);
+                // Fórmula: Subtotal = precio × cantidad_cajas × box_size
+                const boxSize = item.box || 1; // Botellas por caja (6 o 12)
+                const itemTotal = (item.price || 0) * (item.qty || 1) * boxSize;
                 subtotal += itemTotal;
 
                 html += `
                     <div class="cart-item">
                         <div class="item-info">
                             <div class="item-name">${item.name || 'Vino'}</div>
-                            <div class="item-qty">Cantidad: ${item.qty} caja${item.qty > 1 ? 's' : ''} × ${item.price?.toFixed(2) || '0.00'} €</div>
+                            <div class="item-qty">Cantidad: ${item.qty} caja${item.qty > 1 ? 's' : ''} × ${boxSize} botellas × ${item.price?.toFixed(2) || '0.00'} €</div>
                         </div>
                         <div class="item-price">${itemTotal.toFixed(2).replace('.', ',')} €</div>
                     </div>
@@ -286,6 +288,13 @@
                 aiem: aiem,
                 total: total
             };
+
+            console.log('📦 CARRITO CALCULADO:');
+            console.log('   Items:', items.length);
+            console.log('   Subtotal (precio × qty × box_size):', subtotal.toFixed(2) + ' €');
+            console.log('   IGIC (7%):', igic.toFixed(2) + ' €');
+            console.log('   AIEM (15%):', aiem.toFixed(2) + ' €');
+            console.log('   TOTAL:', total.toFixed(2) + ' €');
         }
 
         // Validar formulario
