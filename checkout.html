@@ -288,13 +288,6 @@
                 aiem: aiem,
                 total: total
             };
-
-            console.log('📦 CARRITO CALCULADO:');
-            console.log('   Items:', items.length);
-            console.log('   Subtotal (precio × qty × box_size):', subtotal.toFixed(2) + ' €');
-            console.log('   IGIC (7%):', igic.toFixed(2) + ' €');
-            console.log('   AIEM (15%):', aiem.toFixed(2) + ' €');
-            console.log('   TOTAL:', total.toFixed(2) + ' €');
         }
 
         // Validar formulario
@@ -340,13 +333,10 @@
 
         // Procesar pago
         async function handlePayment(event) {
-            console.log('🔷 DEBUG: Iniciando pago...');
-            console.log('EDGE_FUNCTION_URL:', EDGE_FUNCTION_URL);
-            console.log('window.orderData:', window.orderData);
+            console.log('🟢 Pago Iniciado');
 
             if (!validateForm()) {
                 showAlert('error', 'Por favor completa todos los campos requeridos');
-                console.warn('⚠️ Validación fallida - campos incompletos');
                 return;
             }
 
@@ -355,7 +345,6 @@
 
             try {
                 document.getElementById('loading-overlay').classList.add('show');
-                console.log('🔷 DEBUG: Overlay mostrado, iniciando fetch...');
 
                 // Crear Payment Intent en Supabase (función edge)
                 const paymentIntentResponse = await fetch(EDGE_FUNCTION_URL, {
@@ -370,21 +359,17 @@
                 });
 
                 if (!paymentIntentResponse.ok) {
-                    console.error('❌ Error en fetch:', paymentIntentResponse.status, paymentIntentResponse.statusText);
-                    throw new Error(`No se pudo crear el Payment Intent (${paymentIntentResponse.status})`);
+                    throw new Error(`Error conectando con pagos (${paymentIntentResponse.status})`);
                 }
 
                 const paymentData = await paymentIntentResponse.json();
-                console.log('✅ Respuesta de Edge Function:', paymentData);
-
                 const { clientSecret } = paymentData;
+
                 if (!clientSecret) {
-                    throw new Error('No se recibió clientSecret de la Edge Function');
+                    throw new Error('No se recibió confirmación de pago');
                 }
-                console.log('✅ ClientSecret recibido:', clientSecret.substring(0, 20) + '...');
 
                 // Confirmar pago con Stripe
-                console.log('🔷 Confirmando pago con Stripe...');
                 const { error } = await stripe.confirmPayment({
                     elements,
                     clientSecret,
@@ -392,14 +377,11 @@
                 });
 
                 if (error) {
-                    console.error('❌ Error en confirmPayment:', error);
-                    showAlert('error', `Error de Stripe: ${error.message}`);
+                    showAlert('error', `Error: ${error.message}`);
                     return;
                 }
-                console.log('✅ Pago confirmado por Stripe');
 
                 // Guardar orden en Supabase
-                console.log('🔷 Guardando orden en Supabase...');
                 const { data: order, error: orderError } = await supabase
                     .from('orders')
                     .insert([{
@@ -420,71 +402,49 @@
                     }])
                     .select();
 
-                if (orderError) {
-                    console.error('❌ Error guardando orden:', orderError);
-                    throw orderError;
-                }
-                console.log('✅ Orden guardada:', order[0].id);
+                if (orderError) throw orderError;
 
                 const orderId = order[0].id;
 
                 // Guardar items de la orden
-                console.log('🔷 Guardando items de la orden...');
                 const orderItems = window.orderData.items.map(item => ({
                     order_id: orderId,
                     wine_id: item.id,
                     quantity: item.qty,
                     unit_price: item.price
                 }));
-                console.log('   Items a guardar:', orderItems.length);
 
                 const { error: itemsError } = await supabase
                     .from('order_items')
                     .insert(orderItems);
 
-                if (itemsError) {
-                    console.error('❌ Error guardando items:', itemsError);
-                    throw itemsError;
-                }
-                console.log('✅ Items guardados correctamente');
+                if (itemsError) throw itemsError;
 
                 // ✅ Éxito
                 localStorage.removeItem('deAlturaCart');
-                console.log('✅ localStorage limpiado');
-                console.log('🟢 PAGO COMPLETADO EXITOSAMENTE');
+                console.log('🟢 Pago Exitoso');
                 showAlert('success', `¡Pedido confirmado! Número: ${orderId.slice(0, 8).toUpperCase()}`);
 
                 setTimeout(() => {
-                    console.log('🔷 Redirigiendo a confirmación...');
                     window.location.href = `confirmation.html?order=${orderId}`;
                 }, 2000);
 
             } catch (error) {
-                console.error('❌ Error en pago:', error);
-                console.error('   Stack:', error.stack);
+                console.error('Error en pago:', error.message);
                 showAlert('error', error.message || 'Error procesando el pago');
             } finally {
                 document.getElementById('loading-overlay').classList.remove('show');
                 btnPay.disabled = false;
-                console.log('🔷 Liberando botón de pago');
             }
         }
 
         // Inicializar
         async function init() {
-            console.log('🟢 Iniciando checkout...');
             renderCartSummary();
 
             const cart = loadCart();
-            const cartItems = Object.keys(cart).length;
-            console.log('📦 Items en carrito:', cartItems);
-
-            if (cartItems > 0) {
+            if (Object.keys(cart).length > 0) {
                 try {
-                    console.log('🔷 Carrito válido, creando Payment Intent...');
-                    console.log('   Amount:', window.orderData?.total);
-                    console.log('   Edge Function URL:', EDGE_FUNCTION_URL);
-
                     // Crear Payment Element
                     const paymentIntentResponse = await fetch(EDGE_FUNCTION_URL, {
                         method: 'POST',
@@ -497,48 +457,40 @@
                         })
                     });
 
-                    console.log('🔷 Response status:', paymentIntentResponse.status);
-
                     if (!paymentIntentResponse.ok) {
-                        throw new Error(`HTTP ${paymentIntentResponse.status}: ${paymentIntentResponse.statusText}`);
+                        throw new Error(`Error de conexión (${paymentIntentResponse.status})`);
                     }
 
                     const responseData = await paymentIntentResponse.json();
-                    console.log('✅ Payment Intent creado:', responseData.clientSecret?.substring(0, 20) + '...');
-
                     const { clientSecret } = responseData;
+
+                    if (!clientSecret) {
+                        throw new Error('No se recibió Payment Intent');
+                    }
 
                     // Verificar que el contenedor existe
                     const stripeContainer = document.getElementById('stripe-container');
                     if (!stripeContainer) {
-                        throw new Error('Contenedor #stripe-container no encontrado en el DOM');
+                        throw new Error('Contenedor de pago no encontrado');
                     }
-                    console.log('✅ Contenedor #stripe-container encontrado');
 
                     elements = stripe.elements({ clientSecret });
                     paymentElement = elements.create('payment');
                     paymentElement.mount('#stripe-container');
-                    console.log('✅ Stripe Payment Element montado correctamente');
 
                     // Registrar listener del botón
                     const btnPay = document.getElementById('btn-pay');
-                    if (!btnPay) {
-                        throw new Error('Botón #btn-pay no encontrado en el DOM');
+                    if (btnPay) {
+                        btnPay.addEventListener('click', handlePayment);
                     }
-                    console.log('✅ Botón #btn-pay encontrado, registrando listener...');
-                    btnPay.addEventListener('click', handlePayment);
-                    console.log('✅ Listener del botón registrado correctamente');
 
                 } catch (error) {
-                    console.error('❌ Error en init():', error);
-                    showAlert('error', `Error inicializando checkout: ${error.message}`);
+                    console.error('Error inicializando:', error.message);
+                    showAlert('error', `Error: ${error.message}`);
                 }
-            } else {
-                console.warn('⚠️ Carrito vacío');
             }
         }
 
-        console.log('🟢 Script de checkout cargado');
         init();
     </script>
 </body>
