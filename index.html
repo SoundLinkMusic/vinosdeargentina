@@ -10,7 +10,165 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Config Module -->
+    <script>
+        const API_CONFIG = {
+            SUPABASE_URL: 'https://pzzbvinbyzaxrshlmlcn.supabase.co',
+            SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6emJ2aW5ieXpheHJzaGxtbGNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTI5NDYsImV4cCI6MjA5MTEyODk0Nn0.YgeGDVZfyqI-nv7iAhROMsBfZbIK7BGUDyU1ERE-SFA',
+            STRIPE_PUBLIC: '',
+            WINES_DATA: '/assets/data/wines.json',
+            PATHS: {
+                WINES: '/assets/data/wines.json',
+                LOGIN: '/login.html',
+                MARKETPLACE: '/index.html',
+                CHECKOUT: '/checkout.html',
+                CRM: '/crm.html'
+            },
+            TAXES: {
+                AIEM_DEFAULT: 0.15,
+                IGIC_CANARIAS: 0.07,
+                HORECA_DISCOUNT: 0.20
+            }
+        };
+    </script>
+
+    <!-- API Module (Supabase) -->
+    <script>
+        const APIModule = (() => {
+            const config = API_CONFIG;
+            const supabase = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+
+            const getWines = async () => {
+                try {
+                    const { data, error } = await supabase
+                        .from('wines')
+                        .select('*')
+                        .order('region', { ascending: true });
+                    if (error) throw error;
+                    return data || [];
+                } catch (error) {
+                    console.error('Error en getWines:', error);
+                    return [];
+                }
+            };
+
+            const getWineById = async (id) => {
+                const wines = await getWines();
+                return wines.find(w => w.id === id) || null;
+            };
+
+            const filterWines = async (filters) => {
+                let wines = await getWines();
+                if (filters.type) wines = wines.filter(w => filters.type.includes(w.type));
+                if (filters.region) wines = wines.filter(w => filters.region.includes(w.region));
+                if (filters.box) wines = wines.filter(w => filters.box.includes(w.box));
+                if (filters.priceMax) wines = wines.filter(w => w.price <= filters.priceMax);
+                return wines;
+            };
+
+            const createOrder = async (orderData) => {
+                try {
+                    const { data, error } = await supabase
+                        .from('orders')
+                        .insert([{
+                            customer_name: orderData.customer_name,
+                            customer_email: orderData.customer_email,
+                            customer_phone: orderData.customer_phone || '',
+                            island: orderData.island,
+                            address: orderData.address,
+                            postal_code: orderData.postal_code || '',
+                            subtotal_amount: orderData.subtotal_amount || 0,
+                            tax_amount: orderData.tax_amount || 0,
+                            total_amount: orderData.total_amount,
+                            items: orderData.items,
+                            payment_method: orderData.payment_method,
+                            payment_status: orderData.payment_status || 'pending',
+                            shipping_status: orderData.shipping_status || 'new',
+                            notes: orderData.notes || ''
+                        }])
+                        .select();
+                    if (error) throw error;
+                    return { order: data ? data[0] : null };
+                } catch (error) {
+                    console.error('Error creando orden:', error);
+                    return { error: error.message || 'No se pudo crear la orden' };
+                }
+            };
+
+            const createPaymentIntent = async (amount, currency = 'EUR') => {
+                try {
+                    console.log('PaymentIntent creado (mock):', { amount, currency });
+                    return { clientSecret: 'pi_mock_' + Math.random() };
+                } catch (error) {
+                    console.error('Error en pago:', error);
+                    return { error: 'No se pudo procesar el pago' };
+                }
+            };
+
+            const getUserOrders = async (userId) => {
+                try {
+                    const { data, error } = await supabase
+                        .from('orders')
+                        .select('*')
+                        .eq('user_id', userId)
+                        .order('created_at', { ascending: false });
+                    if (error) throw error;
+                    return { orders: data || [] };
+                } catch (error) {
+                    console.error('Error obteniendo órdenes:', error);
+                    return { error: 'No se pudieron obtener las órdenes' };
+                }
+            };
+
+            const getAllOrders = async () => {
+                try {
+                    const { data, error } = await supabase
+                        .from('orders')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    if (error) throw error;
+                    return { orders: data || [] };
+                } catch (error) {
+                    console.error('Error obteniendo todas las órdenes:', error);
+                    return { error: 'No se pudieron obtener las órdenes' };
+                }
+            };
+
+            const calculateTotal = (items, userDiscountPercent = 0) => {
+                let subtotal = 0;
+                items.forEach(item => {
+                    const pricePerUnit = item.price || 0;
+                    const quantity = item.quantity || 1;
+                    subtotal += pricePerUnit * quantity;
+                });
+                if (userDiscountPercent > 0) {
+                    subtotal *= (1 - userDiscountPercent / 100);
+                }
+                const igic = subtotal * config.TAXES.IGIC_CANARIAS;
+                const total = subtotal + igic;
+                return {
+                    subtotal: parseFloat(subtotal.toFixed(2)),
+                    igic: parseFloat(igic.toFixed(2)),
+                    total: parseFloat(total.toFixed(2))
+                };
+            };
+
+            return {
+                getWines,
+                getWineById,
+                filterWines,
+                createOrder,
+                createPaymentIntent,
+                getUserOrders,
+                getAllOrders,
+                calculateTotal,
+                supabase
+            };
+        })();
+    </script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -48,25 +206,44 @@
 
     <style>
         body { background-color: theme('colors.stone.50'); color: theme('colors.stone.800'); }
-        
+
         /* Sistema de Idiomas */
         body.lang-en [lang="es"] { display: none !important; }
         body.lang-es [lang="en"] { display: none !important; }
-        
+
         /* Acento de Canarias */
         .canary-stripe {
             background: linear-gradient(90deg, #ffffff 0%, #ffffff 33.33%, #00a1e4 33.33%, #00a1e4 66.66%, #fcd116 66.66%, #fcd116 100%);
         }
-        
+
+        /* CRÍTICO: Asegurar visibilidad de contenedores de vinos */
+        #section-norte,
+        #section-cuyo,
+        #section-patagonia,
+        #container-norte,
+        #container-cuyo,
+        #container-patagonia,
+        #catalog-grid,
+        .wine-row,
+        .wine-card {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            height: auto !important;
+            max-height: none !important;
+            margin: revert !important;
+            padding: revert !important;
+        }
+
         /* Animaciones */
         #cart-drawer { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .drawer-open { transform: translateX(0) !important; }
         #cart-overlay { transition: opacity 0.3s ease; }
-        
+
         .wine-row { transition: all 0.3s ease; }
         .wine-row:hover { background-color: white; transform: translateY(-2px); box-shadow: theme('boxShadow.premium'); border-color: transparent; z-index: 10; position: relative; border-radius: 0.5rem; }
         .wine-row.in-cart { background-color: theme('colors.stone.100'); border-left: 4px solid theme('colors.wine.700'); }
-        
+
         .btn-pop:active { transform: scale(0.95); }
         @keyframes pop {
             0% { transform: scale(1); }
@@ -74,10 +251,10 @@
             100% { transform: scale(1); }
         }
         .animate-pop { animation: pop 0.3s ease-out forwards; }
-        
+
         .filter-btn { transition: all 0.3s ease; }
-        
-        input[type="number"]::-webkit-inner-spin-button, 
+
+        input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
@@ -296,6 +473,9 @@
             <div id="container-patagonia" class="flex flex-col gap-2"></div>
         </section>
 
+        <!-- Fallback para renderizado unificado -->
+        <div id="catalog-grid" class="wine-grid hidden"></div>
+
         <div id="no-results" class="hidden py-16 text-center text-stone-400 italic">
             <span lang="es">No se encontraron vinos con los filtros seleccionados.</span>
             <span lang="en">No wines found matching the selected filters.</span>
@@ -384,58 +564,31 @@
     </aside>
 
     <script>
-        // BASE DE DATOS DEL CATÁLOGO (44 Vinos)
-        const catalogData = [
-            // NORTE ARGENTINO
-            { id: 'llama-malbec', type: 'tinto', region: 'norte', box: 6, price: 11.48, bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Malbec 2025', notes_es: 'Fruta roja y pimienta negra. Taninos sedosos de arena profunda.', notes_en: 'Red fruit and black pepper. Silky tannins from deep sand.' },
-            { id: 'llama-torrontes', type: 'blanco', region: 'norte', box: 6, price: 11.48, bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Torrontés 2025', notes_es: 'Luz de montaña. Frescura vibrante y perfil floral.', notes_en: 'Mountain light. Vibrant freshness and floral profile.' },
-            { id: 'llama-rose', type: 'rosado', region: 'norte', box: 6, price: 11.48, bodega: 'Viñas en Flor · Cafayate', name: 'The Llama Rosé 2025', notes_es: 'Rosado de Syrah. Expresivo y vibrante.', notes_en: 'Syrah Rosé. Expressive and vibrant.' },
-            { id: 'dupont-punta', type: 'tinto', region: 'norte', box: 6, price: 20.25, bodega: 'Fernando Dupont · Maimará', name: 'Punta Corral 2022', notes_es: 'Blend de altura extrema. Malbec, Syrah y Cab Franc. 10 meses en roble.', notes_en: 'Extreme altitude blend. Malbec, Syrah, Cab Franc. 10 months oak.' },
-            { id: 'dupont-franc', type: 'tinto', region: 'norte', box: 6, price: 25.65, bodega: 'Fernando Dupont · Maimará', name: 'Franc Dupont 2022', notes_es: 'Pioneros en Jujuy. Frescura y complejidad aromática.', notes_en: 'Pioneers in Jujuy. Freshness and aromatic complexity.' },
-            { id: 'dupont-sikuri', type: 'tinto', region: 'norte', box: 6, price: 25.65, bodega: 'Fernando Dupont · Maimará', name: 'Sikuri Syrah 2022', notes_es: 'Gran frescura, notas de carnes ahumadas y pimienta negra.', notes_en: 'Great freshness, hints of smoked meats and black pepper.' },
-            { id: 'yaco-pasacana', type: 'tinto', region: 'norte', box: 6, price: 37.80, bodega: 'Bodega Yacochuya · Cafayate', name: 'Pasacana 2021', notes_es: 'Creación de Michel Rolland & Flia Etchart. 18 meses de barrica.', notes_en: 'Creation of Michel Rolland & Etchart Family. 18 months in barrel.' },
-            { id: 'yaco-coquena', type: 'tinto', region: 'norte', box: 6, price: 13.50, bodega: 'Bodega Yacochuya · Cafayate', name: 'Coquena Tannat 2025', notes_es: 'Potencia y frescura. Aromas de fruta negra y taninos firmes.', notes_en: 'Power and freshness. Dark fruit aromas and firm tannins.' },
-            { id: 'yaco-malbec', type: 'tinto', region: 'norte', box: 6, price: 37.80, bodega: 'Bodega Yacochuya · Cafayate', name: 'Yacochuya Malbec 2021', notes_es: 'Vino icónico de la bodega, estructurado y de gran guarda.', notes_en: 'Iconic wine of the winery, structured and for long aging.' },
-            { id: 'yaco-sanpedro', type: 'tinto', region: 'norte', box: 6, price: 24.30, bodega: 'Bodega Yacochuya · Cafayate', name: 'San Pedro de Yacochuya', notes_es: 'Elegancia clásica del valle Calchaquí.', notes_en: 'Classic elegance of the Calchaquí Valley.' },
-            { id: 'lanus-ilogico-malbec', type: 'tinto', region: 'norte', box: 6, price: 22.95, bodega: 'Agustín Lanús · Calchaquí', name: 'Ilógico Malbec 2020', notes_es: '50% roble, 50% huevos de hormigón. Fruta oscura y pimienta.', notes_en: '50% oak, 50% concrete eggs. Dark fruit and pepper.' },
-            { id: 'lanus-ilogico-criolla', type: 'tinto', region: 'norte', box: 6, price: 20.25, bodega: 'Agustín Lanús · Calchaquí', name: 'Ilógico Criolla 2022', notes_es: 'Aromas balsámicos y cereza. Frescura de extrema altura.', notes_en: 'Balsamic and cherry aromas. Extreme altitude freshness.' },
-            { id: 'lanus-atypico', type: 'tinto', region: 'norte', box: 6, price: 37.80, bodega: 'Agustín Lanús · Calchaquí', name: 'Atypico Blend 2018', notes_es: 'Malbec y Cabernet Sauvignon. Complejidad brutal.', notes_en: 'Malbec and Cabernet Sauvignon. Brutal complexity.' },
-            { id: 'lanus-sunal-malbec', type: 'tinto', region: 'norte', box: 6, price: 47.25, bodega: 'Agustín Lanús · Calchaquí', name: 'Sunal Extreme Altitude Malbec', notes_es: 'El límite de la viticultura en Argentina. Precisión extrema.', notes_en: 'The limit of viticulture in Argentina. Extreme precision.' },
-            { id: 'lanus-sunal-criolla', type: 'tinto', region: 'norte', box: 6, price: 20.25, bodega: 'Agustín Lanús · Calchaquí', name: 'Sunal Ilógico Criolla Chica 2021', notes_es: 'Cepas centenarias recuperadas. Pura identidad.', notes_en: 'Recovered century-old vines. Pure identity.' },
+        // CATÁLOGO DINÁMICO (Cargado desde Supabase)
+        let catalogData = [];
 
-            // REGIÓN DE CUYO
-            { id: 'nido-franc', type: 'tinto', region: 'cuyo', box: 6, price: 14.18, bodega: 'Nido del Tigre · San Juan', name: 'Cabernet Franc 2024', notes_es: 'Huevos de concreto, levaduras indígenas. Pimiento rojo y ciruelas.', notes_en: 'Concrete eggs, indigenous yeasts. Red bell pepper and plums.' },
-            { id: 'nido-alcaparrosa', type: 'tinto', region: 'cuyo', box: 6, price: 14.18, bodega: 'Nido del Tigre · San Juan', name: 'Alcaparrosa Ancellotta 2023', notes_es: 'Tinto fermentado sin pieles, vinificación de blanco.', notes_en: 'Red fermented without skins, white vinification.' },
-            { id: 'nido-ripasso', type: 'tinto', region: 'cuyo', box: 6, price: 14.18, bodega: 'Nido del Tigre · San Juan', name: 'Ripasso del Giardino 2024', notes_es: 'Pieles recuperadas y fermentadas con Malbec. Elegante.', notes_en: 'Recovered skins fermented with Malbec. Elegant.' },
-            { id: 'paso-orange', type: 'blanco', region: 'cuyo', box: 12, price: 14.85, bodega: 'Paso a Paso · Valle de Uco', name: 'Orange Field Blend (Orgánico)', notes_es: 'Vino de garage. Criollas co-fermentadas 90 días.', notes_en: 'Garage wine. Criollas co-fermented for 90 days.' },
-            { id: 'paso-semillon', type: 'blanco', region: 'cuyo', box: 6, price: 22.95, bodega: 'Paso a Paso · Valle de Uco', name: 'Abandonados Semillón 2022', notes_es: 'Maloláctica y crianza 8 meses en barrica. Excepcional.', notes_en: 'Malolactic and aged 8 months in barrel. Exceptional.' },
-            { id: 'paso-clarete', type: 'rosado', region: 'cuyo', box: 12, price: 12.83, bodega: 'Paso a Paso · Valle de Uco', name: 'Criolla Clarete 2025', notes_es: 'Rescate de viñedos clásicos, mínima intervención.', notes_en: 'Rescue of classic vineyards, minimal intervention.' },
-            { id: 'paso-blanca', type: 'blanco', region: 'cuyo', box: 12, price: 12.83, bodega: 'Paso a Paso · Valle de Uco', name: 'Criolla Blanca 2025', notes_es: 'Frescura notable, pura expresión de uva criolla.', notes_en: 'Notable freshness, pure expression of criolla grape.' },
-            { id: 'paso-bonarda', type: 'tinto', region: 'cuyo', box: 12, price: 14.85, bodega: 'Paso a Paso · Valle de Uco', name: 'Bonarda Vino de Garage 2023', notes_es: 'Textura aterciopelada y acidez equilibrada.', notes_en: 'Velvety texture and balanced acidity.' },
-            { id: 'paso-don-graciano', type: 'tinto', region: 'cuyo', box: 12, price: 14.85, bodega: 'Paso a Paso · Valle de Uco', name: 'Las Criollas de Don Graciano', notes_es: 'Elaboración artesanal extrema. Edición limitada.', notes_en: 'Extreme artisanal production. Limited edition.' },
-            { id: 'huentala-malbec', type: 'tinto', region: 'cuyo', box: 6, price: 17.55, bodega: 'Huentala Wines · Gualtallary', name: 'Gran Sombrerero Malbec 2023', notes_es: 'Suelo calcáreo. Estructura y tensión.', notes_en: 'Calcareous soil. Structure and tension.' },
-            { id: 'huentala-chard', type: 'blanco', region: 'cuyo', box: 6, price: 16.20, bodega: 'Huentala Wines · Gualtallary', name: 'Gran Sombrerero Chardonnay', notes_es: 'Elegante y fresco, altitud pura.', notes_en: 'Elegant and fresh, pure altitude.' },
-            { id: 'huentala-verde', type: 'tinto', region: 'cuyo', box: 6, price: 14.85, bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec Mevushal Verde', notes_es: 'Línea Kosher certificada. Calidad excepcional.', notes_en: 'Certified Kosher line. Exceptional quality.' },
-            { id: 'huentala-azul', type: 'tinto', region: 'cuyo', box: 6, price: 18.90, bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec No-Mevushal Azul', notes_es: 'Línea Kosher. Gran intensidad aromática.', notes_en: 'Kosher line. Great aromatic intensity.' },
-            { id: 'huentala-negro', type: 'tinto', region: 'cuyo', box: 6, price: 29.70, bodega: 'Huentala Wines · Gualtallary', name: 'Dreidel Malbec No-Mevushal Negro', notes_es: 'El tope de gama Kosher. Complejo y de larga guarda.', notes_en: 'Top of the Kosher line. Complex and for long aging.' },
-            { id: 'coloso-blanc', type: 'blanco', region: 'cuyo', box: 6, price: 12.83, bodega: 'Coloso Wines · Agrelo', name: 'Indomable Blanc de Malbec 2023', notes_es: 'Blanc de Noir. Cosecha nocturna. Floral y vivo.', notes_en: 'Blanc de Noir. Night harvest. Floral and lively.' },
-            { id: 'coloso-malbec', type: 'tinto', region: 'cuyo', box: 6, price: 12.83, bodega: 'Coloso Wines · Agrelo', name: 'Indomable Malbec Clásico', notes_es: 'Pura expresión del terruño de Agrelo.', notes_en: 'Pure expression of the Agrelo terroir.' },
-            { id: 'ba-malbec', type: 'tinto', region: 'cuyo', box: 12, price: 6.75, bodega: 'Buenos Aires · Mendoza', name: 'Malbec 2024 (Oro G&G)', notes_es: 'Sumamente afrutado, cerezas y ciruelas. Fácil de beber.', notes_en: 'Extremely fruity, cherries and plums. Easy to drink.' },
-            { id: 'ba-chard', type: 'blanco', region: 'cuyo', box: 12, price: 6.75, bodega: 'Buenos Aires · Mendoza', name: 'Chardonnay 2024', notes_es: 'Fresco y vibrante, ideal para el canal HORECA.', notes_en: 'Fresh and vibrant, ideal for the HORECA channel.' },
-            { id: 'ba-reserva', type: 'tinto', region: 'cuyo', box: 12, price: 8.78, bodega: 'Buenos Aires · Mendoza', name: 'Malbec Reserva 2022', notes_es: 'Paso por madera, estructura definida.', notes_en: 'Aged in wood, defined structure.' },
-            { id: 'ba-rose', type: 'rosado', region: 'cuyo', box: 12, price: 6.75, bodega: 'Buenos Aires · Mendoza', name: 'Rosé of Malbec', notes_es: 'Delicado, fresco y con mucha fruta roja.', notes_en: 'Delicate, fresh with lots of red fruit.' },
-            { id: 'ba-cab', type: 'tinto', region: 'cuyo', box: 12, price: 6.75, bodega: 'Buenos Aires · Mendoza', name: 'Cabernet Sauvignon 2020', notes_es: 'Oro Gilbert & Gaillard. Estructura y tipicidad.', notes_en: 'Gilbert & Gaillard Gold. Structure and typicity.' },
-            { id: 'ba-blend', type: 'tinto', region: 'cuyo', box: 12, price: 6.75, bodega: 'Buenos Aires · Mendoza', name: 'Red Blend 2020', notes_es: 'El corte perfecto de la casa. Equilibrado y goloso.', notes_en: 'The perfect house blend. Balanced and sweet.' },
-
-            // PATAGONIA
-            { id: 'desierto-merlot', type: 'tinto', region: 'patagonia', box: 6, price: 16.20, bodega: 'Bodega del Desierto · La Pampa', name: 'Merlot 2020', notes_es: 'Crianza de 9 meses en roble. Personalidad patagónica.', notes_en: '9 months in oak. Patagonian personality.' },
-            { id: 'desierto-cabfranc', type: 'tinto', region: 'patagonia', box: 6, price: 16.20, bodega: 'Bodega del Desierto · La Pampa', name: 'Cabernet Franc 2019', notes_es: 'Suelos áridos y aluviales, rico en minerales.', notes_en: 'Arid and alluvial soils, rich in minerals.' },
-            { id: 'desierto-pinot', type: 'tinto', region: 'patagonia', box: 6, price: 16.20, bodega: 'Bodega del Desierto · La Pampa', name: 'Pinot Noir 2021', notes_es: 'Elegancia y frescura extrema del desierto.', notes_en: 'Extreme elegance and freshness of the desert.' },
-            { id: 'desierto-pampeano', type: 'tinto', region: 'patagonia', box: 6, price: 13.50, bodega: 'Bodega del Desierto · La Pampa', name: 'Pampeano Pinot Noir 2024', notes_es: 'Sin madera. Frescura, fruta roja y flores blancas.', notes_en: 'No wood. Freshness, red fruit and white flowers.' },
-            { id: 'desierto-25malbec', type: 'tinto', region: 'patagonia', box: 6, price: 16.20, bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto 25 Malbec', notes_es: 'El clásico patagónico de estructura plena.', notes_en: 'The Patagonian classic with full structure.' },
-            { id: 'desierto-25syrah', type: 'tinto', region: 'patagonia', box: 6, price: 16.20, bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto 25 Syrah', notes_es: 'Especiado, potente y de gran carácter.', notes_en: 'Spicy, powerful and of great character.' },
-            { id: 'desierto-pampa-blend', type: 'tinto', region: 'patagonia', box: 6, price: 21.60, bodega: 'Bodega del Desierto · La Pampa', name: 'Desierto Pampa Blend', notes_es: 'El corte insignia de la bodega pampeana.', notes_en: 'The flagship blend of the Pampean winery.' }
-        ];
+        // Cargar catálogo desde Supabase
+        async function initCatalog() {
+            console.log('Cargando catálogo desde Supabase...');
+            const wines = await APIModule.getWines();
+            if (wines && wines.length > 0) {
+                catalogData = wines.map(wine => ({
+                    id: wine.id,
+                    type: wine.type,
+                    region: wine.region,
+                    box: wine.box_size || wine.box,
+                    price: wine.price_retail || wine.price,
+                    bodega: wine.bodega,
+                    name: wine.name,
+                    notes_es: wine.notes_es,
+                    notes_en: wine.notes_en
+                }));
+                console.log(`✓ ${catalogData.length} vinos cargados desde Supabase`);
+                renderCatalog();
+            } else {
+                console.error('No se pudieron cargar los vinos');
+            }
+        }
 
         // LÓGICA DE ESTADO (Estado, Filtros, Ordenación y Carrito)
         let cart = {};
@@ -452,7 +605,13 @@
 
         // MOTOR DE RENDERIZADO DEL CATÁLOGO
         function renderCatalog() {
-            // 1. Filtrar
+            // 1. Validar que catalogData existe
+            if (!catalogData || catalogData.length === 0) {
+                console.error('catalogData está vacío o no definido');
+                return;
+            }
+
+            // 2. Filtrar
             let filtered = catalogData.filter(w => {
                 if (activeFilters.type.size > 0 && !activeFilters.type.has(w.type)) return false;
                 if (activeFilters.region.size > 0 && !activeFilters.region.has(w.region)) return false;
@@ -460,37 +619,37 @@
                 return true;
             });
 
-            // 2. Ordenar
+            // 3. Ordenar
             if (currentSort === 'asc') {
                 filtered.sort((a, b) => (a.price * a.box) - (b.price * b.box));
             } else if (currentSort === 'desc') {
                 filtered.sort((a, b) => (b.price * b.box) - (a.price * a.box));
             }
 
-            // 3. Agrupar
+            // 4. Agrupar
             const norte = filtered.filter(w => w.region === 'norte');
             const cuyo = filtered.filter(w => w.region === 'cuyo');
             const patagonia = filtered.filter(w => w.region === 'patagonia');
 
-            // 4. Función generadora de HTML
+            // 5. Función generadora de HTML
             const generateHtml = (wines) => {
                 return wines.map(w => {
                     const total = (w.price * w.box).toFixed(2).replace('.', ',');
                     const price = w.price.toFixed(2).replace('.', ',');
                     const inCartCls = cart[w.id] ? 'in-cart' : '';
                     const cartQty = cart[w.id] ? cart[w.id].qty : 0;
-                    
+
                     let extraTag = '';
-                    if(w.name.includes('(Orgánico)')) extraTag = '<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-800 text-[9px] font-bold uppercase rounded-sm"><span lang="es">Orgánico</span><span lang="en">Organic</span></span>';
-                    if(w.name.includes('(Oro G&G)')) extraTag = '<span class="ml-2 px-1.5 py-0.5 bg-yellow-100 text-yellow-800 text-[9px] font-bold uppercase rounded-sm"><span lang="es">Oro</span><span lang="en">Gold</span></span>';
+                    if(w.name && w.name.includes('(Orgánico)')) extraTag = '<span class="ml-2 px-1.5 py-0.5 bg-green-100 text-green-800 text-[9px] font-bold uppercase rounded-sm"><span lang="es">Orgánico</span><span lang="en">Organic</span></span>';
+                    if(w.name && w.name.includes('(Oro G&G)')) extraTag = '<span class="ml-2 px-1.5 py-0.5 bg-yellow-100 text-yellow-800 text-[9px] font-bold uppercase rounded-sm"><span lang="es">Oro</span><span lang="en">Gold</span></span>';
 
                     return `
-                        <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50 ${inCartCls}">
+                        <article class="wine-row grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:px-6 border-b border-stone-200/50 ${inCartCls}" data-wine-id="${w.id}">
                             <div class="col-span-5 flex flex-col">
-                                <span class="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-1">${w.bodega}</span>
-                                <h4 class="text-lg font-serif text-wine-900 font-bold leading-tight flex items-center flex-wrap gap-1">${w.name.replace(' (Orgánico)','').replace(' (Oro G&G)','')} ${extraTag}</h4>
+                                <span class="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-1">${w.bodega || ''}</span>
+                                <h4 class="text-lg font-serif text-wine-900 font-bold leading-tight flex items-center flex-wrap gap-1">${(w.name || '').replace(' (Orgánico)','').replace(' (Oro G&G)','')} ${extraTag}</h4>
                                 <p class="text-xs text-stone-500 mt-1 line-clamp-2">
-                                    <span lang="es">${w.notes_es}</span><span lang="en">${w.notes_en}</span>
+                                    <span lang="es">${w.notes_es || ''}</span><span lang="en">${w.notes_en || ''}</span>
                                 </p>
                                 <a href="https://dealturawines.com/es/" target="_blank" class="inline-flex items-center text-[10px] font-bold uppercase tracking-widest text-gold-600 hover:text-wine-700 transition-colors mt-2 w-fit">
                                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -518,16 +677,65 @@
                 }).join('');
             };
 
-            // 5. Inyectar en DOM
-            document.getElementById('container-norte').innerHTML = generateHtml(norte);
-            document.getElementById('container-cuyo').innerHTML = generateHtml(cuyo);
-            document.getElementById('container-patagonia').innerHTML = generateHtml(patagonia);
+            // 6. Inyectar en DOM por región
+            try {
+                const containerNorte = document.getElementById('container-norte');
+                const containerCuyo = document.getElementById('container-cuyo');
+                const containerPatagonia = document.getElementById('container-patagonia');
 
-            // 6. Gestionar visibilidad de Secciones
-            document.getElementById('section-norte').style.display = norte.length ? 'block' : 'none';
-            document.getElementById('section-cuyo').style.display = cuyo.length ? 'block' : 'none';
-            document.getElementById('section-patagonia').style.display = patagonia.length ? 'block' : 'none';
-            document.getElementById('no-results').style.display = filtered.length === 0 ? 'block' : 'none';
+                if (containerNorte) containerNorte.innerHTML = generateHtml(norte);
+                if (containerCuyo) containerCuyo.innerHTML = generateHtml(cuyo);
+                if (containerPatagonia) containerPatagonia.innerHTML = generateHtml(patagonia);
+            } catch (e) {
+                console.error('Error inyectando en contenedores regionales:', e);
+            }
+
+            // 7. Fallback: inyectar en catalog-grid unificado
+            try {
+                const catalogGrid = document.getElementById('catalog-grid');
+                if (catalogGrid) {
+                    catalogGrid.innerHTML = generateHtml(filtered);
+                    catalogGrid.classList.toggle('hidden', filtered.length === 0);
+                }
+            } catch (e) {
+                console.error('Error inyectando en catalog-grid:', e);
+            }
+
+            // 8. Gestionar visibilidad de Secciones (SIEMPRE VISIBLES - CSS !important lo garantiza)
+            try {
+                const sectionNorte = document.getElementById('section-norte');
+                const sectionCuyo = document.getElementById('section-cuyo');
+                const sectionPatagonia = document.getElementById('section-patagonia');
+                const noResults = document.getElementById('no-results');
+
+                // Forzar visibilidad con CSS inline
+                if (sectionNorte) {
+                    sectionNorte.style.display = 'block';
+                    sectionNorte.style.visibility = 'visible';
+                    sectionNorte.style.opacity = '1';
+                }
+                if (sectionCuyo) {
+                    sectionCuyo.style.display = 'block';
+                    sectionCuyo.style.visibility = 'visible';
+                    sectionCuyo.style.opacity = '1';
+                }
+                if (sectionPatagonia) {
+                    sectionPatagonia.style.display = 'block';
+                    sectionPatagonia.style.visibility = 'visible';
+                    sectionPatagonia.style.opacity = '1';
+                }
+
+                // Solo ocultar "no results" si no hay vinos filtrados
+                if (noResults) {
+                    noResults.style.display = filtered.length === 0 ? 'block' : 'none';
+                }
+
+                console.log(`✓ Secciones visibles: norte=${norte.length}, cuyo=${cuyo.length}, patagonia=${patagonia.length}`);
+            } catch (e) {
+                console.error('Error gestionando visibilidad:', e);
+            }
+
+            console.log(`✓ renderCatalog() completado: ${filtered.length} vinos mostrados`);
         }
 
         // LÓGICA DE FILTRADO
@@ -691,8 +899,10 @@
                     cart = {};
                 }
             }
-            renderCatalog();
-            renderCart();
+            // Cargar catálogo desde Supabase
+            initCatalog().then(() => {
+                renderCart();
+            });
         });
     </script>
 </body>
