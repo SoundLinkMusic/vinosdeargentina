@@ -4,298 +4,465 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - De Altura Wines</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="/assets/js/config.js"></script>
-    <script src="/assets/js/auth.js"></script>
-    <script src="/assets/js/api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Montserrat', sans-serif; background-color: #fdfbf7; color: #2c2c2a; }
-        :root { --wine-dark: #4a0404; --wine-bright: #720000; --amber-dark: #d4851a; --stone-50: #fef9f6; --stone-100: #f9fafa; --stone-200: #f3f4f6; --stone-400: #9ca3af; --stone-500: #6b7280; --stone-900: #1f2937; }
-        
-        .checkout-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; backdrop-filter: blur(6px); }
-        .checkout-modal { background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); width: 100%; max-width: 520px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .checkout-header { background: linear-gradient(135deg, var(--wine-dark) 0%, var(--wine-bright) 100%); color: white; padding: 2rem; }
-        .checkout-header h2 { font-size: 1.5rem; font-family: 'Playfair Display', serif; margin-bottom: 0.5rem; }
-        .checkout-header p { font-size: 0.9rem; opacity: 0.9; }
-        
-        .progress-bar { display: flex; margin-top: 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 8px; overflow: hidden; height: 4px; }
-        .progress-segment { flex: 1; background: rgba(255, 255, 255, 0.3); transition: background 0.3s ease; }
-        .progress-segment.active { background: #fcd116; }
-        
-        .checkout-content { flex: 1; overflow-y: auto; padding: 2rem; }
-        .step { display: none; }
-        .step.active { display: block; animation: fadeIn 0.3s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        .step h3 { font-size: 1.25rem; margin-bottom: 1.5rem; color: var(--stone-900); font-family: 'Playfair Display', serif; }
-        
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--stone-900); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        .form-group input, .form-group select { width: 100%; padding: 0.875rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; font-family: inherit; transition: all 0.2s; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--wine-bright); box-shadow: 0 0 0 3px rgba(114, 0, 0, 0.1); }
-        
-        .order-summary { background: var(--stone-50); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid #e5e7eb; }
-        .summary-item { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.75rem; color: var(--stone-600); }
-        .summary-item:last-child { margin-bottom: 0; padding-top: 0.75rem; border-top: 1px solid #e5e7eb; font-weight: 700; color: var(--stone-900); font-size: 1rem; }
-        
-        /* Opciones de Pago */
-        .payment-option { border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 1rem; }
-        .payment-option:hover { border-color: var(--stone-400); background: var(--stone-50); }
-        .payment-option.selected { border-color: var(--wine-bright); background: var(--red-50); }
-        .payment-option input { accent-color: var(--wine-bright); width: 18px; height: 18px; cursor: pointer; }
-        .payment-details { flex: 1; }
-        .payment-details h4 { font-size: 1rem; color: var(--stone-900); margin-bottom: 0.25rem; font-family: 'Montserrat', sans-serif; }
-        .payment-details p { font-size: 0.8rem; color: var(--stone-500); }
-        
-        .checkout-footer { background: var(--stone-50); padding: 1.5rem 2rem; border-top: 1px solid #e5e7eb; display: flex; gap: 1rem; justify-content: space-between; }
-        .btn { padding: 0.875rem 1.5rem; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; font-family: inherit; }
-        .btn-secondary { background: transparent; color: var(--stone-600); border: 1px solid #e5e7eb; }
-        .btn-primary { background: var(--wine-bright); color: white; flex: 1; display: flex; justify-content: center; align-items: center; }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-        
-        .success-icon { width: 80px; height: 80px; margin: 0 auto 1.5rem; background: #dcfce7; color: #15803d; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
-        .success-message { text-align: center; }
-        
-        .loader { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 1s ease-in-out infinite; display: none; }
+        body { font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #360914 0%, #54101d 100%); min-height: 100vh; }
+
+        .checkout-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+
+        .header { text-align: center; color: white; margin-bottom: 40px; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; font-weight: 700; }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+
+        .checkout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 30px; }
+        @media (max-width: 768px) { .checkout-grid { grid-template-columns: 1fr; } }
+
+        /* RESUMEN DE CARRITO */
+        .cart-summary { background: white; padding: 30px; border-radius: 12px; height: fit-content; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .cart-summary h2 { color: #360914; margin-bottom: 20px; font-size: 1.5em; border-bottom: 2px solid #C89F5D; padding-bottom: 15px; }
+
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .cart-item:last-child { border-bottom: none; }
+        .item-info { flex: 1; }
+        .item-name { font-weight: 600; color: #360914; }
+        .item-qty { font-size: 0.9em; color: #666; margin-top: 5px; }
+        .item-price { font-weight: 700; color: #360914; font-size: 1.1em; }
+
+        .summary-row { display: flex; justify-content: space-between; padding: 12px 0; font-size: 0.95em; }
+        .summary-row.total { border-top: 2px solid #C89F5D; padding-top: 20px; margin-top: 20px; font-size: 1.3em; font-weight: 700; color: #360914; }
+
+        .empty-cart { text-align: center; padding: 40px 0; color: #999; }
+        .empty-cart svg { width: 80px; height: 80px; margin-bottom: 20px; opacity: 0.3; }
+
+        /* FORMULARIO */
+        .payment-form { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .payment-form h2 { color: #360914; margin-bottom: 25px; font-size: 1.5em; }
+
+        .form-section { margin-bottom: 30px; }
+        .form-section h3 { font-size: 1.1em; color: #360914; margin-bottom: 15px; font-weight: 600; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .form-row.full { grid-template-columns: 1fr; }
+
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 0.9em; font-weight: 600; color: #360914; margin-bottom: 8px; }
+        .form-group input, .form-group select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #C89F5D; box-shadow: 0 0 0 3px rgba(200, 159, 93, 0.1); }
+        .form-group input::placeholder { color: #aaa; }
+
+        .form-error { color: #d32f2f; font-size: 0.85em; margin-top: 5px; display: none; }
+        .form-group.error input { border-color: #d32f2f; }
+        .form-group.error .form-error { display: block; }
+
+        /* STRIPE */
+        #stripe-container { margin-bottom: 20px; }
+        .StripeElement { padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: white; }
+        .StripeElement--focus { border-color: #C89F5D; box-shadow: 0 0 0 3px rgba(200, 159, 93, 0.1); }
+
+        /* BOTONES */
+        .btn-container { margin-top: 30px; }
+        .btn-pay { width: 100%; padding: 16px; background: linear-gradient(135deg, #360914 0%, #54101d 100%); color: white; font-size: 1.1em; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(54, 9, 20, 0.3); }
+        .btn-pay:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(54, 9, 20, 0.4); }
+        .btn-pay:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-pay.loading::after { content: ' '; display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ALERTS */
+        .alert { padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .alert.success { background: #e8f5e9; color: #2e7d32; }
+        .alert.error { background: #ffebee; color: #c62828; }
+        .alert.info { background: #e3f2fd; color: #1565c0; }
+
+        /* LOADING */
+        .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .loading-overlay.show { display: flex; }
+        .loading-spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+        .breadcrumb { color: white; font-size: 0.9em; margin-bottom: 30px; }
+        .breadcrumb a { color: #C89F5D; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
-
-<div class="checkout-overlay" id="checkoutOverlay">
-    <div class="checkout-modal">
-        <div class="checkout-header">
-            <h2>Completar Pedido</h2>
-            <p>De Altura Wines · Canarias 2026</p>
-            <div class="progress-bar">
-                <div class="progress-segment active" id="seg-1"></div>
-                <div class="progress-segment" id="seg-2"></div>
-                <div class="progress-segment" id="seg-3"></div>
-                <div class="progress-segment" id="seg-4"></div>
-            </div>
+    <div class="checkout-container">
+        <div class="breadcrumb">
+            <a href="marketplace.html">← Volver al Marketplace</a>
         </div>
-        
-        <div class="checkout-content">
-            <!-- STEP 1: Email -->
-            <div class="step active" id="step-1">
-                <h3>Contacto</h3>
-                <div class="form-group">
-                    <label>Nombre del Local / Cliente</label>
-                    <input type="text" id="name-input" placeholder="Restaurante El Risco" required>
-                </div>
-                <div class="form-group">
-                    <label>Email de facturación</label>
-                    <input type="email" id="email-input" placeholder="tu@email.com" required>
-                </div>
-            </div>
-            
-            <!-- STEP 2: Shipping -->
-            <div class="step" id="step-2">
-                <h3>Datos de Envío</h3>
-                <div class="form-group">
-                    <label>Isla de Destino</label>
-                    <select id="island-select" required>
-                        <option value="">Selecciona una isla</option>
-                        <option value="Gran Canaria">Gran Canaria</option>
-                        <option value="Tenerife">Tenerife</option>
-                        <option value="Lanzarote">Lanzarote</option>
-                        <option value="Fuerteventura">Fuerteventura</option>
-                        <option value="La Palma">La Palma</option>
-                        <option value="La Gomera">La Gomera</option>
-                        <option value="El Hierro">El Hierro</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Dirección Completa</label>
-                    <input type="text" id="address-input" placeholder="Calle, Número, Localidad" required>
-                </div>
-            </div>
-            
-            <!-- STEP 3: Payment -->
-            <div class="step" id="step-3">
-                <h3>Método de Pago</h3>
-                <p style="color: var(--stone-500); margin-bottom: 1.5rem; font-size: 0.9rem;">Seleccione cómo desea procesar el pedido.</p>
-                
-                <label class="payment-option selected" id="opt-stripe">
-                    <input type="radio" name="payment" value="stripe" checked onchange="selectPayment('stripe')">
-                    <div class="payment-details">
-                        <h4>Pago Online (Tarjeta / Bizum)</h4>
-                        <p>Plataforma segura de Stripe. Envío inmediato.</p>
-                    </div>
-                </label>
-                
-                <label class="payment-option" id="opt-transfer">
-                    <input type="radio" name="payment" value="transfer" onchange="selectPayment('transfer')">
-                    <div class="payment-details">
-                        <h4>Transferencia Bancaria (B2B)</h4>
-                        <p>El pedido quedará reservado hasta confirmar el ingreso.</p>
-                    </div>
-                </label>
 
-                <div class="order-summary mt-6">
-                    <div class="summary-item">
-                        <span>Total Cajas</span>
-                        <span>5 cajas</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>Total Neto a Pagar</span>
-                        <span style="color: var(--wine-bright)">427,57 €</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- STEP 4: Success -->
-            <div class="step" id="step-4">
-                <div class="success-icon">✓</div>
-                <div class="success-message">
-                    <h4 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #15803d; margin-bottom: 0.5rem;">¡Pedido Registrado!</h4>
-                    <p style="color: var(--stone-600); line-height: 1.6;">Tu pedido ha sido enviado a nuestro sistema.</p>
-                    <p id="transfer-instructions" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--stone-50); border-radius: 8px; font-size: 0.85rem; border: 1px dashed var(--stone-400);">
-                        <strong>Datos para transferencia:</strong><br>
-                        ES98 1234 5678 9012 3456<br>
-                        Concepto: Pedido Vinos Altura
-                    </p>
-                </div>
-            </div>
+        <div class="header">
+            <h1>De Altura Wines - Pagar Pedido</h1>
+            <p>Completa tus datos y elige tu método de pago</p>
         </div>
-        
-        <div class="checkout-footer">
-            <button class="btn btn-secondary" id="btn-back" onclick="previousStep()" style="display: none;">← Atrás</button>
-            <button class="btn btn-primary" id="btn-next" onclick="nextStep()">
-                <span id="btn-text">Continuar</span>
-                <div class="loader" id="btn-loader"></div>
-            </button>
+
+        <div class="checkout-grid">
+            <!-- RESUMEN DE CARRITO -->
+            <div class="cart-summary">
+                <h2>Resumen del Pedido</h2>
+                <div id="cart-items"></div>
+
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">0,00 €</span>
+                </div>
+                <div class="summary-row">
+                    <span>IGIC (7%):</span>
+                    <span id="igic">0,00 €</span>
+                </div>
+                <div class="summary-row">
+                    <span>AIEM (15%):</span>
+                    <span id="aiem">0,00 €</span>
+                </div>
+                <div class="summary-row total">
+                    <span>TOTAL:</span>
+                    <span id="total">0,00 €</span>
+                </div>
+
+                <div id="empty-message" class="empty-cart" style="display: none;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m10 0l2-9m-10 9h12m0 0l2-9m-2 9v3m-2-3v3"></path>
+                    </svg>
+                    <p>Tu carrito está vacío</p>
+                    <p style="font-size: 0.9em; margin-top: 10px;">Agrega vinos antes de proceder</p>
+                </div>
+            </div>
+
+            <!-- FORMULARIO DE PAGO -->
+            <div class="payment-form" id="form-container" style="display: none;">
+                <h2>Información de Pago</h2>
+
+                <div id="alerts"></div>
+
+                <!-- DATOS DEL CLIENTE -->
+                <div class="form-section">
+                    <h3>1. Tus Datos</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Nombre Completo *</label>
+                            <input type="text" id="name" placeholder="Juan García">
+                            <div class="form-error">Campo requerido</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" placeholder="juan@example.com">
+                            <div class="form-error">Email inválido</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Teléfono</label>
+                            <input type="tel" id="phone" placeholder="+34 612 345 678">
+                            <div class="form-error">Teléfono inválido</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="island">Isla de Destino *</label>
+                            <select id="island" required>
+                                <option value="">Selecciona una isla...</option>
+                                <option value="Tenerife">Tenerife</option>
+                                <option value="Gran Canaria">Gran Canaria</option>
+                                <option value="La Palma">La Palma</option>
+                                <option value="La Gomera">La Gomera</option>
+                                <option value="El Hierro">El Hierro</option>
+                                <option value="Fuerteventura">Fuerteventura</option>
+                                <option value="Lanzarote">Lanzarote</option>
+                            </select>
+                            <div class="form-error">Selecciona una isla</div>
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="address">Dirección Completa *</label>
+                            <input type="text" id="address" placeholder="Calle Principal 123, Apt. 4B">
+                            <div class="form-error">Campo requerido</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="postal">Código Postal *</label>
+                            <input type="text" id="postal" placeholder="38001">
+                            <div class="form-error">Código postal inválido</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STRIPE PAYMENT ELEMENT -->
+                <div class="form-section">
+                    <h3>2. Método de Pago</h3>
+                    <div id="stripe-container"></div>
+                    <div id="stripe-error" style="color: #d32f2f; margin-top: 10px; display: none;"></div>
+                </div>
+
+                <!-- BOTÓN DE PAGO -->
+                <div class="btn-container">
+                    <button class="btn-pay" id="btn-pay">
+                        <span id="btn-text">Pagar Ahora</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<script type="module">
-    // INTEGRACIÓN FIREBASE (BBDD en Tiempo Real)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
 
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'de-altura-crm';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-    
-    // Inicializar (Si estamos en el entorno de despliegue)
-    let db, auth;
-    try {
-        const app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app);
-        signInAnonymously(auth); // Requisito obligatorio
-    } catch(e) { console.log("Firebase config not available in local dev"); }
+    <!-- CONFIG Y SUPABASE -->
+    <script>
+        const SUPABASE_URL = 'https://pzzbvinbyzaxrshlmlcn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6emJ2aW5ieXpheHJzaGxtbGNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTI5NDYsImV4cCI6MjA5MTEyODk0Nn0.YgeGDVZfyqI-nv7iAhROMsBfZbIK7BGUDyU1ERE-SFA';
+        const STRIPE_PUBLISHABLE_KEY = 'pk_test_YOUR_KEY_HERE'; // ⚠️ CAMBIAR CON KEY REAL DE NICO
 
-    // UI Logic
-    window.currentStep = 1;
-    window.selectedPayment = 'stripe';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+        let elements;
+        let paymentElement;
+    </script>
 
-    window.selectPayment = function(method) {
-        window.selectedPayment = method;
-        document.getElementById('opt-stripe').classList.remove('selected');
-        document.getElementById('opt-transfer').classList.remove('selected');
-        document.getElementById(`opt-${method}`).classList.add('selected');
-        
-        const btnNext = document.getElementById('btn-next');
-        document.getElementById('btn-text').innerText = method === 'stripe' ? 'Ir a Stripe 🔒' : 'Confirmar Pedido';
-    };
-
-    window.updateUI = function() {
-        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-        document.getElementById(`step-${window.currentStep}`).classList.add('active');
-        
-        for (let i = 1; i <= 4; i++) {
-            const seg = document.getElementById(`seg-${i}`);
-            i <= window.currentStep ? seg.classList.add('active') : seg.classList.remove('active');
+    <!-- LÓGICA DE CHECKOUT -->
+    <script>
+        // Cargar carrito desde localStorage
+        function loadCart() {
+            const cartData = localStorage.getItem('deAlturaCart') || '{}';
+            try {
+                return JSON.parse(cartData);
+            } catch {
+                return {};
+            }
         }
 
-        const backBtn = document.getElementById('btn-back');
-        const nextBtn = document.getElementById('btn-next');
-        const btnText = document.getElementById('btn-text');
-        
-        backBtn.style.display = window.currentStep > 1 && window.currentStep < 4 ? 'block' : 'none';
-        
-        if (window.currentStep === 1 || window.currentStep === 2) {
-            btnText.innerText = 'Continuar →';
-        } else if (window.currentStep === 3) {
-            btnText.innerText = window.selectedPayment === 'stripe' ? 'Ir a Stripe 🔒' : 'Confirmar Pedido';
-        } else if (window.currentStep === 4) {
-            nextBtn.style.display = 'none';
-            backBtn.style.display = 'none';
-            setTimeout(() => { document.getElementById('checkoutOverlay').style.display = 'none'; }, 4000);
-        }
-    };
+        // Renderizar resumen de carrito
+        function renderCartSummary() {
+            const cart = loadCart();
+            const items = Object.values(cart);
 
-    window.nextStep = async function() {
-        if (window.currentStep === 1) {
-            if(!document.getElementById('name-input').value || !document.getElementById('email-input').value) return alert('Completa los datos');
-        }
-        if (window.currentStep === 2) {
-            if(!document.getElementById('island-select').value) return alert('Selecciona una isla');
+            if (items.length === 0) {
+                document.getElementById('empty-message').style.display = 'block';
+                document.getElementById('form-container').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('form-container').style.display = 'block';
+            document.getElementById('empty-message').style.display = 'none';
+
+            let html = '';
+            let subtotal = 0;
+
+            items.forEach(item => {
+                if (!item.id) return;
+                const itemTotal = (item.price || 0) * (item.qty || 1);
+                subtotal += itemTotal;
+
+                html += `
+                    <div class="cart-item">
+                        <div class="item-info">
+                            <div class="item-name">${item.name || 'Vino'}</div>
+                            <div class="item-qty">Cantidad: ${item.qty} caja${item.qty > 1 ? 's' : ''} × ${item.price?.toFixed(2) || '0.00'} €</div>
+                        </div>
+                        <div class="item-price">${itemTotal.toFixed(2).replace('.', ',')} €</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('cart-items').innerHTML = html;
+
+            // Calcular totales
+            const igic = subtotal * 0.07;
+            const aiem = subtotal * 0.15;
+            const total = subtotal + igic + aiem;
+
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('igic').textContent = igic.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('aiem').textContent = aiem.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('total').textContent = total.toFixed(2).replace('.', ',') + ' €';
+
+            // Guardar para usar en pago
+            window.orderData = {
+                items: items,
+                subtotal: subtotal,
+                igic: igic,
+                aiem: aiem,
+                total: total
+            };
         }
 
-        if (window.currentStep === 3) {
-            // PROCESAR PEDIDO Y GUARDAR EN SUPABASE
-            document.getElementById('btn-text').style.display = 'none';
-            document.getElementById('btn-loader').style.display = 'block';
-            document.getElementById('btn-next').disabled = true;
-
-            const orderData = {
-                customer_name: document.getElementById('name-input').value,
-                customer_email: document.getElementById('email-input').value,
-                customer_phone: document.getElementById('phone-input')?.value || '',
-                island: document.getElementById('island-select').value,
-                address: document.getElementById('address-input').value,
-                postal_code: document.getElementById('postal-input')?.value || '',
-                subtotal_amount: 0, // Será calculado desde el carrito
-                tax_amount: 0,
-                total_amount: 427.57,
-                items: window.cartItems || [],
-                payment_method: window.selectedPayment,
-                payment_status: 'pending',
-                shipping_status: 'new',
-                notes: ''
+        // Validar formulario
+        function validateForm() {
+            const fields = {
+                name: { value: document.getElementById('name').value.trim(), min: 3 },
+                email: { value: document.getElementById('email').value.trim(), pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+                island: { value: document.getElementById('island').value },
+                address: { value: document.getElementById('address').value.trim(), min: 5 },
+                postal: { value: document.getElementById('postal').value.trim(), min: 3 }
             };
 
-            try {
-                const result = await APIModule.createOrder(orderData);
-                if (result.error) {
-                    throw new Error(result.error);
+            let isValid = true;
+
+            Object.entries(fields).forEach(([id, config]) => {
+                const element = document.getElementById(id);
+                const group = element.parentElement;
+
+                if (!config.value) {
+                    group.classList.add('error');
+                    isValid = false;
+                } else if (config.min && config.value.length < config.min) {
+                    group.classList.add('error');
+                    isValid = false;
+                } else if (config.pattern && !config.pattern.test(config.value)) {
+                    group.classList.add('error');
+                    isValid = false;
+                } else {
+                    group.classList.remove('error');
                 }
+            });
 
-                console.log('✓ Pedido creado en Supabase:', result.order);
+            return isValid;
+        }
 
-                if(window.selectedPayment === 'transfer') {
-                    document.getElementById('transfer-instructions').style.display = 'block';
-                }
+        // Mostrar alerta
+        function showAlert(type, message) {
+            const alertsDiv = document.getElementById('alerts');
+            const alertHtml = `<div class="alert ${type}">${message}</div>`;
+            alertsDiv.innerHTML = alertHtml;
+            alertsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
 
-                window.currentStep++;
-                window.updateUI();
-            } catch (error) {
-                console.error("Error guardando orden:", error);
-                alert("Hubo un error procesando el pedido: " + error.message);
-            } finally {
-                document.getElementById('btn-text').style.display = 'block';
-                document.getElementById('btn-loader').style.display = 'none';
-                document.getElementById('btn-next').disabled = false;
+        // Procesar pago
+        async function handlePayment() {
+            if (!validateForm()) {
+                showAlert('error', 'Por favor completa todos los campos requeridos');
+                return;
             }
-            return;
-        }
-        
-        window.currentStep++;
-        window.updateUI();
-    };
 
-    window.previousStep = function() {
-        if (window.currentStep > 1) {
-            window.currentStep--;
-            window.updateUI();
+            const btnPay = document.getElementById('btn-pay');
+            btnPay.disabled = true;
+
+            try {
+                document.getElementById('loading-overlay').classList.add('show');
+
+                // Crear Payment Intent en Supabase (función edge)
+                const paymentIntentResponse = await fetch(
+                    `${SUPABASE_URL}/functions/v1/create-payment-intent`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            amount: Math.round(window.orderData.total * 100),
+                            description: `Pedido De Altura - ${window.orderData.items.length} vino(s)`
+                        })
+                    }
+                );
+
+                if (!paymentIntentResponse.ok) {
+                    throw new Error('No se pudo crear el Payment Intent');
+                }
+
+                const { clientSecret } = await paymentIntentResponse.json();
+
+                // Confirmar pago con Stripe
+                const { error } = await stripe.confirmPayment({
+                    elements,
+                    clientSecret,
+                    redirect: 'if_required'
+                });
+
+                if (error) {
+                    showAlert('error', error.message);
+                    return;
+                }
+
+                // Guardar orden en Supabase
+                const { data: order, error: orderError } = await supabase
+                    .from('orders')
+                    .insert([{
+                        customer_name: document.getElementById('name').value,
+                        customer_email: document.getElementById('email').value,
+                        customer_phone: document.getElementById('phone').value,
+                        island: document.getElementById('island').value,
+                        address: document.getElementById('address').value,
+                        postal_code: document.getElementById('postal').value,
+                        subtotal_amount: window.orderData.subtotal,
+                        tax_amount: window.orderData.igic + window.orderData.aiem,
+                        total_amount: window.orderData.total,
+                        items: window.orderData.items,
+                        payment_method: 'stripe',
+                        payment_status: 'paid',
+                        shipping_status: 'new',
+                        stripe_payment_id: clientSecret.split('_secret_')[0]
+                    }])
+                    .select();
+
+                if (orderError) throw orderError;
+
+                const orderId = order[0].id;
+
+                // Guardar items de la orden
+                const orderItems = window.orderData.items.map(item => ({
+                    order_id: orderId,
+                    wine_id: item.id,
+                    quantity: item.qty,
+                    unit_price: item.price
+                }));
+
+                const { error: itemsError } = await supabase
+                    .from('order_items')
+                    .insert(orderItems);
+
+                if (itemsError) throw itemsError;
+
+                // ✅ Éxito
+                localStorage.removeItem('deAlturaCart');
+                showAlert('success', `¡Pedido confirmado! Número: ${orderId.slice(0, 8).toUpperCase()}`);
+
+                setTimeout(() => {
+                    window.location.href = `confirmation.html?order=${orderId}`;
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error en pago:', error);
+                showAlert('error', error.message || 'Error procesando el pago');
+            } finally {
+                document.getElementById('loading-overlay').classList.remove('show');
+                btnPay.disabled = false;
+            }
         }
-    };
-</script>
+
+        // Inicializar
+        async function init() {
+            renderCartSummary();
+
+            if (Object.keys(loadCart()).length > 0) {
+                // Crear Payment Element
+                const paymentIntentResponse = await fetch(
+                    `${SUPABASE_URL}/functions/v1/create-payment-intent`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            amount: Math.round((window.orderData?.total || 0) * 100),
+                            description: 'De Altura Wines'
+                        })
+                    }
+                );
+
+                const { clientSecret } = await paymentIntentResponse.json();
+
+                elements = stripe.elements({ clientSecret });
+                paymentElement = elements.create('payment');
+                paymentElement.mount('#stripe-container');
+
+                document.getElementById('btn-pay').addEventListener('click', handlePayment);
+            }
+        }
+
+        init();
+    </script>
 </body>
 </html>
