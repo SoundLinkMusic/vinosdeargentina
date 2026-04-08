@@ -30,25 +30,22 @@ CREATE TABLE IF NOT EXISTS wines (
 
 -- Tabla de Órdenes
 CREATE TABLE IF NOT EXISTS orders (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  customer_name TEXT NOT NULL,
-  customer_email TEXT NOT NULL,
+  id BIGSERIAL PRIMARY KEY,
+  customer_name TEXT,
+  customer_email TEXT,
   customer_phone TEXT,
-  island TEXT NOT NULL,
-  address TEXT NOT NULL,
+  island TEXT,
+  address TEXT,
   postal_code TEXT,
-  subtotal_amount DECIMAL(10,2) NOT NULL,
-  tax_amount DECIMAL(10,2) NOT NULL,
-  total_amount DECIMAL(10,2) NOT NULL,
-  items JSONB NOT NULL,
-  payment_method TEXT CHECK (payment_method IN ('stripe', 'transfer')),
-  payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'failed', 'refunded')),
-  shipping_status TEXT DEFAULT 'new' CHECK (shipping_status IN ('new', 'processing', 'shipped', 'delivered', 'cancelled')),
+  subtotal_amount DECIMAL(10,2),
+  tax_amount DECIMAL(10,2),
+  total_amount DECIMAL(10,2),
+  items JSONB,
+  payment_method TEXT,
+  payment_status TEXT,
+  shipping_status TEXT DEFAULT 'pending',
   stripe_payment_id TEXT,
-  notes TEXT,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Tabla de Items de Órdenes
