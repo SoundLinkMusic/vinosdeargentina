@@ -347,7 +347,18 @@
             try {
                 document.getElementById('loading-overlay').classList.add('show');
 
-                // Crear Payment Intent en Supabase (función edge)
+                // PASO 1: Validar payment element con elements.submit()
+                console.log('📋 Validando elementos de pago...');
+                const submitResult = await elements.submit();
+
+                if (submitResult.error) {
+                    throw new Error(submitResult.error.message || 'Error validando el método de pago');
+                }
+
+                console.log('✅ Elementos validados correctamente');
+
+                // PASO 2: Crear Payment Intent en Supabase (función edge)
+                console.log('🔄 Creando Payment Intent...');
                 const paymentIntentResponse = await fetch(EDGE_FUNCTION_URL, {
                     method: 'POST',
                     headers: {
@@ -370,7 +381,10 @@
                     throw new Error('No se recibió confirmación de pago');
                 }
 
-                // Confirmar pago con Stripe
+                console.log('🎫 Payment Intent creado:', clientSecret.slice(0, 20) + '...');
+
+                // PASO 3: Confirmar pago con Stripe
+                console.log('💳 Confirmando pago con Stripe...');
                 const { error } = await stripe.confirmPayment({
                     elements,
                     clientSecret,
@@ -381,6 +395,8 @@
                     showAlert('error', `Error: ${error.message}`);
                     return;
                 }
+
+                console.log('✅ Pago confirmado por Stripe');
 
                 // Guardar orden en Supabase
                 const { data: order, error: orderError } = await window.deAlturaSupabase

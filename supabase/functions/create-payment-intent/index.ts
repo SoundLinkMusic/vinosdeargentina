@@ -12,7 +12,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { amount } = await req.json();
+    const body = await req.json();
+    console.log("Cuerpo recibido:", body);
+    const { amount } = body;
 
     // Inicializar Stripe con la SECRET KEY
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
@@ -20,11 +22,17 @@ Deno.serve(async (req) => {
     });
 
     // Crear Payment Intent
+    const amountInCents = Math.floor(Number(amount) * 100);
+    console.log("Amount recibido:", amount);
+    console.log("Amount en centavos (floor):", amountInCents);
+
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Convertir a centavos
+      amount: amountInCents,
       currency: 'eur',
       description: 'De Altura Wines - Pedido',
     });
+
+    console.log("Payment Intent creado exitosamente:", paymentIntent.id);
 
     return new Response(
       JSON.stringify({
