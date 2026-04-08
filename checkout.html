@@ -399,7 +399,15 @@
                 console.log('✅ Pago confirmado por Stripe');
 
                 // Guardar orden en Supabase
-                const { data: order, error: orderError } = await window.deAlturaSupabase
+                const paymentId = clientSecret ? clientSecret.split('_secret_')[0] : 'unknown';
+                console.log('💾 Insertando orden en Supabase con datos:', {
+                    customer_name: document.getElementById('name').value,
+                    customer_email: document.getElementById('email').value,
+                    total_amount: window.orderData.total,
+                    stripe_payment_id: paymentId
+                });
+
+                const { data: orderData, error: orderError } = await window.deAlturaSupabase
                     .from('orders')
                     .insert([{
                         customer_name: document.getElementById('name').value,
@@ -415,27 +423,42 @@
                         payment_method: 'stripe',
                         payment_status: 'paid',
                         shipping_status: 'new',
-                        stripe_payment_id: clientSecret.split('_secret_')[0]
-                    }])
-                    .select();
+                        stripe_payment_id: paymentId
+                    }]);
 
-                if (orderError) throw orderError;
+                if (orderError) {
+                    console.error('❌ Error insertando orden:', orderError);
+                    throw orderError;
+                }
 
-                const orderId = order[0].id;
+                console.log('✅ Orden insertada:', orderData);
+                if (!orderData || orderData.length === 0) {
+                    throw new Error('No se retornó el ID de la orden');
+                }
 
-                // Guardar items de la orden
-                const orderItems = window.orderData.items.map(item => ({
-                    order_id: orderId,
-                    wine_id: item.id,
-                    quantity: item.qty,
-                    unit_price: item.price
-                }));
+                const orderId = orderData[0].id;
 
-                const { error: itemsError } = await window.deAlturaSupabase
-                    .from('order_items')
-                    .insert(orderItems);
+                // Guardar items de la orden (opcional, continuar si falla)
+                try {
+                    const orderItems = window.orderData.items.map(item => ({
+                        order_id: orderId,
+                        wine_id: item.id,
+                        quantity: item.qty,
+                        unit_price: item.price
+                    }));
 
-                if (itemsError) throw itemsError;
+                    const { error: itemsError } = await window.deAlturaSupabase
+                        .from('order_items')
+                        .insert(orderItems);
+
+                    if (itemsError) {
+                        console.warn('⚠️ Error guardando items (no bloqueante):', itemsError);
+                    } else {
+                        console.log('✅ Items guardados exitosamente');
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Error insertando items:', e.message);
+                }
 
                 // ✅ Éxito
                 localStorage.removeItem('deAlturaCart');
