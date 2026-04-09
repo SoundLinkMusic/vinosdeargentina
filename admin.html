@@ -625,15 +625,42 @@
                 document.getElementById('all-orders-body').innerHTML = orders.map(o => {
                     const badgeClass = o.payment_status === 'paid' ? 'badge-paid' : 'badge-pending';
                     const statusText = o.payment_status === 'paid' ? 'PAGADO' : 'PENDIENTE';
+
+                    const isShipped = o.shipping_status === 'shipped';
+                    const shipBadge = isShipped ? 'badge-paid' : 'badge-pending';
+                    const shipText = isShipped ? '<i class="fa-solid fa-check"></i> ENVIADO' : '<i class="fa-solid fa-truck"></i> PREPARANDO';
+
                     return `<tr>
                         <td><strong>#${o.id.slice(0, 8).toUpperCase()}</strong><br><small>${new Date(o.created_at).toLocaleDateString()}</small></td>
                         <td>${o.customer_name}<br><small style="color: var(--text-muted)">${o.customer_email}</small></td>
                         <td>${o.island || 'N/A'}</td>
                         <td><strong>${parseFloat(o.total_amount).toFixed(2)} €</strong></td>
                         <td><span class="status-badge ${badgeClass}">${statusText}</span></td>
-                        <td><span class="status-badge badge-pending"><i class="fa-solid fa-truck"></i> PREPARANDO</span></td>
+                        <td>
+                            <span class="status-badge ${shipBadge}" id="ship-status-${o.id}">${shipText}</span>
+                            ${!isShipped ? `
+                                <button class="btn-action" style="margin-left:5px; padding: 4px 8px; background: #25D366; border: none;" onclick="app.markAsShipped('${o.id}', '${o.customer_phone}', '${o.customer_name}')" title="Marcar envío y avisar">
+                                    <i class="fa-brands fa-whatsapp"></i>
+                                </button>
+                            ` : ''}
+                        </td>
                     </tr>`;
                 }).join('');
+            },
+
+            markAsShipped: async function (id, phone, name) {
+                if (!confirm('¿Confirmar envío y avisar al cliente por WhatsApp?')) return;
+
+                const { error } = await this.db.from('orders').update({ shipping_status: 'shipped' }).eq('id', id);
+
+                if (error) {
+                    alert('Error: ' + error.message);
+                } else {
+                    const mensaje = `Hola ${name}, soy Nicolás de De Altura Wines. Tu pedido #${id.slice(0, 8).toUpperCase()} ya ha sido procesado y va de camino. ¡Que lo disfrutes! 🍷`;
+                    const cleanPhone = phone.replace(/\D/g, '');
+                    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(mensaje)}`, '_blank');
+                    this.loadOrdersTable();
+                }
             },
 
             loadInventoryTable: async function () {
