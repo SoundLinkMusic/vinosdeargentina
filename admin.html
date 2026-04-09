@@ -695,15 +695,17 @@
                         basado en (PVP/1.07 - Coste) | Stock Negativo = Pendiente de Reposición</span>
                 </div>
                 <div class="table-wrapper">
-                    <table>
+                    <table style="min-width: 1400px;">
                         <thead>
                             <tr>
                                 <th data-i18n="table_product">Producto (Bodega)</th>
                                 <th data-i18n="table_net_cost">💰 Coste Neto</th>
                                 <th data-i18n="table_horeca">🍽️ PVP HORECA</th>
+                                <th data-i18n="table_margin_horeca">↗ Mg. HORECA</th>
+                                <th data-i18n="table_tax_horeca">+ IGIC HORECA</th>
                                 <th data-i18n="table_retail">🛍️ PVP Retail</th>
-                                <th data-i18n="table_margin">↗ Margen %</th>
-                                <th data-i18n="table_tax_short">+ IGIC 7%</th>
+                                <th data-i18n="table_margin_retail">↗ Mg. Retail</th>
+                                <th data-i18n="table_tax_retail">+ IGIC Retail</th>
                                 <th style="text-align: center;" data-i18n="table_stock">Stock JIT</th>
                                 <th style="text-align: right;" data-i18n="table_action">Acción</th>
                             </tr>
@@ -762,7 +764,9 @@
                     confirm_shipment: '¿Confirmar envío y avisar al cliente por WhatsApp?',
                     whatsapp_msg: "Hola {name}, soy Nicolás de De Altura Wines. Tu pedido #{id} ya ha sido procesado y va de camino. ¡Que lo disfrutes! 🍷",
                     error_stock_update: 'Error al actualizar el stock: ',
-                    cost_net_label: 'Coste Neto', horeca_label: 'HORECA', retail_label: 'Retail', margin_label: 'Margen', tax_label: 'IGIC 7%'
+                    cost_net_label: 'Coste Neto', horeca_label: 'HORECA', retail_label: 'Retail', margin_label: 'Margen', tax_label: 'IGIC 7%',
+                    table_margin_horeca: '↗ Mg. HORECA', table_tax_horeca: '+ IGIC HORECA',
+                    table_margin_retail: '↗ Mg. Retail', table_tax_retail: '+ IGIC Retail'
                 },
                 en: {
                     nav_dashboard: 'Dashboard', nav_orders: 'Sales & Shipping', nav_inventory: 'Catalog & Pricing', nav_crm: 'Customer CRM',
@@ -784,7 +788,9 @@
                     confirm_shipment: 'Confirm shipment and notify customer via WhatsApp?',
                     whatsapp_msg: "Hello {name}, this is Nicolas from De Altura Wines. Your order #{id} has been processed and is on its way. Enjoy! 🍷",
                     error_stock_update: 'Error updating stock: ',
-                    cost_net_label: 'Net Cost', horeca_label: 'HORECA', retail_label: 'Retail', margin_label: 'Margin', tax_label: 'IGIC 7%'
+                    cost_net_label: 'Net Cost', horeca_label: 'HORECA', retail_label: 'Retail', margin_label: 'Margin', tax_label: 'IGIC 7%',
+                    table_margin_horeca: '↗ Mg. HORECA', table_tax_horeca: '+ IGIC HORECA',
+                    table_margin_retail: '↗ Mg. Retail', table_tax_retail: '+ IGIC Retail'
                 }
             },
 
@@ -956,26 +962,42 @@
                 if (!products) return;
 
                 document.getElementById('inventory-body').innerHTML = products.map(p => {
-                    const pvpTotal = parseFloat(p.price_retail || 0);
-                    const precioSinIgic = pvpTotal / 1.07;
-                    const igicValor = pvpTotal - precioSinIgic;
+                    const costNet = parseFloat(p.price_cost_net || 0);
+                    
+                    // HORECA Calculations
+                    const priceHorecaTotal = parseFloat(p.price_horeca || 0);
+                    const netPriceHoreca = priceHorecaTotal / 1.07;
+                    const igicHoreca = priceHorecaTotal - netPriceHoreca;
+                    const marginHoreca = netPriceHoreca - costNet;
+                    const marginPercentHoreca = costNet > 0 ? (marginHoreca / costNet) * 100 : 0;
 
-                    const costeNeto = parseFloat(p.price_cost_net || 0);
-                    const precioHoreca = parseFloat(p.price_horeca || 0);
+                    // RETAIL Calculations
+                    const priceRetailTotal = parseFloat(p.price_retail || 0);
+                    const netPriceRetail = priceRetailTotal / 1.07;
+                    const igicRetail = priceRetailTotal - netPriceRetail;
+                    const marginRetail = netPriceRetail - costNet;
+                    const marginPercentRetail = costNet > 0 ? (marginRetail / costNet) * 100 : 0;
 
-                    const margenValor = precioSinIgic - costeNeto;
-                    const margenPorcentaje = costeNeto > 0 ? (margenValor / costeNeto) * 100 : 0;
                     const stockClass = p.stock < 0 ? 'negative-stock' : '';
 
                     return `<tr>
                         <td><strong>${p.name}</strong><br><small style="color: var(--text-muted)">${p.bodega || p.region}</small></td>
-                        <td class="finance-value" style="color: var(--text-muted);">💰 ${costeNeto.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].cost_net_label}</small></td>
-                        <td class="finance-value" style="color: var(--text-muted);">🍽️ ${precioHoreca.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].horeca_label}</small></td>
-                        <td class="finance-value" style="color: var(--brand-gold);">🛍️ ${pvpTotal.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].retail_label}</small></td>
+                        <td class="finance-value" style="color: var(--text-muted);">💰 ${costNet.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].cost_net_label}</small></td>
+                        
+                        <!-- HORECA -->
+                        <td class="finance-value" style="color: var(--text-muted);">🍽️ ${priceHorecaTotal.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].horeca_label}</small></td>
                         <td class="finance-value" style="color: var(--text-main);">
-                            <span class="math-symbol">↗</span><span class="margin-percent">${margenPorcentaje.toFixed(1)}%</span>${margenValor.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].margin_label}</small>
+                            <span class="math-symbol">↗</span><span class="margin-percent">${marginPercentHoreca.toFixed(1)}%</span>${marginHoreca.toFixed(2)} €<br><small>Mg. HORECA</small>
                         </td>
-                        <td class="finance-value" style="color: var(--tax-color);"><span class="math-symbol">+</span>${igicValor.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].tax_label}</small></td>
+                        <td class="finance-value" style="color: var(--tax-color);"><span class="math-symbol">+</span>${igicHoreca.toFixed(2)} €<br><small>IGIC HORECA</small></td>
+
+                        <!-- RETAIL -->
+                        <td class="finance-value" style="color: var(--brand-gold);">🛍️ ${priceRetailTotal.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].retail_label}</small></td>
+                        <td class="finance-value" style="color: var(--text-main);">
+                            <span class="math-symbol">↗</span><span class="margin-percent">${marginPercentRetail.toFixed(1)}%</span>${marginRetail.toFixed(2)} €<br><small>Mg. Retail</small>
+                        </td>
+                        <td class="finance-value" style="color: var(--tax-color);"><span class="math-symbol">+</span>${igicRetail.toFixed(2)} €<br><small>IGIC Retail</small></td>
+
                         <td style="text-align: center;"><input type="number" class="input-stock ${stockClass}" id="inv-${p.id}" value="${p.stock || 0}"></td>
                         <td style="text-align: right;"><button class="btn-action" onclick="app.updateSingleStock('${p.id}', event)"><i class="fa-solid fa-floppy-disk"></i></button></td>
                     </tr>`;
