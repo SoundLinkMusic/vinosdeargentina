@@ -135,6 +135,10 @@
             flex: 1;
             margin-left: 260px;
             padding: 40px;
+            width: calc(100% - 260px);
+            max-width: 100%;
+            overflow-x: hidden;
+            box-sizing: border-box;
         }
 
         .top-header {
@@ -240,6 +244,10 @@
             border: 1px solid #E2E8F0;
             padding: 25px;
             margin-bottom: 30px;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            box-sizing: border-box;
         }
 
         .panel-header {
@@ -418,17 +426,20 @@
                 width: 260px;
                 height: 100vh;
                 z-index: 200;
-                transform: translateX(-100%);
+                transform: translateX(-100%) !important;
                 transition: transform 0.3s ease;
             }
 
             .sidebar.mobile-open {
-                transform: translateX(0);
+                transform: translateX(0) !important;
             }
 
             .main-content {
                 margin-left: 0;
-                padding: 20px;
+                padding: 15px;
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
             }
 
             /* --- TABLAS WRAPPER --- */
