@@ -201,10 +201,9 @@
 
                         for (const item of items) {
                             try {
-                                // 🔒 CONVERSIÓN EXPLÍCITA A STRING - PREVENIR CONFLICTOS DE TIPOS
-                                const rawId = item.id || item.uuid;
-                                const productId = String(rawId).trim().toLowerCase();
-                                console.log(`🔑 Item ID procesado: ${rawId} → ${productId}`);
+                                // Usar directamente item.id (UUID de Supabase)
+                                const productId = item.id;
+                                console.log(`🔑 Actualizando stock para: ${productId}`);
 
                                 // 🛡️ VALIDAR QUE SEA UN UUID VÁLIDO
                                 if (!uuidRegex.test(productId)) {
@@ -218,7 +217,7 @@
                                 const { data: product, error: fetchError } = await supabaseClient
                                     .from('products')
                                     .select('stock')
-                                    .filter('id', 'eq', productId)
+                                    .eq('id', productId)
                                     .single();
 
                                 if (fetchError) {
@@ -231,7 +230,7 @@
                                     const { error: updateError } = await supabaseClient
                                         .from('products')
                                         .update({ stock: newStock })
-                                        .filter('id', 'eq', productId);
+                                        .eq('id', productId);
 
                                     if (updateError) {
                                         console.error(`❌ Error actualizando stock de ${productId}:`, updateError);
