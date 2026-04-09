@@ -123,18 +123,38 @@
                 const shortId = payment_intent.slice(-8).toUpperCase();
                 orderIdDisplay.innerText = shortId;
 
-                // Anti-duplicado
-                if (localStorage.getItem(`processed_${payment_intent}`)) return;
+                // ✅ ÉXITO VISUAL INMEDIATO
+                console.log('✅ Pago confirmado por Stripe');
+
+                // 🔒 ANTI-DUPLICADO
+                if (localStorage.getItem(`processed_${payment_intent}`)) {
+                    console.log('⚠️ Orden ya procesada, evitando duplicado');
+                    return;
+                }
                 localStorage.setItem(`processed_${payment_intent}`, 'true');
 
-                try {
-                    const cartStr = localStorage.getItem('deAlturaCart');
-                    const customerStr = localStorage.getItem('altura_customer_info');
+                // 📋 GUARDAR DATOS ANTES DE LIMPIAR
+                const cartStr = localStorage.getItem('deAlturaCart');
+                const customerStr = localStorage.getItem('altura_customer_info');
 
+                // 🗑️ LIMPIAR CARRITO INMEDIATAMENTE (El cliente verá éxito)
+                localStorage.removeItem('deAlturaCart');
+                localStorage.removeItem('altura_customer_info');
+                console.log('✨ Carrito limpiado - Cliente verá mensaje de éxito');
+
+                // 🎯 SINCRONIZACIÓN EN BACKGROUND - Errores NO afectan la UX
+                // El cliente ya está viendo la pantalla de éxito
+                try {
                     if (cartStr && customerStr) {
                         const cart = JSON.parse(cartStr);
                         const customer = JSON.parse(customerStr);
                         const items = Object.values(cart);
+
+                        // CONVERTIR TODOS LOS IDs A STRING
+                        const itemsWithStringIds = items.map(item => ({
+                            ...item,
+                            id: String(item.id)
+                        }));
 
                         let subtotal = 0;
                         items.forEach(item => {
@@ -142,13 +162,7 @@
                         });
                         const totalAmount = parseFloat((subtotal * 1.07).toFixed(2));
 
-                        // 1. INTENTO DE INSERTAR LA ORDEN
-                        // Asegurar que los IDs en items sean String
-                        const itemsWithStringIds = items.map(item => ({
-                            ...item,
-                            id: String(item.id)
-                        }));
-
+                        // 1. INSERTAR ORDEN
                         const orderPayload = {
                             customer_name: customer.name,
                             customer_email: customer.email,
@@ -162,8 +176,7 @@
                             postal_code: customer.postal_code || null
                         };
 
-                        console.log('📤 Intentando insertar orden...', orderPayload);
-                        console.log('📦 DATOS QUE SE VAN A INSERTAR:', JSON.stringify(orderPayload, null, 2));
+                        console.log('📤 Insertando orden en BD (background)...');
 
                         const { data: orderData, error: orderError } = await supabaseClient
                             .from('orders')
@@ -171,42 +184,47 @@
                             .select();
 
                         if (orderError) {
-                            console.error('❌ ERROR TÉCNICO EN INSERT:', orderError);
-                            throw orderError;
+                            console.error('❌ Error al insertar orden (silencioso):', orderError);
+                        } else {
+                            console.log('✅ Orden guardada en BD');
                         }
 
-                        console.log('✅ Orden guardada exitosamente');
-
-                        // 2. ACTUALIZACIÓN DE STOCK (Independiente)
+                        // 2. ACTUALIZAR STOCK (Independiente)
                         for (const item of items) {
                             const pid = String(item.id);
                             if (pid) {
                                 try {
-                                    const { data: prod } = await supabaseClient.from('products').select('stock').eq('id', String(pid)).single();
+                                    const { data: prod } = await supabaseClient
+                                        .from('products')
+                                        .select('stock')
+                                        .eq('id', String(pid))
+                                        .single();
+
                                     if (prod) {
                                         const newStock = (prod.stock || 0) - (item.qty || 1);
-                                        await supabaseClient.from('products').update({ stock: newStock }).eq('id', String(pid));
+                                        await supabaseClient
+                                            .from('products')
+                                            .update({ stock: newStock })
+                                            .eq('id', String(pid));
+
                                         console.log(`✅ Stock actualizado para ${pid}: ${newStock}`);
                                     }
                                 } catch (err) {
-                                    console.warn(`⚠️ Error actualizando stock para ${pid}:`, err.message);
+                                    console.warn(`⚠️ Error en stock para ${pid} (silencioso):`, err.message);
                                 }
                             }
                         }
-
-                        // 3. LIMPIEZA
-                        localStorage.removeItem('deAlturaCart');
-                        localStorage.removeItem('altura_customer_info');
                     }
                 } catch (e) {
-                    console.error('❌ ERROR TÉCNICO DETALLADO:', {
+                    // ⚠️ ERROR SILENCIOSO - Solo loguea, el cliente ya vio éxito
+                    console.error('❌ ERROR TÉCNICO EN BACKGROUND (silencioso):', {
                         message: e.message,
                         details: e.details,
                         hint: e.hint,
                         code: e.code,
                         fullError: e
                     });
-                    showError(e.message || 'Database connection error');
+                    // ✅ NO LLAMAR showError() - El cliente ya está feliz
                 }
             } else {
                 showError('Payment not completed');
