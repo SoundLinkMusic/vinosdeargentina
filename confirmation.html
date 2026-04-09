@@ -179,7 +179,7 @@
                                 payment_status: 'paid',
                                 shipping_status: 'new',
                                 payment_method: 'stripe',
-                                items: JSON.stringify(items),
+                                items: items,
                                 address: customer.address || null,
                                 postal_code: customer.postal_code || null
                             }])
