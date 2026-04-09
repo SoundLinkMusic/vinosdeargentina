@@ -55,6 +55,34 @@
             transition: transform 0.3s ease;
         }
 
+        /* --- LANG SWITCH --- */
+        .lang-switch {
+            display: flex;
+            background: #e9ecef;
+            padding: 2px;
+            border-radius: 20px;
+            margin-right: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        .lang-switch button {
+            border: none;
+            background: none;
+            padding: 5px 12px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 18px;
+            transition: all 0.2s ease;
+        }
+
+        .lang-switch button.active {
+            background: var(--white);
+            color: var(--sidebar-bg);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+        }
+
         .brand {
             padding: 30px 20px;
             text-align: center;
@@ -541,21 +569,21 @@
             <span>SuperAdmin Hub</span>
         </div>
         <nav class="nav-menu">
-            <div class="nav-item active" onclick="app.switchView('dashboard', this)"><i
+            <div class="nav-item active" onclick="app.switchView('dashboard', this)" data-i18n="nav_dashboard"><i
                     class="fa-solid fa-chart-pie"></i> Vista General</div>
-            <div class="nav-item" onclick="app.switchView('orders', this)"><i class="fa-solid fa-receipt"></i> Ventas &
+            <div class="nav-item" onclick="app.switchView('orders', this)" data-i18n="nav_orders"><i class="fa-solid fa-receipt"></i> Ventas &
                 Envíos</div>
-            <div class="nav-item" onclick="app.switchView('inventory', this)"><i class="fa-solid fa-calculator"></i>
+            <div class="nav-item" onclick="app.switchView('inventory', this)" data-i18n="nav_inventory"><i class="fa-solid fa-calculator"></i>
                 Catálogo & Pricing</div>
-            <div class="nav-item" onclick="app.switchView('crm', this)"><i class="fa-solid fa-users"></i> CRM Clientes
+            <div class="nav-item" onclick="app.switchView('crm', this)" data-i18n="nav_crm"><i class="fa-solid fa-users"></i> CRM Clientes
             </div>
 
             <div class="nav-divider"></div>
-            <div class="nav-item" onclick="window.location.href='index.html'" style="color: var(--brand-gold);"><i
+            <div class="nav-item" onclick="window.location.href='index.html'" style="color: var(--brand-gold);" data-i18n="nav_store"><i
                     class="fa-solid fa-store"></i> Volver a la Tienda</div>
         </nav>
         <div class="logout-container">
-            <button class="btn-logout" onclick="app.logout()"><i class="fa-solid fa-right-from-bracket"></i> Cerrar
+            <button class="btn-logout" onclick="app.logout()" data-i18n="nav_logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar
                 Sesión</button>
         </div>
     </aside>
@@ -568,10 +596,14 @@
 
     <main class="main-content">
         <div class="top-header">
-            <h1 id="page-title">Vista General</h1>
+            <h1 id="page-title" data-i18n="nav_dashboard">Vista General</h1>
             <div class="user-profile">
+                <div class="lang-switch">
+                    <button onclick="app.changeLanguage('es')" id="btn-lang-es">ES</button>
+                    <button onclick="app.changeLanguage('en')" id="btn-lang-en">EN</button>
+                </div>
                 <i class="fa-solid fa-circle-user fa-2x" style="color: var(--brand-gold);"></i>
-                <span id="user-email-display">Cargando...</span>
+                <span id="user-email-display" data-i18n="loading">Cargando...</span>
             </div>
         </div>
 
@@ -579,28 +611,28 @@
             <div class="metrics-grid">
                 <div class="metric-card">
                     <div class="metric-info">
-                        <h4>Ingresos Netos</h4>
+                        <h4 data-i18n="metric_revenue">Ingresos Netos</h4>
                         <h2 id="metric-revenue">0.00 €</h2>
                     </div>
                     <div class="metric-icon icon-gold"><i class="fa-solid fa-euro-sign"></i></div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-info">
-                        <h4>Pedidos Exitosos</h4>
+                        <h4 data-i18n="metric_orders">Pedidos Exitosos</h4>
                         <h2 id="metric-orders">0</h2>
                     </div>
                     <div class="metric-icon icon-blue"><i class="fa-solid fa-clipboard-check"></i></div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-info">
-                        <h4>Impuestos (IGIC)</h4>
+                        <h4 data-i18n="metric_tax">Impuestos (IGIC)</h4>
                         <h2 id="metric-tax">0.00 €</h2>
                     </div>
                     <div class="metric-icon icon-green"><i class="fa-solid fa-file-invoice-dollar"></i></div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-info">
-                        <h4>Vinos a Reponer</h4>
+                        <h4 data-i18n="metric_alerts">Vinos a Reponer</h4>
                         <h2 id="metric-alerts">0</h2>
                     </div>
                     <div class="metric-icon icon-red"><i class="fa-solid fa-boxes-stacked"></i></div>
@@ -609,22 +641,22 @@
 
             <div class="panel">
                 <div class="panel-header">
-                    <h3><i class="fa-solid fa-clock-rotate-left"></i> Últimos Pedidos Recibidos</h3>
+                    <h3 data-i18n="recent_orders_title"><i class="fa-solid fa-clock-rotate-left"></i> Últimos Pedidos Recibidos</h3>
                 </div>
                 <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID / Ref</th>
-                                <th>Cliente</th>
-                                <th>Total</th>
-                                <th>Estado Pago</th>
-                                <th>Logística (WhatsApp)</th>
+                                <th data-i18n="table_id">ID / Ref</th>
+                                <th data-i18n="table_customer">Cliente</th>
+                                <th data-i18n="table_total">Total</th>
+                                <th data-i18n="table_payment_status">Estado Pago</th>
+                                <th data-i18n="table_logistics">Logística (WhatsApp)</th>
                             </tr>
                         </thead>
                         <tbody id="recent-orders-body">
                             <tr>
-                                <td colspan="5" style="text-align:center;">Cargando...</td>
+                                <td colspan="5" style="text-align:center;" data-i18n="loading">Cargando...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -635,18 +667,18 @@
         <section id="view-orders" class="section">
             <div class="panel">
                 <div class="panel-header">
-                    <h3><i class="fa-solid fa-list-check"></i> Gestión de Órdenes</h3>
+                    <h3 data-i18n="orders_mgmt_title"><i class="fa-solid fa-list-check"></i> Gestión de Órdenes</h3>
                 </div>
                 <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
-                                <th>Ref. Pedido</th>
-                                <th>Cliente info</th>
-                                <th>Destino</th>
-                                <th>Importe</th>
-                                <th>Estado Pago</th>
-                                <th>Logística</th>
+                                <th data-i18n="table_ref">Ref. Pedido</th>
+                                <th data-i18n="table_customer_info">Cliente info</th>
+                                <th data-i18n="table_destination">Destino</th>
+                                <th data-i18n="table_amount">Importe</th>
+                                <th data-i18n="table_payment_status">Estado Pago</th>
+                                <th data-i18n="table_logistics_short">Logística</th>
                             </tr>
                         </thead>
                         <tbody id="all-orders-body"></tbody>
@@ -658,22 +690,22 @@
         <section id="view-inventory" class="section">
             <div class="panel">
                 <div class="panel-header">
-                    <h3><i class="fa-solid fa-calculator"></i> Desglose Financiero y Control de Stock</h3>
-                    <span style="font-size: 0.85rem; color: var(--text-muted);">✅ Coste Real (price_cost_net) | Margen
+                    <h3 data-i18n="inventory_title"><i class="fa-solid fa-calculator"></i> Desglose Financiero y Control de Stock</h3>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);" data-i18n="inventory_subtitle">✅ Coste Real (price_cost_net) | Margen
                         basado en (PVP/1.07 - Coste) | Stock Negativo = Pendiente de Reposición</span>
                 </div>
                 <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
-                                <th>Producto (Bodega)</th>
-                                <th>💰 Coste Neto</th>
-                                <th>🍽️ PVP HORECA</th>
-                                <th>🛍️ PVP Retail</th>
-                                <th>↗ Margen %</th>
-                                <th>+ IGIC 7%</th>
-                                <th style="text-align: center;">Stock JIT</th>
-                                <th style="text-align: right;">Acción</th>
+                                <th data-i18n="table_product">Producto (Bodega)</th>
+                                <th data-i18n="table_net_cost">💰 Coste Neto</th>
+                                <th data-i18n="table_horeca">🍽️ PVP HORECA</th>
+                                <th data-i18n="table_retail">🛍️ PVP Retail</th>
+                                <th data-i18n="table_margin">↗ Margen %</th>
+                                <th data-i18n="table_tax_short">+ IGIC 7%</th>
+                                <th style="text-align: center;" data-i18n="table_stock">Stock JIT</th>
+                                <th style="text-align: right;" data-i18n="table_action">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="inventory-body"></tbody>
@@ -685,17 +717,17 @@
         <section id="view-crm" class="section">
             <div class="panel">
                 <div class="panel-header">
-                    <h3><i class="fa-solid fa-address-book"></i> Gestión de Clientes (LTV)</h3>
+                    <h3 data-i18n="crm_title"><i class="fa-solid fa-address-book"></i> Gestión de Clientes (LTV)</h3>
                 </div>
                 <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
-                                <th>Cliente</th>
+                                <th data-i18n="table_customer">Cliente</th>
                                 <th>Email</th>
-                                <th style="text-align: center;">Pedidos</th>
-                                <th>Total Gastado</th>
-                                <th>Última Compra</th>
+                                <th style="text-align: center;" data-i18n="table_orders_count">Pedidos</th>
+                                <th data-i18n="table_total_spent">Total Gastado</th>
+                                <th data-i18n="table_last_purchase">Última Compra</th>
                             </tr>
                         </thead>
                         <tbody id="crm-body"></tbody>
@@ -708,6 +740,84 @@
     <script>
         const app = {
             db: null,
+            currentLang: 'es',
+            adminTranslations: {
+                es: {
+                    nav_dashboard: 'Vista General', nav_orders: 'Ventas & Envíos', nav_inventory: 'Catálogo & Pricing', nav_crm: 'CRM Clientes',
+                    nav_store: 'Volver a la Tienda', nav_logout: 'Cerrar Sesión', loading: 'Cargando...',
+                    metric_revenue: 'Ingresos Netos', metric_orders: 'Pedidos Exitosos', metric_tax: 'Impuestos (IGIC)', metric_alerts: 'Vinos a Reponer',
+                    recent_orders_title: 'Últimos Pedidos Recibidos', table_id: 'ID / Ref', table_customer: 'Cliente', table_total: 'Total',
+                    table_payment_status: 'Estado Pago', table_logistics: 'Logística (WhatsApp)', orders_mgmt_title: 'Gestión de Órdenes',
+                    table_ref: 'Ref. Pedido', table_customer_info: 'Cliente info', table_destination: 'Destino', table_amount: 'Importe',
+                    table_logistics_short: 'Logística', inventory_title: 'Desglose Financiero y Control de Stock',
+                    inventory_subtitle: '✅ Coste Real (price_cost_net) | Margen basado en (PVP/1.07 - Coste) | Stock Negativo = Pendiente de Reposición',
+                    table_product: 'Producto (Bodega)', table_net_cost: '💰 Coste Neto', table_horeca: '🍽️ PVP HORECA',
+                    table_retail: '🛍️ PVP Retail', table_margin: '↗ Margen %', table_tax_short: '+ IGIC 7%', table_stock: 'Stock JIT',
+                    table_action: 'Acción', crm_title: 'Gestión de Clientes (LTV)', table_orders_count: 'Pedidos',
+                    table_total_spent: 'Total Gastado', table_last_purchase: 'Última Compra',
+                    status_paid: 'Pagado', status_pending: 'Pendiente', status_shipped: 'Enviado', status_preparing: 'Prep.',
+                    shipped_upper: 'ENVIADO', preparing_upper: 'PREPARANDO', paid_upper: 'PAGADO', pending_upper: 'PENDIENTE',
+                    no_sales_recorded: 'No hay ventas registradas.', no_order_data: 'No hay datos de pedidos.',
+                    no_customers_recorded: 'Aún no hay clientes registrados.', error_loading_data: 'Error al cargar datos.',
+                    confirm_shipment: '¿Confirmar envío y avisar al cliente por WhatsApp?',
+                    whatsapp_msg: "Hola {name}, soy Nicolás de De Altura Wines. Tu pedido #{id} ya ha sido procesado y va de camino. ¡Que lo disfrutes! 🍷",
+                    error_stock_update: 'Error al actualizar el stock: ',
+                    cost_net_label: 'Coste Neto', horeca_label: 'HORECA', retail_label: 'Retail', margin_label: 'Margen', tax_label: 'IGIC 7%'
+                },
+                en: {
+                    nav_dashboard: 'Dashboard', nav_orders: 'Sales & Shipping', nav_inventory: 'Catalog & Pricing', nav_crm: 'Customer CRM',
+                    nav_store: 'Back to Store', nav_logout: 'Logout', loading: 'Loading...',
+                    metric_revenue: 'Net Revenue', metric_orders: 'Successful Orders', metric_tax: 'Taxes (IGIC)', metric_alerts: 'Wines to Restock',
+                    recent_orders_title: 'Recent Orders Received', table_id: 'ID / Ref', table_customer: 'Customer', table_total: 'Total',
+                    table_payment_status: 'Payment Status', table_logistics: 'Logistics (WhatsApp)', orders_mgmt_title: 'Order Management',
+                    table_ref: 'Order Ref.', table_customer_info: 'Customer info', table_destination: 'Destination', table_amount: 'Amount',
+                    table_logistics_short: 'Logistics', inventory_title: 'Financial Breakdown & Stock Control',
+                    inventory_subtitle: '✅ Real Cost (price_cost_net) | Margin based on (RRP/1.07 - Cost) | Negative Stock = Pending Restock',
+                    table_product: 'Product (Winery)', table_net_cost: '💰 Net Cost', table_horeca: '🍽️ HORECA Price',
+                    table_retail: '🛍️ Retail Price', table_margin: '↗ Margin %', table_tax_short: '+ IGIC 7%', table_stock: 'JIT Stock',
+                    table_action: 'Action', crm_title: 'Customer Management (LTV)', table_orders_count: 'Orders',
+                    table_total_spent: 'Total Spent', table_last_purchase: 'Last Purchase',
+                    status_paid: 'Paid', status_pending: 'Pending', status_shipped: 'Shipped', status_preparing: 'Prep.',
+                    shipped_upper: 'SHIPPED', preparing_upper: 'PREPARING', paid_upper: 'PAID', pending_upper: 'PENDING',
+                    no_sales_recorded: 'No sales recorded.', no_order_data: 'No order data.',
+                    no_customers_recorded: 'No customers registered yet.', error_loading_data: 'Error loading data.',
+                    confirm_shipment: 'Confirm shipment and notify customer via WhatsApp?',
+                    whatsapp_msg: "Hello {name}, this is Nicolas from De Altura Wines. Your order #{id} has been processed and is on its way. Enjoy! 🍷",
+                    error_stock_update: 'Error updating stock: ',
+                    cost_net_label: 'Net Cost', horeca_label: 'HORECA', retail_label: 'Retail', margin_label: 'Margin', tax_label: 'IGIC 7%'
+                }
+            },
+
+            changeLanguage: function (lang) {
+                this.currentLang = lang;
+                localStorage.setItem('admin_lang', lang);
+                document.getElementById('btn-lang-es').classList.toggle('active', lang === 'es');
+                document.getElementById('btn-lang-en').classList.toggle('active', lang === 'en');
+
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    const translation = this.adminTranslations[lang][key];
+                    if (translation) {
+                        const icon = el.querySelector('i');
+                        if (icon) {
+                            el.innerHTML = '';
+                            el.appendChild(icon);
+                            el.appendChild(document.createTextNode(' ' + translation));
+                        } else {
+                            el.textContent = translation;
+                        }
+                    }
+                });
+
+                // Update page title if it's dynamic
+                const activeNav = document.querySelector('.nav-item.active');
+                if (activeNav) {
+                    const viewId = activeNav.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    const titleKey = 'nav_' + viewId;
+                    document.getElementById('page-title').textContent = this.adminTranslations[lang][titleKey];
+                }
+            },
+
             initDB: function () {
                 const URL = 'https://pzzbvinbyzaxrshlmlcn.supabase.co';
                 const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6emJ2aW5ieXpheHJzaGxtbGNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTI5NDYsImV4cCI6MjA5MTEyODk0Nn0.YgeGDVZfyqI-nv7iAhROMsBfZbIK7BGUDyU1ERE-SFA';
@@ -723,8 +833,8 @@
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
                 element.classList.add('active');
 
-                const titles = { 'dashboard': 'Vista General', 'orders': 'Ventas & Envíos', 'inventory': 'Catálogo & Pricing', 'crm': 'Gestión de Clientes' };
-                document.getElementById('page-title').textContent = titles[viewId] || 'Panel';
+                const titleKey = 'nav_' + viewId;
+                document.getElementById('page-title').textContent = this.adminTranslations[this.currentLang][titleKey] || 'Panel';
 
                 document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
                 document.getElementById('view-' + viewId).classList.add('active');
@@ -777,7 +887,7 @@
                         });
                         document.getElementById('recent-orders-body').innerHTML = recentRows;
                     } else {
-                        document.getElementById('recent-orders-body').innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay ventas registradas.</td></tr>';
+                        document.getElementById('recent-orders-body').innerHTML = `<tr><td colspan="5" style="text-align:center;">${this.adminTranslations[this.currentLang].no_sales_recorded}</td></tr>`;
                     }
 
                     document.getElementById('metric-revenue').textContent = revenue.toFixed(2) + ' €';
@@ -794,16 +904,16 @@
             loadOrdersTable: async function () {
                 const { data: orders } = await this.db.from('orders').select('*').order('created_at', { ascending: false });
                 if (!orders || orders.length === 0) {
-                    document.getElementById('all-orders-body').innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay datos de pedidos.</td></tr>';
+                    document.getElementById('all-orders-body').innerHTML = `<tr><td colspan="6" style="text-align:center;">${this.adminTranslations[this.currentLang].no_order_data}</td></tr>`;
                     return;
                 }
                 document.getElementById('all-orders-body').innerHTML = orders.map(o => {
                     const badgeClass = o.payment_status === 'paid' ? 'badge-paid' : 'badge-pending';
-                    const statusText = o.payment_status === 'paid' ? 'PAGADO' : 'PENDIENTE';
+                    const statusText = o.payment_status === 'paid' ? this.adminTranslations[this.currentLang].paid_upper : this.adminTranslations[this.currentLang].pending_upper;
 
                     const isShipped = o.shipping_status === 'shipped';
                     const shipBadge = isShipped ? 'badge-paid' : 'badge-pending';
-                    const shipText = isShipped ? '<i class="fa-solid fa-check"></i> ENVIADO' : '<i class="fa-solid fa-truck"></i> PREPARANDO';
+                    const shipText = isShipped ? `<i class="fa-solid fa-check"></i> ${this.adminTranslations[this.currentLang].shipped_upper}` : `<i class="fa-solid fa-truck"></i> ${this.adminTranslations[this.currentLang].preparing_upper}`;
 
                     return `<tr>
                         <td><strong>#${o.id.slice(0, 8).toUpperCase()}</strong><br><small>${new Date(o.created_at).toLocaleDateString()}</small></td>
@@ -824,14 +934,15 @@
             },
 
             markAsShipped: async function (id, phone, name) {
-                if (!confirm('¿Confirmar envío y avisar al cliente por WhatsApp?')) return;
+                if (!confirm(this.adminTranslations[this.currentLang].confirm_shipment)) return;
 
                 const { error } = await this.db.from('orders').update({ shipping_status: 'shipped' }).eq('id', id);
 
                 if (error) {
                     alert('Error: ' + error.message);
                 } else {
-                    const mensaje = `Hola ${name}, soy Nicolás de De Altura Wines. Tu pedido #${id.slice(0, 8).toUpperCase()} ya ha sido procesado y va de camino. ¡Que lo disfrutes! 🍷`;
+                    const msgTemplate = this.adminTranslations[this.currentLang].whatsapp_msg;
+                    const mensaje = msgTemplate.replace('{name}', name).replace('{id}', id.slice(0, 8).toUpperCase());
                     const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
                     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(mensaje)}`, '_blank');
 
@@ -858,13 +969,13 @@
 
                     return `<tr>
                         <td><strong>${p.name}</strong><br><small style="color: var(--text-muted)">${p.bodega || p.region}</small></td>
-                        <td class="finance-value" style="color: var(--text-muted);">💰 ${costeNeto.toFixed(2)} €<br><small>Coste Neto</small></td>
-                        <td class="finance-value" style="color: var(--text-muted);">🍽️ ${precioHoreca.toFixed(2)} €<br><small>HORECA</small></td>
-                        <td class="finance-value" style="color: var(--brand-gold);">🛍️ ${pvpTotal.toFixed(2)} €<br><small>Retail</small></td>
+                        <td class="finance-value" style="color: var(--text-muted);">💰 ${costeNeto.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].cost_net_label}</small></td>
+                        <td class="finance-value" style="color: var(--text-muted);">🍽️ ${precioHoreca.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].horeca_label}</small></td>
+                        <td class="finance-value" style="color: var(--brand-gold);">🛍️ ${pvpTotal.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].retail_label}</small></td>
                         <td class="finance-value" style="color: var(--text-main);">
-                            <span class="math-symbol">↗</span><span class="margin-percent">${margenPorcentaje.toFixed(1)}%</span>${margenValor.toFixed(2)} €<br><small>Margen</small>
+                            <span class="math-symbol">↗</span><span class="margin-percent">${margenPorcentaje.toFixed(1)}%</span>${margenValor.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].margin_label}</small>
                         </td>
-                        <td class="finance-value" style="color: var(--tax-color);"><span class="math-symbol">+</span>${igicValor.toFixed(2)} €<br><small>IGIC 7%</small></td>
+                        <td class="finance-value" style="color: var(--tax-color);"><span class="math-symbol">+</span>${igicValor.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].tax_label}</small></td>
                         <td style="text-align: center;"><input type="number" class="input-stock ${stockClass}" id="inv-${p.id}" value="${p.stock || 0}"></td>
                         <td style="text-align: right;"><button class="btn-action" onclick="app.updateSingleStock('${p.id}', event)"><i class="fa-solid fa-floppy-disk"></i></button></td>
                     </tr>`;
@@ -875,7 +986,7 @@
                 const newVal = document.getElementById('inv-' + id).value;
                 const { error } = await this.db.from('products').update({ stock: newVal }).eq('id', id);
                 if (error) {
-                    alert('Error al actualizar el stock: ' + error.message);
+                    alert(this.adminTranslations[this.currentLang].error_stock_update + error.message);
                 } else {
                     const btn = event.currentTarget;
                     const originalHTML = btn.innerHTML;
@@ -893,7 +1004,7 @@
             loadCRM: async function () {
                 const { data: orders, error } = await this.db.from('orders').select('*');
                 if (error || !orders) {
-                    document.getElementById('crm-body').innerHTML = '<tr><td colspan="5" style="text-align:center;">Error al cargar datos.</td></tr>';
+                    document.getElementById('crm-body').innerHTML = `<tr><td colspan="5" style="text-align:center;">${this.adminTranslations[this.currentLang].error_loading_data}</td></tr>`;
                     return;
                 }
 
@@ -931,7 +1042,7 @@
                     </tr>
                 `).join('');
 
-                document.getElementById('crm-body').innerHTML = html || '<tr><td colspan="5" style="text-align:center;">Aún no hay clientes registrados.</td></tr>';
+                document.getElementById('crm-body').innerHTML = html || `<tr><td colspan="5" style="text-align:center;">${this.adminTranslations[this.currentLang].no_customers_recorded}</td></tr>`;
             },
 
             toggleMobileMenu: function () {
@@ -977,6 +1088,11 @@
             start: async function () {
                 this.initDB();
                 this.initMobileMenu();
+
+                // Initialize language
+                const savedLang = localStorage.getItem('admin_lang') || 'es';
+                this.changeLanguage(savedLang);
+
                 const { data: { session }, error } = await this.db.auth.getSession();
 
                 if (error || !session) {
