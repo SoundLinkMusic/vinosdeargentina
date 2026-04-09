@@ -192,17 +192,20 @@
 
                         console.log('Orden insertada exitosamente:', orderData);
 
-                        // ✅ DESCONTAR EL STOCK EN ITERACIÓN
+                        // ✅ DESCONTAR EL STOCK EN ITERACIÓN - FIX UUID
                         for (const item of items) {
                             try {
+                                // FIX: Convertir item.id a string y hacer trim para asegurar UUID válido
+                                const productId = String(item.id).trim();
+
                                 const { data: product, error: fetchError } = await supabaseClient
                                     .from('products')
                                     .select('stock')
-                                    .eq('id', item.id)
+                                    .eq('id', productId)
                                     .single();
 
                                 if (fetchError) {
-                                    console.error(`Error fetching producto ${item.id}:`, fetchError);
+                                    console.error(`Error fetching producto ${productId}:`, fetchError);
                                     continue;
                                 }
 
@@ -211,16 +214,16 @@
                                     const { error: updateError } = await supabaseClient
                                         .from('products')
                                         .update({ stock: newStock })
-                                        .eq('id', item.id);
+                                        .eq('id', productId);
 
                                     if (updateError) {
-                                        console.error(`Error actualizando stock de ${item.id}:`, updateError);
+                                        console.error(`Error actualizando stock de ${productId}:`, updateError);
                                     } else {
-                                        console.log(`Stock actualizado para ${item.id}: ${newStock}`);
+                                        console.log(`Stock actualizado para ${productId}: ${newStock}`);
                                     }
                                 }
                             } catch (itemError) {
-                                console.error(`Error procesando item ${item.id}:`, itemError);
+                                console.error(`Error procesando item:`, itemError);
                             }
                         }
 
