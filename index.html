@@ -273,6 +273,25 @@
                     class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors"><span
                         lang="es">Rosados</span><span lang="en">Rosés</span></button>
             </div>
+            
+            <div class="flex flex-wrap gap-3 w-full lg:w-auto">
+                <select id="sort-price" class="bg-white text-stone-600 border border-stone-200 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-md shadow-sm focus:outline-none focus:border-wine-700 transition-colors w-full sm:w-auto appearance-none cursor-pointer">
+                    <option value="default" lang="es">Ordenar por precio</option>
+                    <option value="default" lang="en">Sort by price</option>
+                    <option value="asc" lang="es">Precio: Menor a Mayor</option>
+                    <option value="asc" lang="en">Price: Low to High</option>
+                    <option value="desc" lang="es">Precio: Mayor a Menor</option>
+                    <option value="desc" lang="en">Price: High to Low</option>
+                </select>
+                <select id="filter-box" class="bg-white text-stone-600 border border-stone-200 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-md shadow-sm focus:outline-none focus:border-wine-700 transition-colors w-full sm:w-auto appearance-none cursor-pointer">
+                    <option value="all" lang="es">Todos los formatos</option>
+                    <option value="all" lang="en">All formats</option>
+                    <option value="6" lang="es">Cajas de 6</option>
+                    <option value="6" lang="en">Boxes of 6</option>
+                    <option value="12" lang="es">Cajas de 12</option>
+                    <option value="12" lang="en">Boxes of 12</option>
+                </select>
+            </div>
         </div>
 
         <section id="section-norte" class="region-section">
@@ -343,6 +362,14 @@
         </section>
 
         <div id="no-results" class="hidden py-16 text-center text-stone-400 italic">No se encontraron vinos.</div>
+
+        <div class="mt-12 text-center text-sm text-stone-500 flex flex-col md:flex-row items-center justify-center gap-3 bg-stone-50 py-5 px-6 rounded-lg border border-stone-200 shadow-sm">
+            <svg class="w-6 h-6 text-stone-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <p class="leading-relaxed text-[13px] md:text-sm">
+                <span lang="es"><strong>Nota:</strong> Los tiempos de logística y entrega pueden variar según la isla de destino y disponibilidad. Las condiciones exactas serán confirmadas durante el proceso de compra y el seguimiento postventa.</span>
+                <span lang="en"><strong>Note:</strong> Logistics and delivery times may vary depending on the destination island and availability. Exact conditions will be confirmed during the checkout process and post-sale tracking.</span>
+            </p>
+        </div>
     </main>
 
     <section class="bg-stone-900 text-stone-300 py-20 px-6 border-t-4 border-wine-800">
@@ -445,10 +472,20 @@
         function renderCatalog() {
             if (!catalogData || catalogData.length === 0) return;
 
+            const boxFilter = document.getElementById('filter-box').value;
+            const sortPrice = document.getElementById('sort-price').value;
+
             let filtered = catalogData.filter(w => {
                 if (activeFilters.type.size > 0 && !activeFilters.type.has(w.type)) return false;
+                if (boxFilter !== 'all' && w.box.toString() !== boxFilter) return false;
                 return true;
             });
+
+            if (sortPrice === 'asc') {
+                filtered.sort((a, b) => a.price - b.price);
+            } else if (sortPrice === 'desc') {
+                filtered.sort((a, b) => b.price - a.price);
+            }
 
             const norte = filtered.filter(w => w.region === 'norte');
             const cuyo = filtered.filter(w => w.region === 'cuyo');
@@ -600,6 +637,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             const savedCart = localStorage.getItem('deAlturaCart');
             if (savedCart) { try { cart = JSON.parse(savedCart); } catch (e) { cart = {}; } }
+            
+            document.getElementById('sort-price').addEventListener('change', renderCatalog);
+            document.getElementById('filter-box').addEventListener('change', renderCatalog);
+            
             initCatalog().then(() => renderCart());
         });
     </script>
