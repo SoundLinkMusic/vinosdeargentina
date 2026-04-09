@@ -1,216 +1,143 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pedido Confirmado - De Altura Wines</title>
+    <title>Confirmación | De Altura Wines</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        wine: { 900: '#2B0710', 800: '#3E0C18' },
+                        gold: { 500: '#C89F5D' }
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Montserrat"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #360914 0%, #54101d 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #2B0710;
         }
 
-        .confirmation-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 60px 40px;
-            text-align: center;
-            max-width: 600px;
-            animation: slideUp 0.6s ease-out;
+        .lang-en [lang="es"],
+        .lang-es [lang="en"] {
+            display: none !important;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .checkmark {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 30px;
-            background: linear-gradient(135deg, #360914 0%, #54101d 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 50px;
-            color: #C89F5D;
-        }
-
-        h1 {
-            color: #360914;
-            font-size: 2.5em;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-
-        .subtitle {
-            color: #666;
-            font-size: 1.1em;
-            margin-bottom: 40px;
-            line-height: 1.6;
-        }
-
-        .order-info {
-            background: #f8f8f8;
-            border-left: 4px solid #C89F5D;
-            padding: 25px;
-            margin-bottom: 40px;
-            border-radius: 8px;
-            text-align: left;
-        }
-
-        .order-label {
-            color: #999;
-            font-size: 0.9em;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .order-id {
-            color: #360914;
-            font-size: 1.8em;
-            font-weight: 700;
-            font-family: 'Courier New', monospace;
-            word-break: break-all;
-        }
-
-        .next-steps {
-            color: #666;
-            font-size: 0.95em;
-            margin-bottom: 40px;
-            line-height: 1.8;
-        }
-
-        .next-steps p {
-            margin-bottom: 12px;
-        }
-
-        .btn-return {
-            display: inline-block;
-            background: linear-gradient(135deg, #360914 0%, #54101d 100%);
-            color: white;
-            padding: 16px 40px;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 1.05em;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(54, 9, 20, 0.3);
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-return:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(54, 9, 20, 0.4);
-        }
-
-        .btn-whatsapp {
-            display: inline-block;
-            background: linear-gradient(135deg, #25D366 0%, #1fa952 100%);
-            color: white;
-            padding: 16px 40px;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 1.05em;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-        }
-
-        .btn-whatsapp:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
-            text-decoration: none;
-            color: white;
-        }
-
-        .footer-note {
-            color: #999;
-            font-size: 0.85em;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid #eee;
-        }
-
-        .footer-note a {
-            color: #C89F5D;
-            text-decoration: none;
-        }
-
-        .footer-note a:hover {
-            text-decoration: underline;
+        .canary-stripe {
+            background: linear-gradient(90deg, #ffffff 0%, #ffffff 33.33%, #00a1e4 33.33%, #00a1e4 66.66%, #fcd116 66.66%, #fcd116 100%);
         }
     </style>
 </head>
-<body>
-    <div class="confirmation-container">
-        <div class="checkmark">✓</div>
 
-        <h1>¡Gracias por tu compra!</h1>
+<body class="antialiased flex items-center justify-center min-h-screen py-12 px-4 lang-es" id="body-tag">
 
-        <p class="subtitle">
-            Tu pedido ha sido confirmado y procesado correctamente.<br>
-            Recibirás un email de confirmación en los próximos minutos.
+    <div class="canary-stripe h-2 w-full fixed top-0 z-[100]"></div>
+
+    <div class="fixed top-6 right-6 z-[110] flex bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10">
+        <button onclick="setLang('es')"
+            class="px-3 py-1 text-[10px] font-bold rounded-full text-white hover:bg-white/20 transition-all">ES</button>
+        <button onclick="setLang('en')"
+            class="px-3 py-1 text-[10px] font-bold rounded-full text-white hover:bg-white/20 transition-all">EN</button>
+    </div>
+
+    <main
+        class="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl overflow-hidden text-center p-10 md:p-14 relative">
+        <div class="absolute top-0 left-0 w-full h-2 bg-gold-500"></div>
+
+        <div
+            class="w-20 h-20 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 border border-green-100 shadow-sm">
+            <i class="fa-solid fa-check text-3xl"></i>
+        </div>
+
+        <h1 class="text-3xl md:text-4xl font-serif text-wine-900 mb-4" lang="es">¡Gracias por tu compra!</h1>
+        <h1 class="text-3xl md:text-4xl font-serif text-wine-900 mb-4" lang="en">Thank you for your purchase!</h1>
+
+        <p class="text-stone-500 text-sm leading-relaxed mb-8">
+            <span lang="es">Tu pedido ha sido confirmado y procesado correctamente. Recibirás un email en breve con el
+                detalle.</span>
+            <span lang="en">Your order has been confirmed and processed. You will receive an email shortly with the
+                details.</span>
         </p>
 
-        <div class="order-info">
-            <div class="order-label">Número de Pedido</div>
-            <div class="order-id" id="order-id">-</div>
+        <div class="bg-stone-50 rounded-2xl p-6 mb-10 border border-stone-100 relative group">
+            <span class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] block mb-2" lang="es">Número de
+                Pedido</span>
+            <span class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] block mb-2" lang="en">Order
+                Number</span>
+            <code id="order-id" class="text-lg font-bold text-wine-900 tracking-tight">--------</code>
         </div>
 
-        <div class="next-steps">
-            <p>📦 <strong>Tu pedido está siendo preparado.</strong></p>
-            <p>🚚 Nos pondremos en contacto contigo pronto con los detalles de envío.</p>
-            <p>❓ Si tienes preguntas, consulta tu email o contáctanos.</p>
+        <div class="space-y-4 mb-10 text-xs text-stone-600 text-left px-2">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-box-open text-gold-500 w-5"></i>
+                <span lang="es"><strong>Tu pedido está siendo preparado</strong> en bodega.</span>
+                <span lang="en"><strong>Your order is being prepared</strong> at the winery.</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-truck-fast text-gold-500 w-5"></i>
+                <span lang="es">Te contactaremos para coordinar la entrega en tu isla.</span>
+                <span lang="en">We will contact you to coordinate delivery on your island.</span>
+            </div>
         </div>
 
-        <div style="margin-bottom: 30px;">
-            <button class="btn-return" onclick="window.location.href='index.html'">
-                ← Volver a la Tienda
+        <div class="flex flex-col gap-4">
+            <button onclick="window.location.href='index.html'"
+                class="w-full bg-wine-900 hover:bg-black text-white font-bold py-5 rounded-xl transition-all shadow-xl active:scale-95 uppercase tracking-widest text-[10px] flex items-center justify-center gap-2">
+                <i class="fa-solid fa-arrow-left text-gold-500"></i>
+                <span lang="es">Volver a la Tienda</span>
+                <span lang="en">Back to Store</span>
             </button>
-        </div>
 
-        <div style="margin-bottom: 30px;">
-            <a href="https://wa.me/34633706676?text=Hola,%20tengo%20una%20duda%20sobre%20mi%20pedido" target="_blank" class="btn-whatsapp">
-                💬 ¿Tienes dudas? Escríbenos por WhatsApp
+            <a href="https://wa.me/34633706676?text=Hola,%20tengo%20una%20pregunta%20sobre%20mi%20pedido"
+                target="_blank"
+                class="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] active:scale-95">
+                <i class="fa-brands fa-whatsapp text-lg"></i>
+                <span lang="es">Atención vía WhatsApp</span>
+                <span lang="en">WhatsApp Support</span>
             </a>
         </div>
 
-        <div class="footer-note">
-            De Altura Wines - Vinos Argentinos Premium para Canarias
-        </div>
-    </div>
+        <footer class="mt-12 pt-6 border-t border-stone-100">
+            <p class="text-[9px] text-stone-400 uppercase tracking-widest font-bold">De Altura Wines · Canarias 2026</p>
+        </footer>
+    </main>
 
     <script>
-        // Obtener ID del pedido de la URL
+        // Cargar el Order ID desde la URL
         const params = new URLSearchParams(window.location.search);
-        const orderId = params.get('order');
-
-        if (orderId) {
-            document.getElementById('order-id').textContent = orderId;
-        } else {
-            document.getElementById('order-id').textContent = 'No disponible';
+        const order = params.get('order');
+        if (order) {
+            document.getElementById('order-id').innerText = order.toUpperCase();
         }
 
-        // Log para debug
-        console.log('📦 Pedido confirmado:', orderId);
+        // Sistema de Idioma
+        function setLang(lang) {
+            document.getElementById('body-tag').className = `antialiased flex items-center justify-center min-h-screen py-12 px-4 lang-${lang}`;
+            localStorage.setItem('deAlturaLang', lang);
+        }
+
+        // Cargar idioma preferido
+        const savedLang = localStorage.getItem('deAlturaLang') || 'es';
+        setLang(savedLang);
     </script>
 </body>
+
 </html>

@@ -1,541 +1,418 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - De Altura Wines</title>
+    <title>Checkout | De Altura Wines</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://js.stripe.com/v3/"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        wine: { 900: '#2B0710', 800: '#3E0C18', 700: '#5A1224' },
+                        gold: { 500: '#C89F5D', 600: '#A67F43' }
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Montserrat"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #360914 0%, #54101d 100%); min-height: 100vh; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #FAF9F7;
+        }
 
-        .checkout-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        .lang-en [lang="es"],
+        .lang-es [lang="en"] {
+            display: none !important;
+        }
 
-        .header { text-align: center; color: white; margin-bottom: 40px; }
-        .header h1 { font-size: 2.5em; margin-bottom: 10px; font-weight: 700; }
-        .header p { font-size: 1.1em; opacity: 0.9; }
+        .form-group.error input,
+        .form-group.error select {
+            border-color: #EF4444;
+            background-color: #FEF2F2;
+        }
 
-        .checkout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 30px; }
-        @media (max-width: 768px) { .checkout-grid { grid-template-columns: 1fr; } }
+        .form-error {
+            color: #EF4444;
+            font-size: 0.75rem;
+            margin-top: 4px;
+            display: none;
+        }
 
-        /* RESUMEN DE CARRITO */
-        .cart-summary { background: white; padding: 30px; border-radius: 12px; height: fit-content; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-        .cart-summary h2 { color: #360914; margin-bottom: 20px; font-size: 1.5em; border-bottom: 2px solid #C89F5D; padding-bottom: 15px; }
+        .form-group.error .form-error {
+            display: block;
+        }
 
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
-        .cart-item:last-child { border-bottom: none; }
-        .item-info { flex: 1; }
-        .item-name { font-weight: 600; color: #360914; }
-        .item-qty { font-size: 0.9em; color: #666; margin-top: 5px; }
-        .item-price { font-weight: 700; color: #360914; font-size: 1.1em; }
-
-        .summary-row { display: flex; justify-content: space-between; padding: 12px 0; font-size: 0.95em; }
-        .summary-row.total { border-top: 2px solid #C89F5D; padding-top: 20px; margin-top: 20px; font-size: 1.3em; font-weight: 700; color: #360914; }
-
-        .empty-cart { text-align: center; padding: 40px 0; color: #999; }
-        .empty-cart svg { width: 80px; height: 80px; margin-bottom: 20px; opacity: 0.3; }
-
-        /* FORMULARIO */
-        .payment-form { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-        .payment-form h2 { color: #360914; margin-bottom: 25px; font-size: 1.5em; }
-
-        .form-section { margin-bottom: 30px; }
-        .form-section h3 { font-size: 1.1em; color: #360914; margin-bottom: 15px; font-weight: 600; }
-
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        .form-row.full { grid-template-columns: 1fr; }
-
-        .form-group { display: flex; flex-direction: column; }
-        .form-group label { font-size: 0.9em; font-weight: 600; color: #360914; margin-bottom: 8px; }
-        .form-group input, .form-group select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em; font-family: inherit; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #C89F5D; box-shadow: 0 0 0 3px rgba(200, 159, 93, 0.1); }
-        .form-group input::placeholder { color: #aaa; }
-
-        .form-error { color: #d32f2f; font-size: 0.85em; margin-top: 5px; display: none; }
-        .form-group.error input { border-color: #d32f2f; }
-        .form-group.error .form-error { display: block; }
-
-        /* STRIPE */
-        #stripe-container { margin-bottom: 20px; }
-        .StripeElement { padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: white; }
-        .StripeElement--focus { border-color: #C89F5D; box-shadow: 0 0 0 3px rgba(200, 159, 93, 0.1); }
-
-        /* BOTONES */
-        .btn-container { margin-top: 30px; }
-        .btn-pay { width: 100%; padding: 16px; background: linear-gradient(135deg, #360914 0%, #54101d 100%); color: white; font-size: 1.1em; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(54, 9, 20, 0.3); }
-        .btn-pay:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(54, 9, 20, 0.4); }
-        .btn-pay:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn-pay.loading::after { content: ' '; display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ALERTS */
-        .alert { padding: 15px; border-radius: 6px; margin-bottom: 20px; }
-        .alert.success { background: #e8f5e9; color: #2e7d32; }
-        .alert.error { background: #ffebee; color: #c62828; }
-        .alert.info { background: #e3f2fd; color: #1565c0; }
-
-        /* LOADING */
-        .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
-        .loading-overlay.show { display: flex; }
-        .loading-spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
-
-        .breadcrumb { color: white; font-size: 0.9em; margin-bottom: 30px; }
-        .breadcrumb a { color: #C89F5D; text-decoration: none; }
-        .breadcrumb a:hover { text-decoration: underline; }
+        .canary-stripe {
+            background: linear-gradient(90deg, #ffffff 0%, #ffffff 33.33%, #00a1e4 33.33%, #00a1e4 66.66%, #fcd116 66.66%, #fcd116 100%);
+        }
     </style>
 </head>
-<body>
-    <div class="checkout-container">
-        <div class="breadcrumb">
-            <a href="marketplace.html">← Volver al Marketplace</a>
+
+<body class="antialiased lang-es">
+
+    <div class="canary-stripe h-2 w-full fixed top-0 z-[100]"></div>
+
+    <div
+        class="fixed top-5 right-5 z-[110] flex bg-white/90 backdrop-blur-md p-1 rounded-full shadow border border-stone-200">
+        <button onclick="setLanguage('es')" id="btn-es"
+            class="px-3 py-1 text-[10px] font-bold rounded-full bg-wine-900 text-white transition-all">ES</button>
+        <button onclick="setLanguage('en')" id="btn-en"
+            class="px-3 py-1 text-[10px] font-bold rounded-full text-stone-500 hover:text-wine-900 transition-all">EN</button>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 py-12 md:py-20">
+
+        <div class="mb-8">
+            <a href="index.html"
+                class="inline-flex items-center text-sm font-semibold text-wine-800 hover:text-gold-600 transition-colors">
+                <i class="fa-solid fa-arrow-left mr-2"></i>
+                <span lang="es">Volver a la Tienda</span>
+                <span lang="en">Back to Shop</span>
+            </a>
         </div>
 
-        <div class="header">
-            <h1>De Altura Wines - Pagar Pedido</h1>
-            <p>Completa tus datos y elige tu método de pago</p>
-        </div>
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-serif text-wine-900 mb-4">
+                <span lang="es">Finalizar Pedido</span>
+                <span lang="en">Checkout</span>
+            </h1>
+            <p class="text-stone-500 font-medium">
+                <span lang="es">Cajas seleccionadas directo de Argentina a Canarias</span>
+                <span lang="en">Selected cases directly from Argentina to Canary Islands</span>
+            </p>
+        </header>
 
-        <div class="checkout-grid">
-            <!-- RESUMEN DE CARRITO -->
-            <div class="cart-summary">
-                <h2>Resumen del Pedido</h2>
-                <div id="cart-items"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                <div class="summary-row">
-                    <span>Subtotal:</span>
-                    <span id="subtotal">0,00 €</span>
-                </div>
-                <div class="summary-row">
-                    <span>IGIC (7%):</span>
-                    <span id="igic">0,00 €</span>
-                </div>
-                <div class="summary-row total">
-                    <span>TOTAL:</span>
-                    <span id="total">0,00 €</span>
-                </div>
+            <div
+                class="lg:col-span-7 order-2 lg:order-1 bg-white p-6 md:p-10 rounded-2xl shadow-sm border border-stone-100">
+                <div id="form-container" style="display: none;">
+                    <div id="alerts" class="mb-6"></div>
 
-                <div id="empty-message" class="empty-cart" style="display: none;">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m10 0l2-9m-10 9h12m0 0l2-9m-2 9v3m-2-3v3"></path>
-                    </svg>
-                    <p>Tu carrito está vacío</p>
-                    <p style="font-size: 0.9em; margin-top: 10px;">Agrega vinos antes de proceder</p>
-                </div>
-            </div>
-
-            <!-- FORMULARIO DE PAGO -->
-            <div class="payment-form" id="form-container" style="display: none;">
-                <h2>Información de Pago</h2>
-
-                <div id="alerts"></div>
-
-                <!-- DATOS DEL CLIENTE -->
-                <div class="form-section">
-                    <h3>1. Tus Datos</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="name">Nombre Completo *</label>
-                            <input type="text" id="name" placeholder="Juan García">
-                            <div class="form-error">Campo requerido</div>
+                    <div class="mb-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span
+                                class="w-8 h-8 rounded-full bg-wine-900 text-white flex items-center justify-center text-sm font-bold">1</span>
+                            <h2 class="text-xl font-serif text-wine-900 font-bold">
+                                <span lang="es">Datos de Entrega</span>
+                                <span lang="en">Shipping Details</span>
+                            </h2>
                         </div>
-                        <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" placeholder="juan@example.com">
-                            <div class="form-error">Email inválido</div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                            <div class="form-group flex flex-col">
+                                <label class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2"
+                                    lang="es">Nombre Completo *</label>
+                                <label class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2"
+                                    lang="en">Full Name *</label>
+                                <input type="text" id="name"
+                                    class="p-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-gold-500/20 focus:border-gold-500 outline-none transition-all">
+                                <span class="form-error" lang="es">Nombre requerido</span><span class="form-error"
+                                    lang="en">Name is required</span>
+                            </div>
+                            <div class="form-group flex flex-col">
+                                <label class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Email
+                                    *</label>
+                                <input type="email" id="email"
+                                    class="p-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-gold-500/20 focus:border-gold-500 outline-none transition-all">
+                                <span class="form-error" lang="es">Email inválido</span><span class="form-error"
+                                    lang="en">Invalid email</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                            <div class="form-group flex flex-col">
+                                <label class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2"
+                                    lang="es">Teléfono</label>
+                                <label class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2"
+                                    lang="en">Phone</label>
+                                <input type="tel" id="phone"
+                                    class="p-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-gold-500/20 focus:border-gold-500 outline-none transition-all">
+                            </div>
+                            <div class="form-group flex flex-col">
+                                <label class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2"
+                                    lang="es">Isla de Destino *</label>
+                                <label class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2"
+                                    lang="en">Island *</label>
+                                <select id="island"
+                                    class="p-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-gold-500/20 focus:border-gold-500 outline-none transition-all appearance-none bg-white">
+                                    <option value="" lang="es">Seleccionar isla...</option>
+                                    <option value="" lang="en">Select island...</option>
+                                    <option value="Tenerife">Tenerife</option>
+                                    <option value="Gran Canaria">Gran Canaria</option>
+                                    <option value="La Palma">La Palma</option>
+                                    <option value="La Gomera">La Gomera</option>
+                                    <option value="El Hierro">El Hierro</option>
+                                    <option value="Fuerteventura">Fuerteventura</option>
+                                    <option value="Lanzarote">Lanzarote</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group flex flex-col mb-5">
+                            <label class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2"
+                                lang="es">Dirección Completa *</label>
+                            <label class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2" lang="en">Full
+                                Address *</label>
+                            <input type="text" id="address"
+                                class="p-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-gold-500/20 focus:border-gold-500 outline-none transition-all">
+                        </div>
+
+                        <div class="form-group flex flex-col w-full md:w-1/2">
+                            <label class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2"
+                                lang="es">Código Postal *</label>
+                            <label class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2"
+                                lang="en">Postal Code *</label>
+                            <input type="text" id="postal"
+                                class="p-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-gold-500/20 focus:border-gold-500 outline-none transition-all">
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="phone">Teléfono</label>
-                            <input type="tel" id="phone" placeholder="+34 612 345 678">
-                            <div class="form-error">Teléfono inválido</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="island">Isla de Destino *</label>
-                            <select id="island" required>
-                                <option value="">Selecciona una isla...</option>
-                                <option value="Tenerife">Tenerife</option>
-                                <option value="Gran Canaria">Gran Canaria</option>
-                                <option value="La Palma">La Palma</option>
-                                <option value="La Gomera">La Gomera</option>
-                                <option value="El Hierro">El Hierro</option>
-                                <option value="Fuerteventura">Fuerteventura</option>
-                                <option value="Lanzarote">Lanzarote</option>
-                            </select>
-                            <div class="form-error">Selecciona una isla</div>
-                        </div>
-                    </div>
-                    <div class="form-row full">
-                        <div class="form-group">
-                            <label for="address">Dirección Completa *</label>
-                            <input type="text" id="address" placeholder="Calle Principal 123, Apt. 4B">
-                            <div class="form-error">Campo requerido</div>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="postal">Código Postal *</label>
-                            <input type="text" id="postal" placeholder="38001">
-                            <div class="form-error">Código postal inválido</div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- STRIPE PAYMENT ELEMENT -->
-                <div class="form-section">
-                    <h3>2. Método de Pago</h3>
-                    <div id="stripe-container"></div>
-                    <div id="stripe-error" style="color: #d32f2f; margin-top: 10px; display: none;"></div>
-                </div>
+                    <div class="mb-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span
+                                class="w-8 h-8 rounded-full bg-wine-900 text-white flex items-center justify-center text-sm font-bold">2</span>
+                            <h2 class="text-xl font-serif text-wine-900 font-bold">
+                                <span lang="es">Método de Pago</span>
+                                <span lang="en">Payment Method</span>
+                            </h2>
+                        </div>
+                        <div id="stripe-container" class="p-4 border border-stone-200 rounded-xl bg-stone-50"></div>
+                        <div id="stripe-error" class="mt-4 text-red-500 text-sm font-medium"></div>
+                    </div>
 
-                <!-- BOTÓN DE PAGO -->
-                <div class="btn-container">
-                    <button class="btn-pay" id="btn-pay">
-                        <span id="btn-text">Pagar Ahora</span>
+                    <button id="btn-pay"
+                        class="w-full bg-wine-900 hover:bg-wine-800 text-white font-bold py-5 rounded-lg transition-all shadow-xl hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest text-sm">
+                        <i class="fa-solid fa-lock text-gold-500"></i>
+                        <span lang="es" id="btn-text">Pagar Ahora</span>
+                        <span lang="en" id="btn-text-en">Pay Now</span>
                     </button>
                 </div>
             </div>
+
+            <div class="lg:col-span-5 order-1 lg:order-2">
+                <div class="bg-wine-900 text-white p-6 md:p-8 rounded-2xl shadow-xl sticky top-24">
+                    <h2
+                        class="text-2xl font-serif mb-6 border-b border-white/10 pb-4 flex justify-between items-center">
+                        <span lang="es">Tu Pedido</span>
+                        <span lang="en">Your Order</span>
+                        <i class="fa-solid fa-wine-glass text-gold-500 text-xl"></i>
+                    </h2>
+
+                    <div id="cart-items" class="space-y-4 mb-8 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                    </div>
+
+                    <div class="space-y-3 border-t border-white/10 pt-6">
+                        <div class="flex justify-between text-stone-400 text-sm">
+                            <span lang="es">Subtotal Neto</span><span lang="en">Net Subtotal</span>
+                            <span id="subtotal" class="text-white font-semibold">0,00 €</span>
+                        </div>
+                        <div class="flex justify-between text-stone-400 text-sm">
+                            <span lang="es">Impuestos (IGIC 7%)</span><span lang="en">Taxes (7% IGIC)</span>
+                            <span id="igic" class="text-white font-semibold">0,00 €</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-4 text-white">
+                            <span class="text-lg font-bold">TOTAL</span>
+                            <span id="total" class="text-3xl font-serif font-bold text-gold-500">0,00 €</span>
+                        </div>
+                    </div>
+
+                    <div id="empty-message" class="text-center py-10" style="display: none;">
+                        <i class="fa-solid fa-cart-shopping text-5xl text-white/10 mb-4 block"></i>
+                        <p lang="es">Tu carrito está vacío</p>
+                        <p lang="en">Your cart is empty</p>
+                        <a href="index.html" class="mt-4 inline-block text-gold-500 underline text-sm" lang="es">Volver
+                            a la tienda</a>
+                        <a href="index.html" class="mt-4 inline-block text-gold-500 underline text-sm" lang="en">Back to
+                            shop</a>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <div class="loading-overlay" id="loading-overlay">
-        <div class="loading-spinner"></div>
+    <div id="loading-overlay"
+        class="fixed inset-0 bg-wine-900/90 backdrop-blur-md z-[2000] flex flex-col items-center justify-center text-white opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="w-16 h-16 border-4 border-white/20 border-t-gold-500 rounded-full animate-spin mb-6"></div>
+        <p class="font-serif text-xl animate-pulse" lang="es">Procesando pago seguro...</p>
+        <p class="font-serif text-xl animate-pulse" lang="en">Processing secure payment...</p>
     </div>
 
-    <!-- CONFIG Y SUPABASE -->
     <script>
+        // CONFIGURACIÓN
         const SUPABASE_URL = 'https://pzzbvinbyzaxrshlmlcn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6emJ2aW5ieXpheHJzaGxtbGNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTI5NDYsImV4cCI6MjA5MTEyODk0Nn0.YgeGDVZfyqI-nv7iAhROMsBfZbIK7BGUDyU1ERE-SFA';
         const STRIPE_PUBLISHABLE_KEY = 'pk_test_51TJUdsQ1h6OCxVbfV0s4K3e8Ef7YxoXiKIK92Woj9NfVgJbGkKgBvKWVHuiLFPrZsEAY1auG9so9ilKGYPvcKH6300FWxEsAe5';
         const EDGE_FUNCTION_URL = 'https://pzzbvinbyzaxrshlmlcn.supabase.co/functions/v1/create-payment-intent';
 
-        // ⚠️ IMPORTANTE: Usar window para evitar conflictos de scope
         window.deAlturaSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-        let elements;
-        let paymentElement;
+        let elements, paymentElement;
 
-        // ═══════════════════════════════════════════════════════════════
-        // LÓGICA DE CHECKOUT - Mismo scope que config global
-        // ═══════════════════════════════════════════════════════════════
-
-        // Cargar carrito desde localStorage
-        function loadCart() {
-            const cartData = localStorage.getItem('deAlturaCart');
-            console.log('📦 Debug LocalStorage [deAlturaCart]:', cartData);
-            if (!cartData || cartData === '{}') {
-                console.warn('⚠️ El carrito está vacío en localStorage');
-                return {};
-            }
-            try {
-                return JSON.parse(cartData);
-            } catch (e) {
-                console.error('❌ Error parseando carrito:', e);
-                return {};
-            }
+        function setLanguage(lang) {
+            document.body.className = `antialiased lang-${lang}`;
+            document.getElementById('btn-es').className = lang === 'es' ? 'px-3 py-1 text-[10px] font-bold rounded-full bg-wine-900 text-white transition-all' : 'px-3 py-1 text-[10px] font-bold rounded-full text-stone-500 transition-all';
+            document.getElementById('btn-en').className = lang === 'en' ? 'px-3 py-1 text-[10px] font-bold rounded-full bg-wine-900 text-white transition-all' : 'px-3 py-1 text-[10px] font-bold rounded-full text-stone-500 transition-all';
         }
 
-        // Renderizar resumen de carrito
+        function loadCart() {
+            const cartData = localStorage.getItem('deAlturaCart');
+            if (!cartData || cartData === '{}') return {};
+            try { return JSON.parse(cartData); } catch (e) { return {}; }
+        }
+
         function renderCartSummary() {
             const cart = loadCart();
             const items = Object.values(cart);
-
             if (items.length === 0) {
                 document.getElementById('empty-message').style.display = 'block';
                 document.getElementById('form-container').style.display = 'none';
                 return;
             }
-
             document.getElementById('form-container').style.display = 'block';
             document.getElementById('empty-message').style.display = 'none';
 
-            let html = '';
-            let subtotal = 0;
-
+            let html = '', subtotal = 0;
             items.forEach(item => {
-                if (!item.id) return;
-                // Fórmula: Subtotal = precio × cantidad_cajas × box_size
-                const boxSize = item.box || 1; // Botellas por caja (6 o 12)
+                const boxSize = item.box || 1;
                 const itemTotal = (item.price || 0) * (item.qty || 1) * boxSize;
                 subtotal += itemTotal;
-
                 html += `
-                    <div class="cart-item">
-                        <div class="item-info">
-                            <div class="item-name">${item.name || 'Vino'}</div>
-                            <div class="item-qty">Cantidad: ${item.qty} caja${item.qty > 1 ? 's' : ''} × ${boxSize} botellas × ${item.price?.toFixed(2) || '0.00'} €</div>
+                    <div class="flex justify-between items-start bg-white/5 p-4 rounded-xl border border-white/5">
+                        <div class="pr-2">
+                            <div class="text-sm font-bold text-white">${item.name}</div>
+                            <div class="text-[10px] text-stone-400 mt-1 uppercase font-bold tracking-widest">${item.qty} Caja(s) × ${boxSize} bot.</div>
                         </div>
-                        <div class="item-price">${itemTotal.toFixed(2).replace('.', ',')} €</div>
-                    </div>
-                `;
+                        <div class="text-sm font-bold text-gold-500 whitespace-nowrap">${itemTotal.toFixed(2)} €</div>
+                    </div>`;
             });
-
             document.getElementById('cart-items').innerHTML = html;
-
-            // Calcular totales
             const igic = subtotal * 0.07;
-            const total = Number((subtotal + igic).toFixed(2));
-
-            document.getElementById('subtotal').textContent = subtotal.toFixed(2).replace('.', ',') + ' €';
-            document.getElementById('igic').textContent = igic.toFixed(2).replace('.', ',') + ' €';
-            document.getElementById('total').textContent = total.toFixed(2).replace('.', ',') + ' €';
-
-            // Guardar para usar en pago
-            window.orderData = {
-                items: items,
-                subtotal: subtotal,
-                igic: igic,
-                total: total
-            };
+            const total = (subtotal + igic).toFixed(2);
+            document.getElementById('subtotal').innerText = subtotal.toFixed(2) + ' €';
+            document.getElementById('igic').innerText = igic.toFixed(2) + ' €';
+            document.getElementById('total').innerText = total + ' €';
+            window.orderData = { items, subtotal, igic, total: parseFloat(total) };
         }
 
-        // Validar formulario
         function validateForm() {
-            const fields = {
-                name: { value: document.getElementById('name').value.trim(), min: 3 },
-                email: { value: document.getElementById('email').value.trim(), pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
-                island: { value: document.getElementById('island').value },
-                address: { value: document.getElementById('address').value.trim(), min: 5 },
-                postal: { value: document.getElementById('postal').value.trim(), min: 3 }
-            };
-
-            let isValid = true;
-
-            Object.entries(fields).forEach(([id, config]) => {
-                const element = document.getElementById(id);
-                const group = element.parentElement;
-
-                if (!config.value) {
-                    group.classList.add('error');
-                    isValid = false;
-                } else if (config.min && config.value.length < config.min) {
-                    group.classList.add('error');
-                    isValid = false;
-                } else if (config.pattern && !config.pattern.test(config.value)) {
-                    group.classList.add('error');
-                    isValid = false;
-                } else {
-                    group.classList.remove('error');
-                }
+            const fields = ['name', 'email', 'island', 'address', 'postal'];
+            let valid = true;
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el.value.trim()) { el.parentElement.classList.add('error'); valid = false; }
+                else { el.parentElement.classList.remove('error'); }
             });
-
-            return isValid;
+            return valid;
         }
 
-        // Mostrar alerta
-        function showAlert(type, message) {
-            const alertsDiv = document.getElementById('alerts');
-            const alertHtml = `<div class="alert ${type}">${message}</div>`;
-            alertsDiv.innerHTML = alertHtml;
-            alertsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+        // LA NUEVA FUNCIÓN CORREGIDA
+        async function handlePayment(e) {
+            if (!validateForm()) return;
 
-        // Procesar pago
-        async function handlePayment(event) {
-            console.log('🟢 Pago Iniciado');
-
-            if (!validateForm()) {
-                showAlert('error', 'Por favor completa todos los campos requeridos');
-                return;
-            }
-
-            const btnPay = document.getElementById('btn-pay');
-            btnPay.disabled = true;
+            const btn = document.getElementById('btn-pay');
+            btn.disabled = true;
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
 
             try {
-                document.getElementById('loading-overlay').classList.add('show');
+                console.log("Iniciando proceso de pago...");
+                await elements.submit();
 
-                // PASO 1: Validar payment element con elements.submit()
-                console.log('📋 Validando elementos de pago...');
-                const submitResult = await elements.submit();
-
-                if (submitResult.error) {
-                    throw new Error(submitResult.error.message || 'Error validando el método de pago');
-                }
-
-                console.log('✅ Elementos validados correctamente');
-
-                // PASO 2: Crear Payment Intent en Supabase (función edge)
-                console.log('🔄 Creando Payment Intent...');
-                const paymentIntentResponse = await fetch(EDGE_FUNCTION_URL, {
+                const res = await fetch(EDGE_FUNCTION_URL, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        amount: window.orderData.total
-                    })
+                    headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: window.orderData.total })
                 });
 
-                if (!paymentIntentResponse.ok) {
-                    throw new Error(`Error conectando con pagos (${paymentIntentResponse.status})`);
-                }
+                const { clientSecret } = await res.json();
+                const { error } = await stripe.confirmPayment({ elements, clientSecret, redirect: 'if_required' });
 
-                const paymentData = await paymentIntentResponse.json();
-                const { clientSecret } = paymentData;
+                if (error) throw new Error(error.message);
 
-                if (!clientSecret) {
-                    throw new Error('No se recibió confirmación de pago');
-                }
+                // Si llegamos aquí, el pago en Stripe fue EXITOSO
+                const paymentId = clientSecret.split('_secret_')[0];
+                console.log("Pago Stripe OK:", paymentId);
 
-                console.log('🎫 Payment Intent creado:', clientSecret.slice(0, 20) + '...');
-
-                // PASO 3: Confirmar pago con Stripe
-                console.log('💳 Confirmando pago con Stripe...');
-                const { error } = await stripe.confirmPayment({
-                    elements,
-                    clientSecret,
-                    redirect: 'if_required'
-                });
-
-                if (error) {
-                    showAlert('error', `Error: ${error.message}`);
-                    return;
-                }
-
-                console.log('✅ Pago confirmado por Stripe');
-
-                // Guardar orden en Supabase (silencioso - no bloquea si falla)
-                const paymentId = clientSecret ? clientSecret.split('_secret_')[0] : 'unknown';
-                let orderId = null;
+                // Creamos un ID seguro por si falla Supabase
+                let finalOrderId = `ORD-${paymentId.slice(-6).toUpperCase()}`;
 
                 try {
-                    console.log('💾 Insertando orden en Supabase con datos:', {
+                    const { data: orderData, error: insertError } = await window.deAlturaSupabase.from('orders').insert([{
                         customer_name: document.getElementById('name').value,
                         customer_email: document.getElementById('email').value,
-                        total_amount: window.orderData.total,
+                        customer_phone: document.getElementById('phone').value,
+                        island: document.getElementById('island').value,
+                        address: document.getElementById('address').value,
                         postal_code: document.getElementById('postal').value,
+                        subtotal_amount: window.orderData.subtotal,
+                        tax_amount: window.orderData.igic,
+                        total_amount: window.orderData.total,
+                        items: window.orderData.items,
+                        payment_status: 'paid',
                         stripe_payment_id: paymentId
-                    });
+                    }]).select();
 
-                    const { data: orderData, error: orderError } = await window.deAlturaSupabase
-                        .from('orders')
-                        .insert([{
-                            customer_name: document.getElementById('name').value,
-                            customer_email: document.getElementById('email').value,
-                            customer_phone: document.getElementById('phone').value,
-                            island: document.getElementById('island').value,
-                            address: document.getElementById('address').value,
-                            postal_code: document.getElementById('postal').value,
-                            subtotal_amount: window.orderData.subtotal,
-                            tax_amount: window.orderData.igic,
-                            total_amount: window.orderData.total,
-                            items: window.orderData.items,
-                            payment_method: 'stripe',
-                            payment_status: 'paid',
-                            shipping_status: 'new',
-                            stripe_payment_id: paymentId
-                        }]);
-
-                    if (orderError) {
-                        console.error('❌ Error insertando orden (no bloqueante):', orderError);
-                        // No bloquear - el dinero ya se cobró en Stripe
-                        orderId = `STRIPE-${paymentId}`;
-                    } else if (orderData && orderData.length > 0) {
-                        orderId = orderData[0].id;
-                        console.log('✅ Orden insertada con ID:', orderId);
-                    } else {
-                        console.warn('⚠️ Insert exitoso pero sin datos retornados');
-                        orderId = `STRIPE-${paymentId}`;
+                    // Comprobamos de forma segura si hay datos
+                    if (!insertError && orderData && orderData.length > 0) {
+                        finalOrderId = orderData[0].id;
+                    } else if (insertError) {
+                        console.warn("Aviso Supabase:", insertError);
                     }
-                } catch (e) {
-                    console.error('❌ Excepción insertando orden:', e);
-                    // Fallback: usar stripe payment ID como referencia
-                    orderId = `STRIPE-${paymentId}`;
+                } catch (dbErr) {
+                    console.error("Error guardando en DB (No crítico):", dbErr);
                 }
 
-                // Guardar items de la orden (opcional, continuar si falla)
-                try {
-                    const orderItems = window.orderData.items.map(item => ({
-                        order_id: orderId,
-                        wine_id: item.id,
-                        quantity: item.qty,
-                        unit_price: item.price
-                    }));
-
-                    const { error: itemsError } = await window.deAlturaSupabase
-                        .from('order_items')
-                        .insert(orderItems);
-
-                    if (itemsError) {
-                        console.warn('⚠️ Error guardando items (no bloqueante):', itemsError);
-                    } else {
-                        console.log('✅ Items guardados exitosamente');
-                    }
-                } catch (e) {
-                    console.warn('⚠️ Error insertando items:', e.message);
-                }
-
-                // ✅ Éxito
+                // ÉXITO TOTAL: Limpiar carrito y redirigir
                 localStorage.removeItem('deAlturaCart');
-                console.log('🟢 Pago Exitoso');
-                showAlert('success', `¡Pedido confirmado! Número: ${orderId.slice(0, 8).toUpperCase()}`);
+                console.log("Redirigiendo a confirmación con ID:", finalOrderId);
+                window.location.href = `confirmation.html?order=${finalOrderId}`;
 
-                setTimeout(() => {
-                    window.location.href = `confirmation.html?order=${orderId}`;
-                }, 2000);
-
-            } catch (error) {
-                console.error('Error en pago:', error.message);
-                showAlert('error', error.message || 'Error procesando el pago');
-            } finally {
-                document.getElementById('loading-overlay').classList.remove('show');
-                btnPay.disabled = false;
+            } catch (err) {
+                console.error("Error crítico en proceso:", err);
+                alert("Error: " + err.message);
+                btn.disabled = false;
+                overlay.classList.add('opacity-0', 'pointer-events-none');
             }
         }
 
-        // Inicializar
         async function init() {
             renderCartSummary();
-
             const cart = loadCart();
             if (Object.keys(cart).length > 0) {
                 try {
-                    // Crear Payment Element
-                    const paymentIntentResponse = await fetch(EDGE_FUNCTION_URL, {
+                    const res = await fetch(EDGE_FUNCTION_URL, {
                         method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            amount: window.orderData?.total || 0
-                        })
+                        headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ amount: window.orderData.total })
                     });
-
-                    if (!paymentIntentResponse.ok) {
-                        throw new Error(`Error de conexión (${paymentIntentResponse.status})`);
-                    }
-
-                    const responseData = await paymentIntentResponse.json();
-                    const { clientSecret } = responseData;
-
-                    if (!clientSecret) {
-                        throw new Error('No se recibió Payment Intent');
-                    }
-
-                    // Verificar que el contenedor existe
-                    const stripeContainer = document.getElementById('stripe-container');
-                    if (!stripeContainer) {
-                        throw new Error('Contenedor de pago no encontrado');
-                    }
-
+                    const { clientSecret } = await res.json();
                     elements = stripe.elements({ clientSecret });
                     paymentElement = elements.create('payment');
                     paymentElement.mount('#stripe-container');
 
-                    // Registrar listener del botón
-                    const btnPay = document.getElementById('btn-pay');
-                    if (btnPay) {
-                        btnPay.addEventListener('click', handlePayment);
-                    }
-
-                } catch (error) {
-                    console.error('Error inicializando:', error.message);
-                    showAlert('error', `Error: ${error.message}`);
+                    document.getElementById('btn-pay').addEventListener('click', handlePayment);
+                } catch (e) {
+                    console.error("Error inicializando Stripe:", e);
                 }
             }
         }
@@ -543,4 +420,5 @@
         init();
     </script>
 </body>
+
 </html>
