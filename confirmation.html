@@ -184,9 +184,9 @@
                                 try {
                                     const { data: prod } = await supabaseClient.from('products').select('stock').eq('id', String(pid)).single();
                                     if (prod) {
-                                        const newStock = Math.max(0, (prod.stock || 0) - (item.qty || 1));
+                                        const newStock = (prod.stock || 0) - (item.qty || 1);
                                         await supabaseClient.from('products').update({ stock: newStock }).eq('id', String(pid));
-                                        console.log(`✅ Stock actualizado para ${pid}`);
+                                        console.log(`✅ Stock actualizado para ${pid}: ${newStock}`);
                                     }
                                 } catch (err) {
                                     console.warn(`⚠️ Error actualizando stock para ${pid}:`, err.message);
