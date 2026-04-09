@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         tailwind.config = {
@@ -121,12 +122,105 @@
     </main>
 
     <script>
-        // Cargar el Order ID desde la URL
-        const params = new URLSearchParams(window.location.search);
-        const order = params.get('order');
-        if (order) {
-            document.getElementById('order-id').innerText = order.toUpperCase();
+        const SUPABASE_URL = 'https://pzzbvinbyzaxrshlmlcn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6emJ2aW5ieXpheHJzaGxtbGNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTI5NDYsImV4cCI6MjA5MTEyODk0Nn0.YgeGDVZfyqI-nv7iAhROMsBfZbIK7BGUDyU1ERE-SFA';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function processOrder() {
+            const params = new URLSearchParams(window.location.search);
+            const payment_intent = params.get('payment_intent');
+            const redirect_status = params.get('redirect_status');
+            const orderIdDisplay = document.getElementById('order-id');
+
+            // Si llegamos sin payment_intent (tal vez acceso posterior por URL directa)
+            if (!payment_intent) {
+                const order = params.get('order');
+                if (order) orderIdDisplay.innerText = order.toUpperCase();
+                return;
+            }
+
+            if (redirect_status === 'succeeded') {
+                const shortId = payment_intent.slice(-8).toUpperCase();
+                orderIdDisplay.innerText = shortId;
+
+                // Evitar doble confirmación refrecando la página
+                if (localStorage.getItem(`processed_${payment_intent}`)) return;
+                localStorage.setItem(`processed_${payment_intent}`, 'true');
+
+                try {
+                    const cartStr = localStorage.getItem('deAlturaCart') || localStorage.getItem('altura_cart');
+                    const customerStr = localStorage.getItem('altura_customer_info');
+
+                    if (cartStr && customerStr) {
+                        const cart = JSON.parse(cartStr);
+                        const customer = JSON.parse(customerStr);
+
+                        let subtotal = 0;
+                        const items = Object.values(cart);
+                        items.forEach(item => {
+                            const boxSize = item.box || 1;
+                            subtotal += (item.price || 0) * (item.qty || 1) * boxSize;
+                        });
+                        const igic = subtotal * 0.07;
+                        const totalAmount = parseFloat((subtotal + igic).toFixed(2));
+
+                        // 1. Insertar la orden en Supabase
+                        await supabaseClient.from('orders').insert([{
+                            id: payment_intent,
+                            customer_name: customer.name,
+                            customer_email: customer.email,
+                            customer_phone: customer.phone,
+                            island: customer.island,
+                            address: customer.address,
+                            postal_code: customer.postal_code,
+                            subtotal_amount: subtotal,
+                            tax_amount: igic,
+                            total_amount: totalAmount,
+                            items: items,
+                            payment_status: 'paid',
+                            shipping_status: 'pending',
+                            stripe_payment_id: payment_intent
+                        }]);
+
+                        // 2. Descontar el stock en iteración
+                        for (const item of items) {
+                            const { data: wine } = await supabaseClient.from('products').select('stock').eq('id', item.id).single();
+                            if (wine) {
+                                const newStock = Math.max(0, (wine.stock || 0) - item.qty);
+                                await supabaseClient.from('products').update({ stock: newStock }).eq('id', item.id);
+                            }
+                        }
+
+                        // 3. Limpieza final
+                        localStorage.removeItem('deAlturaCart');
+                        localStorage.removeItem('altura_cart');
+                        localStorage.removeItem('altura_customer_info');
+                    }
+                } catch(e) {
+                    console.error('Error procesando la orden en BD:', e);
+                }
+            } else {
+                showError();
+            }
         }
+
+        function showError() {
+            document.querySelector('h1[lang="es"]').innerText = 'Error en el Pago';
+            document.querySelector('h1[lang="en"]').innerText = 'Payment Failed';
+            document.querySelector('p.text-stone-500 span[lang="es"]').innerText = 'Hubo un problema procesando tu pago. Por favor intenta de nuevo.';
+            document.querySelector('p.text-stone-500 span[lang="en"]').innerText = 'There was a problem processing your payment. Please try again.';
+            
+            const icon = document.querySelector('.fa-check');
+            if (icon) {
+                icon.classList.replace('fa-check', 'fa-xmark');
+                const container = icon.parentElement;
+                container.classList.replace('bg-green-50', 'bg-red-50');
+                container.classList.replace('text-green-600', 'text-red-500');
+            }
+        }
+
+        // Ejecutar procesamiento al cargar
+        processOrder();
 
         // Sistema de Idioma
         function setLang(lang) {

@@ -338,6 +338,17 @@
                 console.log("Iniciando proceso de pago...");
                 await elements.submit();
 
+                // Guardar datos del cliente ANTES de llamar a Stripe
+                const customerInfo = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    island: document.getElementById('island').value,
+                    address: document.getElementById('address').value,
+                    postal_code: document.getElementById('postal').value
+                };
+                localStorage.setItem('altura_customer_info', JSON.stringify(customerInfo));
+
                 const res = await fetch(EDGE_FUNCTION_URL, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
@@ -345,47 +356,19 @@
                 });
 
                 const { clientSecret } = await res.json();
-                const { error } = await stripe.confirmPayment({ elements, clientSecret, redirect: 'if_required' });
-
-                if (error) throw new Error(error.message);
-
-                // Si llegamos aquí, el pago en Stripe fue EXITOSO
-                const paymentId = clientSecret.split('_secret_')[0];
-                console.log("Pago Stripe OK:", paymentId);
-
-                // Creamos un ID seguro por si falla Supabase
-                let finalOrderId = `ORD-${paymentId.slice(-6).toUpperCase()}`;
-
-                try {
-                    const { data: orderData, error: insertError } = await window.deAlturaSupabase.from('orders').insert([{
-                        customer_name: document.getElementById('name').value,
-                        customer_email: document.getElementById('email').value,
-                        customer_phone: document.getElementById('phone').value,
-                        island: document.getElementById('island').value,
-                        address: document.getElementById('address').value,
-                        postal_code: document.getElementById('postal').value,
-                        subtotal_amount: window.orderData.subtotal,
-                        tax_amount: window.orderData.igic,
-                        total_amount: window.orderData.total,
-                        items: window.orderData.items,
-                        payment_status: 'paid',
-                        stripe_payment_id: paymentId
-                    }]).select();
-
-                    // Comprobamos de forma segura si hay datos
-                    if (!insertError && orderData && orderData.length > 0) {
-                        finalOrderId = orderData[0].id;
-                    } else if (insertError) {
-                        console.warn("Aviso Supabase:", insertError);
+                
+                // Confirmamos el pago incluyendo el return_url para esquemas 3D Secure (PSD2)
+                const { error } = await stripe.confirmPayment({ 
+                    elements, 
+                    clientSecret, 
+                    confirmParams: {
+                        return_url: window.location.href.replace('checkout.html', 'confirmation.html')
                     }
-                } catch (dbErr) {
-                    console.error("Error guardando en DB (No crítico):", dbErr);
-                }
+                });
 
-                // ÉXITO TOTAL: Limpiar carrito y redirigir
-                localStorage.removeItem('deAlturaCart');
-                console.log("Redirigiendo a confirmación con ID:", finalOrderId);
-                window.location.href = `confirmation.html?order=${finalOrderId}`;
+                if (error) {
+                    throw new Error(error.message);
+                }
 
             } catch (err) {
                 console.error("Error crítico en proceso:", err);
