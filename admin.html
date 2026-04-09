@@ -55,32 +55,30 @@
             transition: transform 0.3s ease;
         }
 
-        /* --- LANG SWITCH --- */
-        .lang-switch {
-            display: flex;
+        .lang-toggle {
             background: #e9ecef;
-            padding: 2px;
-            border-radius: 20px;
-            margin-right: 20px;
             border: 1px solid #dee2e6;
-        }
-
-        .lang-switch button {
-            border: none;
-            background: none;
-            padding: 5px 12px;
-            font-size: 0.65rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.72rem;
             font-weight: 800;
-            color: var(--text-muted);
+            color: var(--sidebar-bg);
             cursor: pointer;
-            border-radius: 18px;
             transition: all 0.2s ease;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
         }
 
-        .lang-switch button.active {
-            background: var(--white);
-            color: var(--sidebar-bg);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+        .lang-toggle:hover {
+            background: #dee2e6;
+            transform: translateY(-1px);
+        }
+
+        .lang-toggle:active {
+            transform: translateY(0);
         }
 
         .brand {
@@ -493,6 +491,19 @@
                 gap: 15px;
             }
 
+            .user-profile {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .lang-toggle {
+                margin-right: 5px;
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+
             .top-header h1 {
                 font-size: 1.5rem;
             }
@@ -598,10 +609,9 @@
         <div class="top-header">
             <h1 id="page-title" data-i18n="nav_dashboard">Vista General</h1>
             <div class="user-profile">
-                <div class="lang-switch">
-                    <button onclick="app.changeLanguage('es')" id="btn-lang-es">ES</button>
-                    <button onclick="app.changeLanguage('en')" id="btn-lang-en">EN</button>
-                </div>
+                <button onclick="app.toggleLanguage()" id="lang-toggle-btn" class="lang-toggle">
+                    🇬🇧 EN
+                </button>
                 <i class="fa-solid fa-circle-user fa-2x" style="color: var(--brand-gold);"></i>
                 <span id="user-email-display" data-i18n="loading">Cargando...</span>
             </div>
@@ -794,11 +804,19 @@
                 }
             },
 
+            toggleLanguage: function () {
+                const nextLang = this.currentLang === 'es' ? 'en' : 'es';
+                this.changeLanguage(nextLang);
+            },
+
             changeLanguage: function (lang) {
                 this.currentLang = lang;
                 localStorage.setItem('admin_lang', lang);
-                document.getElementById('btn-lang-es').classList.toggle('active', lang === 'es');
-                document.getElementById('btn-lang-en').classList.toggle('active', lang === 'en');
+                
+                const btn = document.getElementById('lang-toggle-btn');
+                if (btn) {
+                    btn.innerHTML = lang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
+                }
 
                 document.querySelectorAll('[data-i18n]').forEach(el => {
                     const key = el.getAttribute('data-i18n');
