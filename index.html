@@ -21,25 +21,68 @@
             SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6emJ2aW5ieXpheHJzaGxtbGNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NTI5NDYsImV4cCI6MjA5MTEyODk0Nn0.YgeGDVZfyqI-nv7iAhROMsBfZbIK7BGUDyU1ERE-SFA',
             TAXES: { IGIC_CANARIAS: 0.07 }
         };
-    </script>
 
-    <script>
+        // MAPEO CORRECTO: Buenos Aires es una bodega que produce en Mendoza.
+        const BODEGA_PROVINCIA_MAP = {
+            'Viñas en Flor': 'Salta', 'The Llama': 'Salta', 'Bodega Yacochuya': 'Salta',
+            'Coquena': 'Salta', 'Agustín Lanús Wines': 'Salta', 'Agustin Lanus Wines': 'Salta',
+            'Bodega Fernando Dupont': 'Jujuy',
+            'Nido del Tigre': 'San Juan',
+            'Paso a Paso': 'Mendoza', 'Paso a Paso Wines': 'Mendoza',
+            'Huentala Wines': 'Mendoza', 'Colosso Wines': 'Mendoza', 'Coloso Wines': 'Mendoza',
+            'Buenos Aires': 'Mendoza',
+            'Bodega del Desierto': 'La Pampa'
+        };
+
+        const getProvinciaBodega = (bodega) => BODEGA_PROVINCIA_MAP[bodega] || 'Desconocida';
+
         const APIModule = (() => {
             const config = API_CONFIG;
-            const supabase = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+            let supabase = null;
 
-            const getWines = async () => {
-                try {
-                    const { data, error } = await supabase.from('products').select('*').order('region', { ascending: true });
-                    if (error) throw error;
-                    return data || [];
-                } catch (error) {
-                    console.error('Error en getWines:', error);
-                    return [];
+            const waitForSupabase = async () => {
+                for (let i = 0; i < 100; i++) {
+                    if (window.supabase) {
+                        supabase = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+                        return true;
+                    }
+                    await new Promise(r => setTimeout(r, 50));
                 }
+                console.error('Error Crítico: Supabase no cargó.');
+                return false;
             };
 
-            return { getWines, supabase };
+            return {
+                getWines: async () => {
+                    if (!supabase) {
+                        const ready = await waitForSupabase();
+                        if (!ready) return [];
+                    }
+
+                    try {
+                        const { data, error } = await supabase.from('products').select('*');
+                        if (error) throw error;
+
+                        return (data || [])
+                            .map(wine => ({ ...wine, provincia: getProvinciaBodega(wine.bodega) }))
+                            .sort((a, b) => {
+                                // 1º PRIORIDAD ABSOLUTA: Bodega 'Buenos Aires' va primero en todo
+                                if (a.bodega === 'Buenos Aires' && b.bodega !== 'Buenos Aires') return -1;
+                                if (b.bodega === 'Buenos Aires' && a.bodega !== 'Buenos Aires') return 1;
+
+                                // 2º ORDEN: Por Bodega (para agrupar los vinos de la misma familia)
+                                const bOrder = (a.bodega || '').localeCompare(b.bodega || '');
+                                if (bOrder !== 0) return bOrder;
+
+                                // 3º ORDEN: Por Precio ascendente (dentro de la misma bodega)
+                                return (a.price_retail || a.price || 0) - (b.price_retail || b.price || 0);
+                            });
+                    } catch (error) {
+                        console.error('Error getWines:', error);
+                        return [];
+                    }
+                }
+            };
         })();
     </script>
 
@@ -55,10 +98,6 @@
                     fontFamily: {
                         serif: ['"Playfair Display"', 'serif'],
                         sans: ['"Montserrat"', 'sans-serif'],
-                    },
-                    boxShadow: {
-                        'premium': '0 10px 40px -10px rgba(43, 7, 16, 0.08)',
-                        'float': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
                     }
                 }
             }
@@ -71,7 +110,6 @@
             color: theme('colors.stone.800');
         }
 
-        /* Sistema de Idiomas */
         body.lang-en [lang="es"] {
             display: none !important;
         }
@@ -84,7 +122,6 @@
             background: linear-gradient(90deg, #ffffff 0%, #ffffff 33.33%, #00a1e4 33.33%, #00a1e4 66.66%, #fcd116 66.66%, #fcd116 100%);
         }
 
-        /* Animaciones Carrito y Filas */
         #cart-drawer {
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -97,22 +134,11 @@
             transition: opacity 0.3s ease;
         }
 
-        .wine-row {
-            transition: all 0.3s ease;
-            border-left: 3px solid transparent;
-        }
-
         .wine-row:hover {
             background-color: #FFFFFF;
-            box-shadow: theme('boxShadow.premium');
             z-index: 10;
             position: relative;
             border-radius: 0.5rem;
-        }
-
-        .wine-row.in-cart {
-            background-color: theme('colors.stone.100');
-            border-left: 3px solid theme('colors.gold.500');
         }
 
         .btn-pop:active {
@@ -189,8 +215,10 @@
 
             <p
                 class="text-2xl md:text-3xl text-stone-100 font-light max-w-3xl mx-auto leading-relaxed mb-10 italic drop-shadow-md">
-                <span lang="es">El prestigio mundial del vino argentino, desde la inmensidad de los Andes directo a Islas Canarias.</span>
-                <span lang="en">The global prestige of Argentine wine, from the immensity of the Andes straight to the Canary Islands.</span>
+                <span lang="es">El prestigio mundial del vino argentino, desde la inmensidad de los Andes directo a
+                    Islas Canarias.</span>
+                <span lang="en">The global prestige of Argentine wine, from the immensity of the Andes straight to the
+                    Canary Islands.</span>
             </p>
 
             <p class="text-sm md:text-base text-stone-300 font-light max-w-2xl mx-auto leading-relaxed mb-12">
@@ -210,33 +238,6 @@
         </div>
     </header>
 
-    <section class="py-12 bg-white border-b border-stone-100 relative z-20 shadow-sm">
-        <div
-            class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left divide-y md:divide-y-0 md:divide-x divide-stone-100">
-            <div class="py-4 md:py-0 md:px-8">
-                <h3 class="text-wine-800 font-serif text-2xl mb-2"><span lang="es">Importación Directa</span><span
-                        lang="en">Direct Import</span></h3>
-                <p class="text-sm text-stone-500 leading-relaxed"><span lang="es">Sin intermediarios. Del viñedo
-                        argentino a su puerta en Canarias.</span><span lang="en">No intermediaries. From the vineyard to
-                        your door.</span></p>
-            </div>
-            <div class="py-4 md:py-0 md:px-8">
-                <h3 class="text-wine-800 font-serif text-2xl mb-2"><span lang="es">Logística Interinsular</span><span
-                        lang="en">Inter-island Logistics</span></h3>
-                <p class="text-sm text-stone-500 leading-relaxed"><span lang="es">Operamos en las 8 islas garantizando
-                        transporte seguro.</span><span lang="en">Operating across all 8 islands ensuring safe
-                        transport.</span></p>
-            </div>
-            <div class="py-4 md:py-0 md:px-8">
-                <h3 class="text-wine-800 font-serif text-2xl mb-2"><span lang="es">Colección Exclusiva</span><span
-                        lang="en">Exclusive Collection</span></h3>
-                <p class="text-sm text-stone-500 leading-relaxed"><span lang="es">Vinos seleccionados, desde la extrema
-                        altitud de Salta hasta la Patagonia.</span><span lang="en">Selected wines, from Salta to
-                        Patagonia.</span></p>
-            </div>
-        </div>
-    </section>
-
     <main id="catalog" class="max-w-6xl mx-auto px-4 py-20 space-y-16">
 
         <div class="flex flex-col md:flex-row justify-between items-end mb-10 pb-6 border-b border-stone-200">
@@ -255,9 +256,9 @@
             </div>
         </div>
 
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
             <div class="flex flex-wrap gap-2 md:gap-3">
-                <button onclick="toggleFilter('all')" data-category="all"
+                <button onclick="toggleFilter('all', 'type')" data-value="all" data-category="type"
                     class="filter-btn bg-wine-900 text-white border-wine-900 border px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm transition-colors"><span
                         lang="es">Todos</span><span lang="en">All</span></button>
                 <div class="w-px h-6 bg-stone-300 mx-1 hidden sm:block self-center"></div>
@@ -288,29 +289,50 @@
             </div>
         </div>
 
-        <section id="section-norte" class="region-section">
-            <div class="mb-6">
-                <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]"><span lang="es">Altitud
-                        Extrema</span><span lang="en">Extreme Altitude</span></span>
-                <h3 class="text-3xl font-serif text-stone-900 mt-1"><span lang="es">Norte Argentino</span><span
-                        lang="en">Northern Argentina</span></h3>
-                <p class="text-sm text-stone-500 mt-2 italic">Valles Calchaquíes y Quebrada de Humahuaca (1.700m -
-                    2.800m)</p>
-            </div>
-            <div id="container-norte" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            </div>
-        </section>
+        <div class="flex flex-wrap items-center gap-2 md:gap-3 mb-10 pb-6 border-b border-stone-100">
+            <div class="text-xs font-bold uppercase text-stone-400 tracking-widest py-2.5 pr-2"><span
+                    lang="es">Provincia:</span><span lang="en">Province:</span></div>
+            <button onclick="toggleFilter('todas_prov', 'provincia')" data-value="todas_prov" data-category="provincia"
+                class="filter-btn bg-wine-900 text-white border-wine-900 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm transition-colors"><span
+                    lang="es">Todas</span><span lang="en">All</span></button>
+            <button onclick="toggleFilter('Mendoza', 'provincia')" data-value="Mendoza" data-category="provincia"
+                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Mendoza</button>
+            <button onclick="toggleFilter('San Juan', 'provincia')" data-value="San Juan" data-category="provincia"
+                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">San
+                Juan</button>
+            <button onclick="toggleFilter('Salta', 'provincia')" data-value="Salta" data-category="provincia"
+                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Salta</button>
+            <button onclick="toggleFilter('Jujuy', 'provincia')" data-value="Jujuy" data-category="provincia"
+                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Jujuy</button>
+            <button onclick="toggleFilter('La Pampa', 'provincia')" data-value="La Pampa" data-category="provincia"
+                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">La
+                Pampa</button>
+        </div>
 
-        <section id="section-cuyo" class="region-section mt-16">
+        <section id="section-cuyo" class="region-section">
             <div class="mb-6">
                 <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]"><span lang="es">Corazón
                         Enológico</span><span lang="en">Oenological Heart</span></span>
                 <h3 class="text-3xl font-serif text-stone-900 mt-1"><span lang="es">Región de Cuyo</span><span
                         lang="en">Cuyo Region</span></h3>
-                <p class="text-sm text-stone-500 mt-2 italic">Mendoza, Valle de Uco y San Juan (900m - 1.500m)</p>
+                <p class="text-sm text-stone-500 mt-2 italic"><span lang="es">Mendoza y San Juan - Valle de Uco, Maipú y
+                        Calingasta (900m - 1.500m)</span><span lang="en">Mendoza & San Juan - Uco Valley, Maipu &
+                        Calingasta (900m - 1.500m)</span></p>
             </div>
-            <div id="container-cuyo" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="container-cuyo" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </section>
+
+        <section id="section-norte" class="region-section mt-16">
+            <div class="mb-6">
+                <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]"><span lang="es">Altitud
+                        Extrema</span><span lang="en">Extreme Altitude</span></span>
+                <h3 class="text-3xl font-serif text-stone-900 mt-1"><span lang="es">Norte Argentino</span><span
+                        lang="en">Northern Argentina</span></h3>
+                <p class="text-sm text-stone-500 mt-2 italic"><span lang="es">Salta y Jujuy - Valles Calchaquíes y
+                        Quebrada de Humahuaca (1.700m - 2.800m)</span><span lang="en">Salta & Jujuy - Calchaqui Valleys
+                        & Quebrada de Humahuaca (1.700m - 2.800m)</span></p>
             </div>
+            <div id="container-norte" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </section>
 
         <section id="section-patagonia" class="region-section mt-16">
@@ -319,10 +341,10 @@
                         Extremo</span><span lang="en">The Extreme South</span></span>
                 <h3 class="text-3xl font-serif text-stone-900 mt-1"><span lang="es">Patagonia Argentina</span><span
                         lang="en">Argentine Patagonia</span></h3>
-                <p class="text-sm text-stone-500 mt-2 italic">Alto Valle del Río Colorado, La Pampa (300m)</p>
+                <p class="text-sm text-stone-500 mt-2 italic"><span lang="es">La Pampa - Alto Valle del Río Colorado
+                        (300m)</span><span lang="en">La Pampa - Colorado River High Valley (300m)</span></p>
             </div>
-            <div id="container-patagonia" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            </div>
+            <div id="container-patagonia" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </section>
 
         <div id="no-results" class="hidden py-16 text-center text-stone-400 italic" data-i18n="not_found">No se
@@ -336,11 +358,10 @@
             </svg>
             <p class="leading-relaxed text-[13px] md:text-sm">
                 <span lang="es"><strong>Nota:</strong> Los tiempos de logística y entrega pueden variar según la isla de
-                    destino y disponibilidad. Las condiciones exactas serán confirmadas durante el proceso de compra y
-                    el seguimiento postventa.</span>
+                    destino y disponibilidad. Las condiciones exactas serán confirmadas durante el proceso de
+                    compra.</span>
                 <span lang="en"><strong>Note:</strong> Logistics and delivery times may vary depending on the
-                    destination island and availability. Exact conditions will be confirmed during the checkout process
-                    and post-sale tracking.</span>
+                    destination island and availability. Exact conditions will be confirmed during checkout.</span>
             </p>
         </div>
     </main>
@@ -425,29 +446,34 @@
 
         let catalogData = [];
         let cart = {};
-        let activeFilters = { type: new Set(), region: new Set(), box: new Set() };
+        let activeFilters = { type: new Set(), provincia: new Set(), box: new Set() };
 
         async function initCatalog() {
-            const wines = await APIModule.getWines();
-            if (wines && wines.length > 0) {
-                catalogData = wines.map(wine => {
-                    const pvpConIgic = wine.price_retail || wine.price || 0;
-                    const precioNeto = pvpConIgic / 1.07;
+            try {
+                const wines = await APIModule.getWines();
+                if (wines && wines.length > 0) {
+                    catalogData = wines.map(wine => {
+                        const pvpConIgic = wine.price_retail || wine.price || 0;
+                        const precioNeto = pvpConIgic / 1.07;
 
-                    return {
-                        id: wine.uuid || wine.id,
-                        type: wine.type,
-                        region: wine.region,
-                        box: wine.box_size || wine.box,
-                        price: precioNeto,
-                        bodega: wine.bodega,
-                        name: wine.name,
-                        notes_es: wine.notes_es,
-                        notes_en: wine.notes_en,
-                        image_url: wine.image_url
-                    };
-                });
-                renderCatalog();
+                        return {
+                            id: wine.uuid || wine.id,
+                            type: wine.type,
+                            region: wine.region,
+                            provincia: wine.provincia,
+                            box: wine.box_size || wine.box,
+                            price: precioNeto,
+                            bodega: wine.bodega,
+                            name: wine.name,
+                            notes_es: wine.notes_es,
+                            notes_en: wine.notes_en,
+                            image_url: wine.image_url
+                        };
+                    });
+                    renderCatalog();
+                }
+            } catch (error) {
+                console.error('Error loading wines:', error);
             }
         }
 
@@ -459,9 +485,7 @@
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 const translation = siteTranslations[lang][key];
-                if (translation) {
-                    el.textContent = translation;
-                }
+                if (translation) { el.textContent = translation; }
             });
 
             renderCart();
@@ -474,8 +498,10 @@
             const boxFilter = document.getElementById('filter-box').value;
             const sortPrice = document.getElementById('sort-price').value;
 
+            // Filtros acumulativos
             let filtered = catalogData.filter(w => {
                 if (activeFilters.type.size > 0 && !activeFilters.type.has(w.type)) return false;
+                if (activeFilters.provincia.size > 0 && !activeFilters.provincia.has(w.provincia)) return false;
                 if (boxFilter !== 'all' && w.box.toString() !== boxFilter) return false;
                 return true;
             });
@@ -486,8 +512,9 @@
                 filtered.sort((a, b) => b.price - a.price);
             }
 
-            const norte = filtered.filter(w => w.region === 'norte');
+            // Reparto exacto de secciones según su región
             const cuyo = filtered.filter(w => w.region === 'cuyo');
+            const norte = filtered.filter(w => w.region === 'norte');
             const patagonia = filtered.filter(w => w.region === 'patagonia');
 
             const generateHtml = (wines) => {
@@ -498,30 +525,28 @@
                     const price = w.price.toFixed(2).replace('.', ',');
                     const inCartCls = cart[w.id] ? 'ring-2 ring-gold-500' : '';
                     const cartQty = cart[w.id] ? cart[w.id].qty : 0;
-                    const notes = currentLang === 'en' ? (w.notes_en || w.notes_es) : w.notes_es;
 
-                    const imgSrc = (w.image_url ? w.image_url + '?v=1.1' : 'https://images.unsplash.com/photo-1510850402719-e4c670846019?auto=format&fit=crop&q=80&w=800');
+                    let notes = w.notes_es || '';
+                    if (currentLang === 'en' && w.notes_en) { notes = w.notes_en; }
+
+                    const imgSrc = w.image_url ? `${w.image_url}?v=1.1` : 'https://images.unsplash.com/photo-1510850402719-e4c670846019?auto=format&fit=crop&q=80&w=800';
 
                     return `
                         <article class="flex flex-col bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-stone-100 overflow-hidden h-full ${inCartCls}" data-wine-id="${w.id}">
-                            
                             <div class="h-72 bg-stone-50 relative overflow-hidden group flex items-center justify-center p-6">
                                 <img src="${imgSrc}" alt="${w.name}" class="w-full h-full object-contain drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
-                                <div class="absolute top-3 right-3 flex flex-col gap-2">
-                                    <span class="bg-wine-900/90 text-white text-[9px] font-bold px-3 py-1 rounded-full backdrop-blur-sm uppercase tracking-widest border border-white/10">
-                                        Caja de ${w.box}
-                                    </span>
-                                    <span class="bg-white/90 text-wine-900 text-[9px] font-bold px-3 py-1 rounded-full backdrop-blur-sm shadow-sm uppercase tracking-widest border border-stone-100">
-                                        ${w.region}
-                                    </span>
+                                <div class="absolute top-3 right-3 flex flex-col gap-2 z-10">
+                                    <span class="bg-wine-900/90 text-white text-[9px] font-bold px-3 py-1 rounded-full backdrop-blur-sm uppercase tracking-widest border border-white/10">Caja de ${w.box}</span>
+                                    <span class="bg-white/90 text-wine-900 text-[9px] font-bold px-3 py-1 rounded-full backdrop-blur-sm shadow-sm uppercase tracking-widest border border-stone-100">${w.region}</span>
                                 </div>
                             </div>
-
                             <div class="p-5 flex flex-col flex-grow">
-                                <span class="text-[10px] font-bold uppercase text-stone-400 tracking-wider mb-1">${w.bodega || ''}</span>
+                                <div class="flex flex-col mb-2">
+                                    <span class="text-[10px] font-bold uppercase text-stone-400 tracking-wider mb-0.5">${w.bodega || ''}</span>
+                                    <span class="text-[9px] text-stone-500 font-medium">${w.provincia}, <span lang="es">Argentina</span><span lang="en">Argentina</span></span>
+                                </div>
                                 <h4 class="text-xl font-serif font-bold text-wine-900 mb-2 leading-tight">${w.name}</h4>
                                 <p class="text-sm text-stone-600 line-clamp-3 mb-4 leading-relaxed">${notes}</p>
-                                
                                 <div class="mt-auto border-t border-stone-100 pt-5">
                                     <div class="flex justify-between items-end mb-4">
                                         <div class="flex flex-col">
@@ -532,7 +557,6 @@
                                             <span class="text-xs text-stone-400 underline decoration-gold-500/30 font-medium">${price} € <span class="text-[9px]">/bot</span></span>
                                         </div>
                                     </div>
-
                                     <div class="flex items-center gap-3">
                                         <div class="flex items-center bg-stone-100 rounded-lg border border-stone-200 overflow-hidden h-11 shrink-0">
                                             <button onclick="updateQty('${w.id}', -1)" class="w-10 h-full flex items-center justify-center text-stone-500 hover:text-wine-800 hover:bg-stone-200 transition-colors btn-pop font-bold">−</button>
@@ -551,14 +575,23 @@
                 }).join('');
             };
 
-            document.getElementById('container-norte').innerHTML = generateHtml(norte);
             document.getElementById('container-cuyo').innerHTML = generateHtml(cuyo);
+            document.getElementById('container-norte').innerHTML = generateHtml(norte);
             document.getElementById('container-patagonia').innerHTML = generateHtml(patagonia);
+
+            document.getElementById('section-cuyo').style.display = cuyo.length > 0 ? 'block' : 'none';
+            document.getElementById('section-norte').style.display = norte.length > 0 ? 'block' : 'none';
+            document.getElementById('section-patagonia').style.display = patagonia.length > 0 ? 'block' : 'none';
+
+            const totalVinos = cuyo.length + norte.length + patagonia.length;
+            document.getElementById('no-results').classList.toggle('hidden', totalVinos > 0);
         }
 
         function toggleFilter(value, category) {
             if (value === 'all') {
                 activeFilters.type.clear();
+            } else if (value === 'todas_prov') {
+                activeFilters.provincia.clear();
             } else {
                 const targetSet = activeFilters[category];
                 targetSet.has(value) ? targetSet.delete(value) : targetSet.add(value);
@@ -566,11 +599,21 @@
 
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 const val = btn.dataset.value;
-                let isActive = (val === 'all' && activeFilters.type.size === 0) || (btn.dataset.category === 'type' && activeFilters.type.has(val));
+                const cat = btn.dataset.category;
+                let isActive = false;
+
+                if (cat === 'type') {
+                    if (val === 'all' && activeFilters.type.size === 0) isActive = true;
+                    if (activeFilters.type.has(val)) isActive = true;
+                } else if (cat === 'provincia') {
+                    if (val === 'todas_prov' && activeFilters.provincia.size === 0) isActive = true;
+                    if (activeFilters.provincia.has(val)) isActive = true;
+                }
+
                 if (isActive) {
-                    btn.className = "filter-btn bg-wine-900 text-white border-wine-900 border px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm transition-colors";
+                    btn.className = "filter-btn bg-wine-900 text-white border-wine-900 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm transition-colors";
                 } else {
-                    btn.className = "filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors";
+                    btn.className = "filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors";
                 }
             });
             renderCatalog();
