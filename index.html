@@ -273,14 +273,16 @@
                     class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors"><span
                         lang="es">Rosados</span><span lang="en">Rosés</span></button>
             </div>
-            
+
             <div class="flex flex-wrap gap-3 w-full lg:w-auto">
-                <select id="sort-price" class="bg-white text-stone-600 border border-stone-200 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-md shadow-sm focus:outline-none focus:border-wine-700 transition-colors w-full sm:w-auto appearance-none cursor-pointer truncate">
+                <select id="sort-price"
+                    class="bg-white text-stone-600 border border-stone-200 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-md shadow-sm focus:outline-none focus:border-wine-700 transition-colors w-full sm:w-auto appearance-none cursor-pointer truncate">
                     <option value="default" data-i18n="sort_price">Ordenar por precio</option>
                     <option value="asc" data-i18n="sort_asc">Precio: Menor a Mayor</option>
                     <option value="desc" data-i18n="sort_desc">Precio: Mayor a Menor</option>
                 </select>
-                <select id="filter-box" class="bg-white text-stone-600 border border-stone-200 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-md shadow-sm focus:outline-none focus:border-wine-700 transition-colors w-full sm:w-auto appearance-none cursor-pointer truncate">
+                <select id="filter-box"
+                    class="bg-white text-stone-600 border border-stone-200 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-md shadow-sm focus:outline-none focus:border-wine-700 transition-colors w-full sm:w-auto appearance-none cursor-pointer truncate">
                     <option value="all" data-i18n="filter_box_all">Todos los formatos</option>
                     <option value="6" data-i18n="filter_box_6">Cajas de 6</option>
                     <option value="12" data-i18n="filter_box_12">Cajas de 12</option>
@@ -297,17 +299,7 @@
                 <p class="text-sm text-stone-500 mt-2 italic">Valles Calchaquíes y Quebrada de Humahuaca (1.700m -
                     2.800m)</p>
             </div>
-            <div
-                class="hidden md:grid grid-cols-12 gap-6 px-6 py-3 bg-stone-100/50 rounded-t-lg border-x border-t border-stone-200 text-[10px] font-bold text-stone-500 uppercase tracking-widest">
-                <div class="col-span-5"><span lang="es">Bodega / Vino</span><span lang="en">Winery / Wine</span></div>
-                <div class="col-span-2 text-center"><span lang="es">Formato</span><span lang="en">Format</span></div>
-                <div class="col-span-2 text-right"><span lang="es">Precio Unitario</span><span lang="en">Unit
-                        Price</span></div>
-                <div class="col-span-3 text-right"><span lang="es">Cajas a Pedir</span><span lang="en">Order
-                        Boxes</span></div>
-            </div>
-            <div id="container-norte"
-                class="flex flex-col border border-t-0 border-stone-200 rounded-b-lg bg-white overflow-hidden shadow-sm">
+            <div id="container-norte" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             </div>
         </section>
 
@@ -319,17 +311,7 @@
                         lang="en">Cuyo Region</span></h3>
                 <p class="text-sm text-stone-500 mt-2 italic">Mendoza, Valle de Uco y San Juan (900m - 1.500m)</p>
             </div>
-            <div
-                class="hidden md:grid grid-cols-12 gap-6 px-6 py-3 bg-stone-100/50 rounded-t-lg border-x border-t border-stone-200 text-[10px] font-bold text-stone-500 uppercase tracking-widest">
-                <div class="col-span-5"><span lang="es">Bodega / Vino</span><span lang="en">Winery / Wine</span></div>
-                <div class="col-span-2 text-center"><span lang="es">Formato</span><span lang="en">Format</span></div>
-                <div class="col-span-2 text-right"><span lang="es">Precio Unitario</span><span lang="en">Unit
-                        Price</span></div>
-                <div class="col-span-3 text-right"><span lang="es">Cajas a Pedir</span><span lang="en">Order
-                        Boxes</span></div>
-            </div>
-            <div id="container-cuyo"
-                class="flex flex-col border border-t-0 border-stone-200 rounded-b-lg bg-white overflow-hidden shadow-sm">
+            <div id="container-cuyo" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             </div>
         </section>
 
@@ -341,27 +323,26 @@
                         lang="en">Argentine Patagonia</span></h3>
                 <p class="text-sm text-stone-500 mt-2 italic">Alto Valle del Río Colorado, La Pampa (300m)</p>
             </div>
-            <div
-                class="hidden md:grid grid-cols-12 gap-6 px-6 py-3 bg-stone-100/50 rounded-t-lg border-x border-t border-stone-200 text-[10px] font-bold text-stone-500 uppercase tracking-widest">
-                <div class="col-span-5"><span lang="es">Bodega / Vino</span><span lang="en">Winery / Wine</span></div>
-                <div class="col-span-2 text-center"><span lang="es">Formato</span><span lang="en">Format</span></div>
-                <div class="col-span-2 text-right"><span lang="es">Precio Unitario</span><span lang="en">Unit
-                        Price</span></div>
-                <div class="col-span-3 text-right"><span lang="es">Cajas a Pedir</span><span lang="en">Order
-                        Boxes</span></div>
-            </div>
-            <div id="container-patagonia"
-                class="flex flex-col border border-t-0 border-stone-200 rounded-b-lg bg-white overflow-hidden shadow-sm">
+            <div id="container-patagonia" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             </div>
         </section>
 
-        <div id="no-results" class="hidden py-16 text-center text-stone-400 italic" data-i18n="not_found">No se encontraron vinos.</div>
+        <div id="no-results" class="hidden py-16 text-center text-stone-400 italic" data-i18n="not_found">No se
+            encontraron vinos.</div>
 
-        <div class="mt-12 text-center text-sm text-stone-500 flex flex-col md:flex-row items-center justify-center gap-3 bg-stone-50 py-5 px-6 rounded-lg border border-stone-200 shadow-sm">
-            <svg class="w-6 h-6 text-stone-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <div
+            class="mt-12 text-center text-sm text-stone-500 flex flex-col md:flex-row items-center justify-center gap-3 bg-stone-50 py-5 px-6 rounded-lg border border-stone-200 shadow-sm">
+            <svg class="w-6 h-6 text-stone-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
             <p class="leading-relaxed text-[13px] md:text-sm">
-                <span lang="es"><strong>Nota:</strong> Los tiempos de logística y entrega pueden variar según la isla de destino y disponibilidad. Las condiciones exactas serán confirmadas durante el proceso de compra y el seguimiento postventa.</span>
-                <span lang="en"><strong>Note:</strong> Logistics and delivery times may vary depending on the destination island and availability. Exact conditions will be confirmed during the checkout process and post-sale tracking.</span>
+                <span lang="es"><strong>Nota:</strong> Los tiempos de logística y entrega pueden variar según la isla de
+                    destino y disponibilidad. Las condiciones exactas serán confirmadas durante el proceso de compra y
+                    el seguimiento postventa.</span>
+                <span lang="en"><strong>Note:</strong> Logistics and delivery times may vary depending on the
+                    destination island and availability. Exact conditions will be confirmed during the checkout process
+                    and post-sale tracking.</span>
             </p>
         </div>
     </main>
@@ -414,8 +395,10 @@
         <div class="px-6 py-6 bg-white border-t border-stone-200 shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
             <div class="flex justify-between items-end mb-6">
                 <div>
-                    <span class="block text-xs uppercase tracking-widest text-stone-400 font-bold mb-1" data-i18n="subtotal_net">Subtotal Neto</span>
-                    <span class="text-[10px] text-stone-400" data-i18n="taxes_hint">Impuestos a calcular en el pago</span>
+                    <span class="block text-xs uppercase tracking-widest text-stone-400 font-bold mb-1"
+                        data-i18n="subtotal_net">Subtotal Neto</span>
+                    <span class="text-[10px] text-stone-400" data-i18n="taxes_hint">Impuestos a calcular en el
+                        pago</span>
                 </div>
                 <div class="text-3xl font-serif text-wine-900 font-bold" id="cart-total">0,00 €</div>
             </div>
@@ -450,20 +433,20 @@
             const wines = await APIModule.getWines();
             if (wines && wines.length > 0) {
                 catalogData = wines.map(wine => {
-                    // EXTRACCIÓN DEL IGIC PARA MOSTRAR PRECIO NETO REAL
                     const pvpConIgic = wine.price_retail || wine.price || 0;
-                    const precioNeto = pvpConIgic / 1.07; // Le quitamos el 7%
+                    const precioNeto = pvpConIgic / 1.07;
 
                     return {
-                        id: wine.uuid || wine.id, // USAR UUID REAL DE SUPABASE (36 caracteres)
+                        id: wine.uuid || wine.id,
                         type: wine.type,
                         region: wine.region,
                         box: wine.box_size || wine.box,
-                        price: precioNeto, // El carrito ahora usa el precio sin impuestos
+                        price: precioNeto,
                         bodega: wine.bodega,
                         name: wine.name,
                         notes_es: wine.notes_es,
-                        notes_en: wine.notes_en
+                        notes_en: wine.notes_en,
+                        image_url: wine.image_url
                     };
                 });
                 renderCatalog();
@@ -474,7 +457,7 @@
             document.body.className = `antialiased relative lang-${lang}`;
             document.getElementById('btn-lang-es').className = lang === 'es' ? 'px-4 py-1.5 text-xs font-bold rounded-full bg-wine-900 text-white shadow-sm' : 'px-4 py-1.5 text-xs font-bold rounded-full text-stone-500 hover:text-wine-900';
             document.getElementById('btn-lang-en').className = lang === 'en' ? 'px-4 py-1.5 text-xs font-bold rounded-full bg-wine-900 text-white shadow-sm' : 'px-4 py-1.5 text-xs font-bold rounded-full text-stone-500 hover:text-wine-900';
-            
+
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 const translation = siteTranslations[lang][key];
@@ -509,48 +492,59 @@
             const patagonia = filtered.filter(w => w.region === 'patagonia');
 
             const generateHtml = (wines) => {
+                const currentLang = document.body.classList.contains('lang-en') ? 'en' : 'es';
+
                 return wines.map(w => {
                     const total = (w.price * w.box).toFixed(2).replace('.', ',');
                     const price = w.price.toFixed(2).replace('.', ',');
-                    const inCartCls = cart[w.id] ? 'in-cart' : '';
+                    const inCartCls = cart[w.id] ? 'ring-2 ring-gold-500' : '';
                     const cartQty = cart[w.id] ? cart[w.id].qty : 0;
+                    const notes = currentLang === 'en' ? (w.notes_en || '') : (w.notes_es || '');
 
-                    // Badges premium
-                    let extraTag = '';
-                    if (w.name && w.name.includes('(Orgánico)')) extraTag = '<span class="ml-2 px-2 py-0.5 border border-green-600/30 text-green-700 bg-green-50 text-[9px] font-bold uppercase rounded"><span lang="es">Orgánico</span><span lang="en">Organic</span></span>';
-                    if (w.name && w.name.includes('(Oro G&G)')) extraTag = '<span class="ml-2 px-2 py-0.5 border border-gold-500/50 text-gold-600 bg-gold-50 text-[9px] font-bold uppercase rounded"><span lang="es">Oro</span><span lang="en">Gold</span></span>';
+                    const imgSrc = (w.image_url ? w.image_url + '?v=1.1' : 'https://images.unsplash.com/photo-1510850402719-e4c670846019?auto=format&fit=crop&q=80&w=800');
 
                     return `
-                        <article class="wine-row group grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 items-center p-5 md:px-6 border-b border-stone-100 last:border-0 ${inCartCls}" data-wine-id="${w.id}">
+                        <article class="flex flex-col bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-stone-100 overflow-hidden h-full ${inCartCls}" data-wine-id="${w.id}">
                             
-                            <div class="col-span-1 md:col-span-5 flex flex-col">
-                                <span class="text-[9px] text-stone-400 uppercase tracking-widest font-bold mb-1">${w.bodega || ''}</span>
-                                <h4 class="text-lg md:text-xl font-serif text-wine-900 font-bold leading-tight flex items-center flex-wrap gap-1">${(w.name || '').replace(' (Orgánico)', '').replace(' (Oro G&G)', '')} ${extraTag}</h4>
-                            </div>
-
-                            <div class="col-span-1 md:col-span-2 flex justify-between md:justify-center items-center mt-2 md:mt-0">
-                                <span class="md:hidden text-xs text-stone-400 uppercase tracking-wider font-bold">Formato:</span>
-                                <div class="flex items-center gap-2 px-3 py-1.5 bg-stone-50 rounded-full border border-stone-200">
-                                    <svg class="w-3.5 h-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                                    <span class="text-[11px] text-stone-600 font-bold uppercase tracking-wide">Caja de ${w.box}</span>
+                            <div class="h-72 bg-stone-50 relative overflow-hidden group flex items-center justify-center p-6">
+                                <img src="${imgSrc}" alt="${w.name}" class="w-full h-full object-contain drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
+                                <div class="absolute top-3 right-3 flex flex-col gap-2">
+                                    <span class="bg-wine-900/90 text-white text-[9px] font-bold px-3 py-1 rounded-full backdrop-blur-sm uppercase tracking-widest border border-white/10">
+                                        Caja de ${w.box}
+                                    </span>
+                                    <span class="bg-white/90 text-wine-900 text-[9px] font-bold px-3 py-1 rounded-full backdrop-blur-sm shadow-sm uppercase tracking-widest border border-stone-100">
+                                        ${w.region}
+                                    </span>
                                 </div>
                             </div>
 
-                            <div class="col-span-1 md:col-span-2 flex justify-between md:justify-end items-center mt-1 md:mt-0">
-                                <span class="md:hidden text-xs text-stone-400 uppercase tracking-wider font-bold">Botella:</span>
-                                <span class="text-sm font-medium text-stone-500">${price} € <span class="text-[10px] text-stone-400">/bot</span></span>
-                            </div>
-
-                            <div class="col-span-1 md:col-span-3 flex justify-between md:justify-end items-center mt-3 md:mt-0 pt-3 md:pt-0 border-t md:border-t-0 border-stone-100">
-                                <div class="flex flex-col items-end mr-4 md:mr-5">
-                                    <span class="text-[9px] text-stone-400 md:hidden uppercase tracking-widest mb-0.5">Total Caja:</span>
-                                    <div class="text-xl font-serif font-bold text-wine-900 group-hover:text-gold-600 transition-colors">${total} €</div>
-                                </div>
+                            <div class="p-5 flex flex-col flex-grow">
+                                <span class="text-[10px] font-bold uppercase text-stone-400 tracking-wider mb-1">${w.bodega || ''}</span>
+                                <h4 class="text-xl font-serif font-bold text-wine-900 mb-2 leading-tight">${w.name}</h4>
+                                <p class="text-sm text-stone-600 line-clamp-3 mb-4 leading-relaxed">${notes}</p>
                                 
-                                <div class="flex items-center bg-white rounded-md border border-stone-200 shadow-sm overflow-hidden h-9">
-                                    <button onclick="updateQty('${w.id}', -1)" class="w-9 h-full flex items-center justify-center text-stone-400 hover:text-wine-800 hover:bg-stone-50 transition-colors btn-pop font-bold border-r border-stone-100">−</button>
-                                    <span class="w-8 text-center text-sm font-bold text-wine-900 bg-stone-50 h-full flex items-center justify-center">${cartQty}</span>
-                                    <button onclick="updateQty('${w.id}', 1)" class="w-9 h-full flex items-center justify-center text-stone-400 hover:text-wine-800 hover:bg-stone-50 transition-colors btn-pop font-bold border-l border-stone-100">+</button>
+                                <div class="mt-auto border-t border-stone-100 pt-5">
+                                    <div class="flex justify-between items-end mb-4">
+                                        <div class="flex flex-col">
+                                            <span class="text-[10px] text-stone-400 uppercase font-bold mb-0.5" data-i18n="subtotal_net">Precio Neto</span>
+                                            <div class="text-2xl font-serif font-bold text-wine-900">${total} €</div>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-xs text-stone-400 underline decoration-gold-500/30 font-medium">${price} € <span class="text-[9px]">/bot</span></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex items-center bg-stone-100 rounded-lg border border-stone-200 overflow-hidden h-11 shrink-0">
+                                            <button onclick="updateQty('${w.id}', -1)" class="w-10 h-full flex items-center justify-center text-stone-500 hover:text-wine-800 hover:bg-stone-200 transition-colors btn-pop font-bold">−</button>
+                                            <span class="w-8 text-center text-sm font-bold text-wine-900">${cartQty}</span>
+                                            <button onclick="updateQty('${w.id}', 1)" class="w-10 h-full flex items-center justify-center text-stone-500 hover:text-wine-800 hover:bg-stone-200 transition-colors btn-pop font-bold">+</button>
+                                        </div>
+                                        <button onclick="updateQty('${w.id}', 1)" class="flex-grow bg-wine-900 hover:bg-wine-800 text-white font-bold h-11 rounded-lg transition-colors flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] shadow-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                                            <span lang="es">Añadir</span><span lang="en">Add</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </article>
@@ -654,10 +648,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             const savedCart = localStorage.getItem('deAlturaCart');
             if (savedCart) { try { cart = JSON.parse(savedCart); } catch (e) { cart = {}; } }
-            
+
             document.getElementById('sort-price').addEventListener('change', renderCatalog);
             document.getElementById('filter-box').addEventListener('change', renderCatalog);
-            
+
             initCatalog().then(() => renderCart());
         });
     </script>
