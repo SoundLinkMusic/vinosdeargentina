@@ -808,8 +808,9 @@
                             <tr>
                                 <th data-i18n="table_reseller_code">Código Socio</th>
                                 <th data-i18n="table_reseller_name">Nombre</th>
-                                <th data-i18n="table_commission">Comisión %</th>
-                                <th data-i18n="table_total_sales">Ventas Totales</th>
+                                <th data-i18n="table_base_sales">Base Ventas (€)</th>
+                                <th data-i18n="table_commission">% Comisión</th>
+                                <th data-i18n="table_total_commission">Total Comisiones (€)</th>
                                 <th data-i18n="table_status">Estado</th>
                                 <th data-i18n="table_action">Acción</th>
                             </tr>
@@ -852,6 +853,7 @@
                     promos_title: 'Cupones y Promociones', table_promo_code: 'Código', table_promo_type: 'Tipo', table_discount_value: 'Descuento',
                     table_min_cart: 'Mínimo Carrito', table_status: 'Estado', resellers_title: 'Gestión de Resellers (Socios)',
                     table_reseller_code: 'Código Socio', table_reseller_name: 'Nombre', table_commission: 'Comisión %', table_total_sales: 'Ventas Totales',
+                    table_base_sales: 'Base Ventas (€)', table_total_commission: 'Total Comisiones (€)',
                     no_promos_data: 'No hay promociones registradas.', no_resellers_data: 'No hay socios registrados.',
                     toggle_active: 'Activar/Desactivar'
                 },
@@ -881,6 +883,7 @@
                     promos_title: 'Coupons & Promotions', table_promo_code: 'Code', table_promo_type: 'Type', table_discount_value: 'Discount',
                     table_min_cart: 'Min Cart', table_status: 'Status', resellers_title: 'Resellers Management (Partners)',
                     table_reseller_code: 'Partner Code', table_reseller_name: 'Name', table_commission: 'Commission %', table_total_sales: 'Total Sales',
+                    table_base_sales: 'Base Sales (€)', table_total_commission: 'Total Commissions (€)',
                     no_promos_data: 'No promotions registered.', no_resellers_data: 'No partners registered.',
                     toggle_active: 'Toggle Active/Inactive'
                 }
@@ -1188,12 +1191,15 @@
                             <td>${discountDisplay}</td>
                             <td>${p.min_cart_amount ? p.min_cart_amount + '€' : 'Sin mínimo'}</td>
                             <td><span class="status-badge ${statusBadge}">${statusText}</span></td>
-                            <td style="display: flex; gap: 8px;">
-                                <button class="btn-action" onclick="app.openPromoModal(${JSON.stringify(p).replace(/"/g, '&quot;')})" title="Editar" style="padding: 4px 8px; background: var(--brand-gold); border: none;">
+                            <td style="display: flex; gap: 6px; align-items: center;">
+                                <button class="btn-action" onclick="app.openPromoModal(${JSON.stringify(p).replace(/"/g, '&quot;')})" title="Editar" style="padding: 4px 8px; background: var(--brand-gold); border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
-                                <button class="btn-action" onclick="app.togglePromoStatus('${p.id}', ${!p.is_active})" title="Toggle" style="padding: 4px 8px;">
+                                <button class="btn-action" onclick="app.togglePromoStatus('${p.id}', ${!p.is_active})" title="Toggle" style="padding: 4px 8px; background: var(--sidebar-hover); border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
                                     <i class="fa-solid fa-toggle-${p.is_active ? 'on' : 'off'}"></i>
+                                </button>
+                                <button class="btn-action" onclick="app.deletePromo('${p.id}')" title="Eliminar" style="padding: 4px 8px; background: var(--danger); color: white; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                                    <i class="fa-solid fa-trash"></i>
                                 </button>
                             </td>
                         </tr>`;
@@ -1219,30 +1225,54 @@
                 }
             },
 
+            deletePromo: async function (id) {
+                if (!confirm('¿Estás seguro de que deseas eliminar este cupón?')) return;
+
+                try {
+                    const { error } = await this.db.from('promotions').delete().eq('id', id);
+                    if (error) {
+                        alert('Error al eliminar: ' + error.message);
+                    } else {
+                        this.showToast('Cupón eliminado');
+                        this.loadPromos();
+                    }
+                } catch (err) {
+                    console.error('Error eliminando promo:', err);
+                    alert('Error al eliminar: ' + err.message);
+                }
+            },
+
             loadResellers: async function () {
                 try {
                     const { data: resellers, error } = await this.db.from('resellers').select('*').order('created_at', { ascending: false });
                     if (error || !resellers) {
-                        document.getElementById('resellers-body').innerHTML = `<tr><td colspan="6" style="text-align:center;">${this.adminTranslations[this.currentLang].no_resellers_data}</td></tr>`;
+                        document.getElementById('resellers-body').innerHTML = `<tr><td colspan="7" style="text-align:center;">${this.adminTranslations[this.currentLang].no_resellers_data}</td></tr>`;
                         return;
                     }
 
                     const html = resellers.map(r => {
                         const statusBadge = r.is_active ? 'badge-paid' : 'badge-pending';
                         const statusText = r.is_active ? 'Activo' : 'Inactivo';
+                        const baseSales = r.total_sales || 0;
+                        const commissionRate = r.commission_rate || 0;
+                        const totalCommission = baseSales * (commissionRate / 100);
 
                         return `<tr>
                             <td><strong>${r.code}</strong></td>
                             <td>${r.name}</td>
-                            <td>${r.commission_rate || 0}%</td>
-                            <td>${r.total_sales ? r.total_sales.toFixed(2) + '€' : '0.00€'}</td>
+                            <td><strong style="color: var(--success);">${baseSales.toFixed(2)} €</strong></td>
+                            <td>${commissionRate.toFixed(2)}%</td>
+                            <td><strong style="color: var(--brand-gold);">${totalCommission.toFixed(2)} €</strong></td>
                             <td><span class="status-badge ${statusBadge}">${statusText}</span></td>
-                            <td style="display: flex; gap: 8px;">
-                                <button class="btn-action" onclick="app.openResellerModal(${JSON.stringify(r).replace(/"/g, '&quot;')})" title="Editar" style="padding: 4px 8px; background: var(--brand-gold); border: none;">
+                            <td style="display: flex; gap: 6px; align-items: center;">
+                                <button class="btn-action" onclick="app.openResellerModal(${JSON.stringify(r).replace(/"/g, '&quot;')})" title="Editar" style="padding: 4px 8px; background: var(--brand-gold); border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
-                                <button class="btn-action" onclick="app.toggleResellerStatus('${r.id}', ${!r.is_active})" title="Toggle" style="padding: 4px 8px;">
+                                <button class="btn-action" onclick="app.toggleResellerStatus('${r.id}', ${!r.is_active})" title="Toggle" style="padding: 4px 8px; background: var(--sidebar-hover); border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
                                     <i class="fa-solid fa-toggle-${r.is_active ? 'on' : 'off'}"></i>
+                                </button>
+                                <button class="btn-action" onclick="app.deleteReseller('${r.id}')" title="Eliminar" style="padding: 4px 8px; background: var(--danger); color: white; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                                    <i class="fa-solid fa-trash"></i>
                                 </button>
                             </td>
                         </tr>`;
@@ -1265,6 +1295,23 @@
                     }
                 } catch (err) {
                     console.error("Error cambiando estado de reseller:", err);
+                }
+            },
+
+            deleteReseller: async function (id) {
+                if (!confirm('¿Estás seguro de que deseas eliminar este socio?')) return;
+
+                try {
+                    const { error } = await this.db.from('resellers').delete().eq('id', id);
+                    if (error) {
+                        alert('Error al eliminar: ' + error.message);
+                    } else {
+                        this.showToast('Socio eliminado');
+                        this.loadResellers();
+                    }
+                } catch (err) {
+                    console.error('Error eliminando reseller:', err);
+                    alert('Error al eliminar: ' + err.message);
                 }
             },
 
