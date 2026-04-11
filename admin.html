@@ -564,6 +564,12 @@
             }
         }
 
+        @media (max-width: 1024px) {
+            [style*="grid-template-columns: 2fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
         @media (max-width: 480px) {
             .metrics-grid {
                 grid-template-columns: 1fr;
@@ -681,30 +687,67 @@
                     </div>
                     <div class="metric-icon icon-blue"><i class="fa-solid fa-clipboard-check"></i></div>
                 </div>
+                <div class="metric-card">
+                    <div class="metric-info">
+                        <h4 data-i18n="metric_boxes_sold">Cajas Vendidas</h4>
+                        <h2 id="metric-boxes">0</h2>
+                    </div>
+                    <div class="metric-icon icon-blue"><i class="fa-solid fa-boxes-stacked"></i></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-info">
+                        <h4 data-i18n="metric_total_cogs">Coste Total (COGS)</h4>
+                        <h2 id="metric-cogs">0.00 €</h2>
+                    </div>
+                    <div class="metric-icon icon-red"><i class="fa-solid fa-chart-line"></i></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-info">
+                        <h4 data-i18n="metric_gross_margin">Margen Bruto</h4>
+                        <div style="display: flex; align-items: baseline; gap: 8px;">
+                            <h2 id="metric-margin-amount" style="margin: 0;">0.00 €</h2>
+                            <span id="metric-margin-percent" style="font-size: 0.9rem; color: var(--success); font-weight: 600;">0%</span>
+                        </div>
+                    </div>
+                    <div class="metric-icon icon-green"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                </div>
             </div>
 
-            <div class="panel">
-                <div class="panel-header">
-                    <h3 data-i18n="recent_orders_title"><i class="fa-solid fa-clock-rotate-left"></i> Últimos Pedidos Recibidos</h3>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 25px; margin-bottom: 40px;">
+                <!-- RECENT ORDERS: 2 columnas -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3 data-i18n="recent_orders_title"><i class="fa-solid fa-clock-rotate-left"></i> Últimos Pedidos Recibidos</h3>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-i18n="table_id">ID / Ref</th>
+                                    <th data-i18n="table_customer">Cliente</th>
+                                    <th data-i18n="table_origin_promo">Origen / Promo</th>
+                                    <th data-i18n="table_total">Total</th>
+                                    <th data-i18n="table_payment_status">Estado Pago</th>
+                                    <th data-i18n="table_logistics">Logística (WhatsApp)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-orders-body">
+                                <tr>
+                                    <td colspan="6" style="text-align:center;" data-i18n="loading">Cargando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th data-i18n="table_id">ID / Ref</th>
-                                <th data-i18n="table_customer">Cliente</th>
-                                <th data-i18n="table_origin_promo">Origen / Promo</th>
-                                <th data-i18n="table_total">Total</th>
-                                <th data-i18n="table_payment_status">Estado Pago</th>
-                                <th data-i18n="table_logistics">Logística (WhatsApp)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recent-orders-body">
-                            <tr>
-                                <td colspan="5" style="text-align:center;" data-i18n="loading">Cargando...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+                <!-- TOP WINES: 1 columna -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3 data-i18n="top_wines_title"><i class="fa-solid fa-wine-glass"></i> Top Vinos Más Vendidos</h3>
+                    </div>
+                    <div id="top-wines-body" style="padding: 20px;">
+                        <div style="text-align: center; color: var(--text-muted);" data-i18n="loading">Cargando...</div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -882,7 +925,9 @@
                     error_reseller_validation: 'Por favor completa Código, Nombre y Comisión del Socio.',
                     metric_gross_sales: 'Ventas Brutas', metric_discounts: 'Descuentos Aplicados', metric_net_income: 'Ingresos Netos',
                     metric_partner_commissions: 'Comisiones a Socios', table_origin_promo: 'Origen / Promo', origin_organic: 'Orgánico',
-                    origin_coupon: 'Cupón', origin_partner: 'Socio'
+                    origin_coupon: 'Cupón', origin_partner: 'Socio',
+                    metric_boxes_sold: 'Cajas Vendidas', metric_total_cogs: 'Coste Total (COGS)', metric_gross_margin: 'Margen Bruto',
+                    top_wines_title: 'Top Vinos Más Vendidos', top_wine_name: 'Vino', top_wine_boxes: 'Cajas', top_wine_revenue: 'Ingreso'
                 },
                 en: {
                     nav_dashboard: 'Dashboard', nav_orders: 'Sales & Shipping', nav_inventory: 'Catalog & Pricing', nav_crm: 'Customer CRM', nav_promos: 'Coupons & Promos', nav_resellers: 'Resellers (Partners)',
@@ -924,7 +969,9 @@
                     error_reseller_validation: 'Please complete Partner Code, Name, and Commission.',
                     metric_gross_sales: 'Gross Sales', metric_discounts: 'Discounts Applied', metric_net_income: 'Net Revenue',
                     metric_partner_commissions: 'Partner Commissions', table_origin_promo: 'Source / Promo', origin_organic: 'Organic',
-                    origin_coupon: 'Coupon', origin_partner: 'Partner'
+                    origin_coupon: 'Coupon', origin_partner: 'Partner',
+                    metric_boxes_sold: 'Boxes Sold', metric_total_cogs: 'Total Cost (COGS)', metric_gross_margin: 'Gross Margin',
+                    top_wines_title: 'Top Wines Sold', top_wine_name: 'Wine', top_wine_boxes: 'Boxes', top_wine_revenue: 'Revenue'
                 }
             },
 
@@ -999,12 +1046,16 @@
                 try {
                     const { data: orders } = await this.db.from('orders').select('*').order('created_at', { ascending: false });
                     const { data: resellers } = await this.db.from('resellers').select('*');
-                    const { data: products } = await this.db.from('products').select('stock');
+                    const { data: products } = await this.db.from('products').select('*');
 
                     // KPI TOTALS
                     let grossSales = 0, discounts = 0, netIncome = 0, taxes = 0, commissions = 0;
+                    let totalBoxes = 0, totalCOGS = 0;
                     let paidCount = 0;
                     let recentRows = '';
+
+                    // TOP PRODUCTS TRACKING
+                    const productSales = {}; // { productName: { boxes: N, revenue: X } }
 
                     if (orders && orders.length > 0) {
                         orders.forEach((o, index) => {
@@ -1020,6 +1071,30 @@
                                 netIncome += baseImponible;
                                 taxes += igic;
                                 paidCount++;
+
+                                // PROCESAR ITEMS: Cajas, COGS, Top Productos
+                                if (o.items && Array.isArray(o.items)) {
+                                    o.items.forEach(item => {
+                                        const qty = parseInt(item.qty) || 1;
+                                        const boxSize = parseInt(item.box) || 1;
+                                        const totalBoxes_item = qty * boxSize;
+                                        totalBoxes += totalBoxes_item;
+
+                                        // COSTE: Asumir 50% del precio si no hay dato real
+                                        const itemPrice = parseFloat(item.price) || 0;
+                                        const itemCost = itemPrice * 0.5;
+                                        const itemCOGS = itemCost * qty;
+                                        totalCOGS += itemCOGS;
+
+                                        // TOP PRODUCTOS: Agrupar por nombre
+                                        const productName = item.name || 'Unknown';
+                                        if (!productSales[productName]) {
+                                            productSales[productName] = { boxes: 0, revenue: 0 };
+                                        }
+                                        productSales[productName].boxes += totalBoxes_item;
+                                        productSales[productName].revenue += itemPrice * qty;
+                                    });
+                                }
 
                                 // COMISIONES: Si es tipo RESELLER, buscar commission_rate
                                 if (o.promo_type === 'RESELLER' && o.promo_code && resellers) {
@@ -1070,6 +1145,10 @@
                         document.getElementById('recent-orders-body').innerHTML = `<tr><td colspan="6" style="text-align:center;">${this.adminTranslations[this.currentLang].no_sales_recorded}</td></tr>`;
                     }
 
+                    // CALCULAR MARGEN BRUTO
+                    const marginAmount = netIncome - totalCOGS;
+                    const marginPercent = netIncome > 0 ? ((marginAmount / netIncome) * 100).toFixed(1) : 0;
+
                     // ACTUALIZAR KPIs
                     document.getElementById('metric-gross-sales').textContent = grossSales.toFixed(2) + ' €';
                     document.getElementById('metric-discounts').textContent = discounts.toFixed(2) + ' €';
@@ -1077,6 +1156,30 @@
                     document.getElementById('metric-tax').textContent = taxes.toFixed(2) + ' €';
                     document.getElementById('metric-commissions').textContent = commissions.toFixed(2) + ' €';
                     document.getElementById('metric-orders').textContent = paidCount;
+                    document.getElementById('metric-boxes').textContent = totalBoxes;
+                    document.getElementById('metric-cogs').textContent = totalCOGS.toFixed(2) + ' €';
+                    document.getElementById('metric-margin-amount').textContent = marginAmount.toFixed(2) + ' €';
+                    document.getElementById('metric-margin-percent').textContent = marginPercent + '%';
+
+                    // TOP VINOS RANKING
+                    const topVinos = Object.entries(productSales)
+                        .map(([name, data]) => ({ name, ...data }))
+                        .sort((a, b) => b.boxes - a.boxes)
+                        .slice(0, 5);
+
+                    const topVinosHtml = topVinos.length > 0
+                        ? topVinos.map((vino, idx) => `
+                            <div style="padding: 12px 0; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;">${idx + 1}. ${vino.name}</div>
+                                    <small style="color: var(--text-muted); font-size: 0.8rem;">${vino.boxes} ${this.adminTranslations[this.currentLang].top_wine_boxes}</small>
+                                </div>
+                                <div style="text-align: right; color: var(--brand-gold); font-weight: 600; font-size: 0.9rem;">${vino.revenue.toFixed(2)} €</div>
+                            </div>
+                        `).join('')
+                        : `<div style="padding: 20px; text-align: center; color: var(--text-muted);">${this.adminTranslations[this.currentLang].no_sales_recorded}</div>`;
+
+                    document.getElementById('top-wines-body').innerHTML = topVinosHtml;
                 } catch (err) { console.error("Error en Dashboard:", err); }
             },
 
