@@ -296,13 +296,13 @@
         const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
         let elements, paymentElement;
 
-        let promoAplicado = { codigo: null, tipo: null, descuento: 0 };
+        let promoAplicado = { codigo: null, tipo: null, descuento: 0, codigoNombre: '' };
         let autoPromoConfig = { minCartAmount: 0, discountValue: 0 };
 
         async function applyPromo() {
             const codigo = document.getElementById('promo_code').value.trim().toUpperCase();
             const msgEl = document.getElementById('promo-message');
-            promoAplicado = { codigo: null, tipo: null, descuento: 0 };
+            promoAplicado = { codigo: null, tipo: null, descuento: 0, codigoNombre: '' };
 
             if (!codigo) {
                 msgEl.innerText = '';
@@ -312,26 +312,26 @@
             }
 
             try {
-                // Buscar en promociones
-                const { data: promo, error: promoError } = await window.deAlturaSupabase
+                // 1. BUSCAR EN PROMOCIONES (DISCOUNT)
+                const { data: promo } = await window.deAlturaSupabase
                     .from('promotions')
                     .select('*')
                     .ilike('code', codigo)
+                    .eq('type', 'DISCOUNT')
                     .eq('is_active', true)
                     .single();
 
                 if (promo) {
-                    // Extraer porcentaje correctamente: si > 1, divide por 100; si <= 1, ya es decimal
                     let rawVal = parseFloat(promo.discount_value);
                     let pct = rawVal > 1 ? rawVal / 100 : rawVal;
-                    promoAplicado = { codigo, tipo: "CODIGO", descuento: pct };
-                    msgEl.innerText = `✓ Descuento ${rawVal > 1 ? rawVal : (rawVal * 100).toFixed(0)}% aplicado`;
+                    promoAplicado = { codigo, tipo: "CODIGO", descuento: pct, codigoNombre: codigo };
+                    msgEl.innerText = `✓ Cupón ${codigo} aplicado (${rawVal > 1 ? rawVal : (rawVal * 100).toFixed(0)}%)`;
                     msgEl.className = 'text-[10px] mt-2 font-medium text-green-600';
                     renderCartSummary();
                     return;
                 }
 
-                // Buscar en resellers
+                // 2. BUSCAR EN RESELLERS
                 const { data: reseller } = await window.deAlturaSupabase
                     .from('resellers')
                     .select('*')
@@ -340,8 +340,9 @@
                     .single();
 
                 if (reseller) {
-                    promoAplicado = { codigo, tipo: "RESELLER", descuento: 0 };
-                    msgEl.innerText = `✓ Código SOCIO aplicado (${codigo})`;
+                    // RESELLER: mantiene AUTO + etiqueta al socio
+                    promoAplicado = { codigo, tipo: "RESELLER", descuento: 0, codigoNombre: reseller.name };
+                    msgEl.innerText = `✓ Código SOCIO aplicado: ${reseller.name}`;
                     msgEl.className = 'text-[10px] mt-2 font-medium text-green-600';
                     renderCartSummary();
                     return;
@@ -397,18 +398,44 @@
             });
             document.getElementById('cart-items').innerHTML = html;
 
-            // Calcular descuento aplicado con lógica segura
+            // LÓGICA HÍBRIDA: Comparar descuento automático vs código (mejor precio)
             let descuentoAplicado = 0;
-            let tipoDescuento = '';
+            let labelDescuento = '';
 
-            if (subtotal >= autoPromoConfig.minCartAmount && autoPromoConfig.minCartAmount > 0 && !promoAplicado.codigo) {
-                // Extraer porcentaje correctamente: si > 1, divide por 100; si <= 1, ya es decimal
+            // 1. Calcular descuento automático si aplica
+            let descuentoAuto = 0;
+            let autoEligible = false;
+            if (subtotal >= autoPromoConfig.minCartAmount && autoPromoConfig.minCartAmount > 0) {
                 let rawVal = parseFloat(autoPromoConfig.discountValue);
-                descuentoAplicado = rawVal > 1 ? rawVal / 100 : rawVal;
-                tipoDescuento = 'Auto 10%';
-            } else if (promoAplicado.descuento > 0) {
-                descuentoAplicado = promoAplicado.descuento;
-                tipoDescuento = promoAplicado.codigo || 'Código';
+                descuentoAuto = rawVal > 1 ? rawVal / 100 : rawVal;
+                autoEligible = true;
+            }
+
+            // 2. Resolver conflictos: RESELLER vs CODIGO vs AUTO
+            if (promoAplicado.tipo === 'RESELLER') {
+                // RESELLER: Mantener descuento automático + etiquetar socio
+                descuentoAplicado = descuentoAuto;
+                labelDescuento = descuentoAuto > 0
+                    ? `Socio: ${promoAplicado.codigoNombre} + Auto ${(descuentoAuto * 100).toFixed(0)}%`
+                    : `Socio: ${promoAplicado.codigoNombre}`;
+            } else if (promoAplicado.tipo === 'CODIGO') {
+                // CODIGO: Comparar con AUTO y aplicar el mejor (MEJOR PRECIO PARA EL CLIENTE)
+                if (promoAplicado.descuento > descuentoAuto) {
+                    descuentoAplicado = promoAplicado.descuento;
+                    labelDescuento = `Cupón ${promoAplicado.codigoNombre} ${(promoAplicado.descuento * 100).toFixed(0)}%`;
+                } else if (descuentoAuto > 0) {
+                    descuentoAplicado = descuentoAuto;
+                    labelDescuento = `Auto ${(descuentoAuto * 100).toFixed(0)}%`;
+                } else {
+                    descuentoAplicado = promoAplicado.descuento;
+                    labelDescuento = `Cupón ${promoAplicado.codigoNombre} ${(promoAplicado.descuento * 100).toFixed(0)}%`;
+                }
+            } else {
+                // SIN CÓDIGO: Aplicar solo descuento automático si aplica
+                descuentoAplicado = descuentoAuto;
+                if (descuentoAuto > 0) {
+                    labelDescuento = `Auto ${(descuentoAuto * 100).toFixed(0)}%`;
+                }
             }
 
             // Mostrar/ocultar fila de descuento
@@ -417,7 +444,7 @@
 
             if (descuentoAplicado > 0) {
                 discountRow.style.display = 'flex';
-                document.getElementById('discount-label').innerText = `(${tipoDescuento})`;
+                document.getElementById('discount-label').innerText = `(${labelDescuento})`;
                 document.getElementById('discount-amount').innerText = `-${valorDescuento.toFixed(2)} €`;
             } else {
                 discountRow.style.display = 'none';
