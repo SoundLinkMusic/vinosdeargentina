@@ -160,7 +160,23 @@
                         items.forEach(item => {
                             subtotal += (item.price || 0) * (item.qty || 1) * (item.box || 1);
                         });
-                        const totalAmount = parseFloat((subtotal * 1.07).toFixed(2));
+
+                        // 💰 EXTRAER DATOS DE DESCUENTO Y PROMO (desde checkout.html window.orderData)
+                        let descuentoAplicado = 0;
+                        let valorDescuento = 0;
+                        let baseImponible = subtotal;
+                        let promoCode = customer.promo_code || null;
+                        let promoType = customer.promo_type || null;
+
+                        // Si hay información de descuento en customer (desde checkout.html)
+                        if (customer.descuentoAplicado !== undefined) {
+                            descuentoAplicado = customer.descuentoAplicado;
+                            valorDescuento = subtotal * descuentoAplicado;
+                            baseImponible = subtotal - valorDescuento;
+                        }
+
+                        const igicAmount = baseImponible * 0.07;
+                        const totalAmount = parseFloat((baseImponible + igicAmount).toFixed(2));
 
                         // 1. INSERTAR ORDEN
                         const orderPayload = {
@@ -173,7 +189,14 @@
                             shipping_status: 'new',
                             items: itemsWithStringIds,
                             address: customer.address || null,
-                            postal_code: customer.postal_code || null
+                            postal_code: customer.postal_code || null,
+                            subtotal_bruto: subtotal,
+                            descuento_aplicado: descuentoAplicado,
+                            valor_descuento: valorDescuento,
+                            base_imponible: baseImponible,
+                            igic_amount: igicAmount,
+                            promo_code: promoCode,
+                            promo_type: promoType
                         };
 
                         console.log('📤 Insertando orden en BD (background)...');

@@ -641,10 +641,38 @@
             <div class="metrics-grid">
                 <div class="metric-card">
                     <div class="metric-info">
-                        <h4 data-i18n="metric_revenue">Ingresos Netos</h4>
-                        <h2 id="metric-revenue">0.00 €</h2>
+                        <h4 data-i18n="metric_gross_sales">Ventas Brutas</h4>
+                        <h2 id="metric-gross-sales">0.00 €</h2>
                     </div>
-                    <div class="metric-icon icon-gold"><i class="fa-solid fa-euro-sign"></i></div>
+                    <div class="metric-icon icon-blue"><i class="fa-solid fa-money-bill-wave"></i></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-info">
+                        <h4 data-i18n="metric_discounts">Descuentos Aplicados</h4>
+                        <h2 id="metric-discounts">0.00 €</h2>
+                    </div>
+                    <div class="metric-icon icon-red"><i class="fa-solid fa-percent"></i></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-info">
+                        <h4 data-i18n="metric_net_income">Ingresos Netos</h4>
+                        <h2 id="metric-net-income">0.00 €</h2>
+                    </div>
+                    <div class="metric-icon icon-green"><i class="fa-solid fa-euro-sign"></i></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-info">
+                        <h4 data-i18n="metric_tax">Impuestos (IGIC)</h4>
+                        <h2 id="metric-tax">0.00 €</h2>
+                    </div>
+                    <div class="metric-icon icon-gold"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-info">
+                        <h4 data-i18n="metric_partner_commissions">Comisiones a Socios</h4>
+                        <h2 id="metric-commissions">0.00 €</h2>
+                    </div>
+                    <div class="metric-icon icon-green"><i class="fa-solid fa-handshake"></i></div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-info">
@@ -652,20 +680,6 @@
                         <h2 id="metric-orders">0</h2>
                     </div>
                     <div class="metric-icon icon-blue"><i class="fa-solid fa-clipboard-check"></i></div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <h4 data-i18n="metric_tax">Impuestos (IGIC)</h4>
-                        <h2 id="metric-tax">0.00 €</h2>
-                    </div>
-                    <div class="metric-icon icon-green"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <h4 data-i18n="metric_alerts">Vinos a Reponer</h4>
-                        <h2 id="metric-alerts">0</h2>
-                    </div>
-                    <div class="metric-icon icon-red"><i class="fa-solid fa-boxes-stacked"></i></div>
                 </div>
             </div>
 
@@ -679,6 +693,7 @@
                             <tr>
                                 <th data-i18n="table_id">ID / Ref</th>
                                 <th data-i18n="table_customer">Cliente</th>
+                                <th data-i18n="table_origin_promo">Origen / Promo</th>
                                 <th data-i18n="table_total">Total</th>
                                 <th data-i18n="table_payment_status">Estado Pago</th>
                                 <th data-i18n="table_logistics">Logística (WhatsApp)</th>
@@ -864,7 +879,10 @@
                     option_fixed: 'Cantidad Fija (€)', confirm_delete_promo: '¿Estás seguro de que deseas eliminar este cupón?',
                     confirm_delete_reseller: '¿Estás seguro de que deseas eliminar este socio?', toast_promo_deleted: 'Cupón eliminado',
                     toast_reseller_deleted: 'Socio eliminado', error_promo_validation: 'Por favor completa Tipo y Valor del Descuento.',
-                    error_reseller_validation: 'Por favor completa Código, Nombre y Comisión del Socio.'
+                    error_reseller_validation: 'Por favor completa Código, Nombre y Comisión del Socio.',
+                    metric_gross_sales: 'Ventas Brutas', metric_discounts: 'Descuentos Aplicados', metric_net_income: 'Ingresos Netos',
+                    metric_partner_commissions: 'Comisiones a Socios', table_origin_promo: 'Origen / Promo', origin_organic: 'Orgánico',
+                    origin_coupon: 'Cupón', origin_partner: 'Socio'
                 },
                 en: {
                     nav_dashboard: 'Dashboard', nav_orders: 'Sales & Shipping', nav_inventory: 'Catalog & Pricing', nav_crm: 'Customer CRM', nav_promos: 'Coupons & Promos', nav_resellers: 'Resellers (Partners)',
@@ -903,7 +921,10 @@
                     option_fixed: 'Fixed Amount (€)', confirm_delete_promo: 'Are you sure you want to delete this coupon?',
                     confirm_delete_reseller: 'Are you sure you want to delete this partner?', toast_promo_deleted: 'Coupon deleted',
                     toast_reseller_deleted: 'Partner deleted', error_promo_validation: 'Please complete Discount Type and Value.',
-                    error_reseller_validation: 'Please complete Partner Code, Name, and Commission.'
+                    error_reseller_validation: 'Please complete Partner Code, Name, and Commission.',
+                    metric_gross_sales: 'Gross Sales', metric_discounts: 'Discounts Applied', metric_net_income: 'Net Revenue',
+                    metric_partner_commissions: 'Partner Commissions', table_origin_promo: 'Source / Promo', origin_organic: 'Organic',
+                    origin_coupon: 'Coupon', origin_partner: 'Partner'
                 }
             },
 
@@ -977,30 +998,60 @@
             loadDashboardData: async function () {
                 try {
                     const { data: orders } = await this.db.from('orders').select('*').order('created_at', { ascending: false });
+                    const { data: resellers } = await this.db.from('resellers').select('*');
                     const { data: products } = await this.db.from('products').select('stock');
 
-                    let revenue = 0, paidCount = 0, tax = 0;
+                    // KPI TOTALS
+                    let grossSales = 0, discounts = 0, netIncome = 0, taxes = 0, commissions = 0;
+                    let paidCount = 0;
                     let recentRows = '';
 
                     if (orders && orders.length > 0) {
                         orders.forEach((o, index) => {
                             if (o.payment_status === 'paid') {
-                                const amount = parseFloat(o.total_amount);
-                                revenue += amount;
+                                // MOTOR DE REGLAS: Extraer valores guardados en la orden
+                                const subtotal = parseFloat(o.subtotal_bruto || o.total_amount / 1.07);
+                                const descuento = parseFloat(o.valor_descuento || 0);
+                                const baseImponible = parseFloat(o.base_imponible || (o.total_amount / 1.07 - descuento));
+                                const igic = parseFloat(o.igic_amount || o.total_amount - baseImponible);
+
+                                grossSales += subtotal;
+                                discounts += descuento;
+                                netIncome += baseImponible;
+                                taxes += igic;
                                 paidCount++;
-                                tax += amount * 0.07;
+
+                                // COMISIONES: Si es tipo RESELLER, buscar commission_rate
+                                if (o.promo_type === 'RESELLER' && o.promo_code && resellers) {
+                                    const reseller = resellers.find(r => r.code && r.code.toUpperCase() === o.promo_code.toUpperCase());
+                                    if (reseller && reseller.commission_rate) {
+                                        const commission = baseImponible * (reseller.commission_rate / 100);
+                                        commissions += commission;
+                                    }
+                                }
                             }
+
+                            // TABLA RECIENTE (primeros 5 pedidos, sin filtro de pagado)
                             if (index < 5) {
                                 const badgeClass = o.payment_status === 'paid' ? 'badge-paid' : 'badge-pending';
-                                const statusText = o.payment_status === 'paid' ? 'Pagado' : 'Pendiente';
+                                const statusText = o.payment_status === 'paid' ? this.adminTranslations[this.currentLang].paid_upper : this.adminTranslations[this.currentLang].pending_upper;
 
                                 const isShipped = o.shipping_status === 'shipped';
                                 const shipBadge = isShipped ? 'badge-paid' : 'badge-pending';
-                                const shipText = isShipped ? '<i class="fa-solid fa-check"></i> Enviado' : '<i class="fa-solid fa-truck"></i> Prep.';
+                                const shipText = isShipped ? `<i class="fa-solid fa-check"></i> ${this.adminTranslations[this.currentLang].shipped_upper}` : `<i class="fa-solid fa-truck"></i> ${this.adminTranslations[this.currentLang].preparing_upper}`;
+
+                                // ORIGEN / PROMO
+                                let originHtml = `<span style="color: var(--text-muted);">-</span>`;
+                                if (o.promo_type === 'CODIGO' && o.promo_code) {
+                                    originHtml = `<span style="color: var(--brand-gold); font-weight: 600;"><i class="fa-solid fa-tag"></i> ${o.promo_code}</span>`;
+                                } else if (o.promo_type === 'RESELLER' && o.promo_code) {
+                                    originHtml = `<span style="color: var(--brand-gold); font-weight: 600;"><i class="fa-solid fa-handshake"></i> ${o.promo_code}</span>`;
+                                }
 
                                 recentRows += `<tr>
                                     <td><strong style="color: var(--text-main)">#${o.id.slice(0, 8).toUpperCase()}</strong></td>
                                     <td>${o.customer_name}</td>
+                                    <td>${originHtml}</td>
                                     <td><strong>${parseFloat(o.total_amount).toFixed(2)} €</strong></td>
                                     <td><span class="status-badge ${badgeClass}">${statusText}</span></td>
                                     <td>
@@ -1016,17 +1067,16 @@
                         });
                         document.getElementById('recent-orders-body').innerHTML = recentRows;
                     } else {
-                        document.getElementById('recent-orders-body').innerHTML = `<tr><td colspan="5" style="text-align:center;">${this.adminTranslations[this.currentLang].no_sales_recorded}</td></tr>`;
+                        document.getElementById('recent-orders-body').innerHTML = `<tr><td colspan="6" style="text-align:center;">${this.adminTranslations[this.currentLang].no_sales_recorded}</td></tr>`;
                     }
 
-                    document.getElementById('metric-revenue').textContent = revenue.toFixed(2) + ' €';
+                    // ACTUALIZAR KPIs
+                    document.getElementById('metric-gross-sales').textContent = grossSales.toFixed(2) + ' €';
+                    document.getElementById('metric-discounts').textContent = discounts.toFixed(2) + ' €';
+                    document.getElementById('metric-net-income').textContent = netIncome.toFixed(2) + ' €';
+                    document.getElementById('metric-tax').textContent = taxes.toFixed(2) + ' €';
+                    document.getElementById('metric-commissions').textContent = commissions.toFixed(2) + ' €';
                     document.getElementById('metric-orders').textContent = paidCount;
-                    document.getElementById('metric-tax').textContent = tax.toFixed(2) + ' €';
-
-                    if (products) {
-                        const itemsToOrder = products.filter(p => p.stock < 0).length;
-                        document.getElementById('metric-alerts').textContent = itemsToOrder;
-                    }
                 } catch (err) { console.error("Error en Dashboard:", err); }
             },
 
