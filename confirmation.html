@@ -92,7 +92,7 @@
                 <span lang="en">Back to Store</span>
             </button>
 
-            <a href="https://wa.me/34633706676?text=Hola,%20tengo%20una%20pregunta%20sobre%20mi%20pedido"
+            <a id="whatsapp-link" href="https://wa.me/34633706676?text=Hola,%20tengo%20una%20pregunta%20sobre%20mi%20pedido"
                 target="_blank"
                 class="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] active:scale-95">
                 <i class="fa-brands fa-whatsapp text-lg"></i>
@@ -249,6 +249,20 @@
             localStorage.setItem('deAlturaLang', lang);
         }
         setLang(localStorage.getItem('deAlturaLang') || 'es');
+
+        // Actualizar mensaje de WhatsApp con código de promo
+        const customerStr = localStorage.getItem('altura_customer_info');
+        if (customerStr) {
+            try {
+                const customer = JSON.parse(customerStr);
+                const promoCode = customer.promo_code || 'SIN CODIGO';
+                const baseMsg = 'Hola,%20tengo%20una%20pregunta%20sobre%20mi%20pedido';
+                const promoMsg = `${baseMsg}%0ACÓDIGO/SOCIO:%20${promoCode}`;
+                document.getElementById('whatsapp-link').href = `https://wa.me/34633706676?text=${promoMsg}`;
+            } catch (e) {
+                console.log('No se pudo leer promo_code');
+            }
+        }
     </script>
 </body>
 
