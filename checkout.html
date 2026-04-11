@@ -239,8 +239,8 @@
 
                     <div class="space-y-3 border-t border-white/10 pt-6">
                         <div class="flex justify-between text-stone-400 text-sm">
-                            <span lang="es">Subtotal Neto</span><span lang="en">Net Subtotal</span>
-                            <span id="subtotal" class="text-white font-semibold">0,00 €</span>
+                            <span lang="es">Importe Productos</span><span lang="en">Product Amount</span>
+                            <span id="importe-bruto" class="text-white font-semibold">0,00 €</span>
                         </div>
                         <div id="discount-row" class="flex justify-between text-gold-500 text-sm font-medium" style="display: none;">
                             <div>
@@ -248,6 +248,10 @@
                                 <span id="discount-label" class="text-stone-400 text-xs ml-1"></span>
                             </div>
                             <span id="discount-amount" class="font-bold">0,00 €</span>
+                        </div>
+                        <div class="flex justify-between text-stone-400 text-sm">
+                            <span lang="es">Base Imponible</span><span lang="en">Taxable Base</span>
+                            <span id="subtotal-neto" class="text-white font-semibold">0,00 €</span>
                         </div>
                         <div class="flex justify-between text-stone-400 text-sm">
                             <span lang="es">Impuestos (IGIC 7%)</span><span lang="en">Taxes (7% IGIC)</span>
@@ -317,8 +321,11 @@
                     .single();
 
                 if (promo) {
-                    promoAplicado = { codigo, tipo: "CODIGO", descuento: promo.discount_value / 100 };
-                    msgEl.innerText = `✓ Descuento ${promo.discount_value}% aplicado`;
+                    // Extraer porcentaje correctamente: si > 1, divide por 100; si <= 1, ya es decimal
+                    let rawVal = parseFloat(promo.discount_value);
+                    let pct = rawVal > 1 ? rawVal / 100 : rawVal;
+                    promoAplicado = { codigo, tipo: "CODIGO", descuento: pct };
+                    msgEl.innerText = `✓ Descuento ${rawVal > 1 ? rawVal : (rawVal * 100).toFixed(0)}% aplicado`;
                     msgEl.className = 'text-[10px] mt-2 font-medium text-green-600';
                     renderCartSummary();
                     return;
@@ -390,12 +397,14 @@
             });
             document.getElementById('cart-items').innerHTML = html;
 
-            // Calcular descuento aplicado
+            // Calcular descuento aplicado con lógica segura
             let descuentoAplicado = 0;
             let tipoDescuento = '';
 
             if (subtotal >= autoPromoConfig.minCartAmount && autoPromoConfig.minCartAmount > 0 && !promoAplicado.codigo) {
-                descuentoAplicado = autoPromoConfig.discountValue / 100;
+                // Extraer porcentaje correctamente: si > 1, divide por 100; si <= 1, ya es decimal
+                let rawVal = parseFloat(autoPromoConfig.discountValue);
+                descuentoAplicado = rawVal > 1 ? rawVal / 100 : rawVal;
                 tipoDescuento = 'Auto 10%';
             } else if (promoAplicado.descuento > 0) {
                 descuentoAplicado = promoAplicado.descuento;
@@ -404,23 +413,27 @@
 
             // Mostrar/ocultar fila de descuento
             const discountRow = document.getElementById('discount-row');
-            const discountAmount = subtotal * descuentoAplicado;
+            const valorDescuento = subtotal * descuentoAplicado;
 
             if (descuentoAplicado > 0) {
                 discountRow.style.display = 'flex';
                 document.getElementById('discount-label').innerText = `(${tipoDescuento})`;
-                document.getElementById('discount-amount').innerText = `-${discountAmount.toFixed(2)} €`;
+                document.getElementById('discount-amount').innerText = `-${valorDescuento.toFixed(2)} €`;
             } else {
                 discountRow.style.display = 'none';
             }
 
-            const subtotalConDesc = subtotal * (1 - descuentoAplicado);
-            const igic = subtotalConDesc * 0.07;
-            const total = (subtotalConDesc + igic).toFixed(2);
-            document.getElementById('subtotal').innerText = subtotal.toFixed(2) + ' €';
-            document.getElementById('igic').innerText = igic.toFixed(2) + ' €';
-            document.getElementById('total').innerText = total + ' €';
-            window.orderData = { items, subtotal, igic, total: parseFloat(total), descuentoAplicado, promoAplicado };
+            // Desglose fiscal correcto
+            const importeBruto = subtotal;
+            const baseImponible = importeBruto - valorDescuento;
+            const igicAmount = baseImponible * 0.07;
+            const totalAmount = baseImponible + igicAmount;
+
+            document.getElementById('importe-bruto').innerText = importeBruto.toFixed(2) + ' €';
+            document.getElementById('subtotal-neto').innerText = baseImponible.toFixed(2) + ' €';
+            document.getElementById('igic').innerText = igicAmount.toFixed(2) + ' €';
+            document.getElementById('total').innerText = totalAmount.toFixed(2) + ' €';
+            window.orderData = { items, subtotal: importeBruto, igic: igicAmount, total: totalAmount, descuentoAplicado, promoAplicado };
         }
 
         function validateForm() {
