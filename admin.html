@@ -5,11 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SuperAdmin | De Altura Wines</title>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false } // Evita que Tailwind rompa tus estilos personalizados
+        }
+    </script>
 
     <style>
         :root {
@@ -190,79 +198,7 @@
             font-weight: 500;
         }
 
-        /* --- METRICS CARDS --- */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-
-        .metric-card {
-            background: var(--white);
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border: 1px solid #E2E8F0;
-            transition: transform 0.2s;
-            gap: 15px;
-        }
-
-        .metric-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .metric-info h4 {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            white-space: nowrap;
-        }
-
-        .metric-info h2 {
-            font-size: 2rem;
-            color: var(--text-main);
-            font-weight: 700;
-        }
-
-        .metric-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            flex-shrink: 0;
-        }
-
-        .icon-gold {
-            background: rgba(200, 159, 93, 0.15);
-            color: var(--brand-gold);
-        }
-
-        .icon-blue {
-            background: rgba(52, 152, 219, 0.15);
-            color: #3498DB;
-        }
-
-        .icon-green {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-        }
-
-        .icon-red {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--danger);
-        }
-
-        /* --- PANELS & TABLES ESTANDARIZADOS --- */
+        /* --- PANELS & TABLES --- */
         .panel {
             background: var(--white);
             border-radius: 12px;
@@ -271,7 +207,6 @@
             padding: 25px;
             margin-bottom: 30px;
             width: 100%;
-            max-width: 100%;
             box-sizing: border-box;
         }
 
@@ -290,20 +225,17 @@
             color: var(--text-main);
         }
 
-        /* Contenedor protector para el scroll horizontal */
         .table-wrapper {
             width: 100%;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             border-radius: 8px;
-            /* Bordes suaves internos */
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             min-width: 900px;
-            /* Fuerza el ancho mínimo para que no se apilen datos */
             background-color: var(--white);
         }
 
@@ -316,7 +248,6 @@
             letter-spacing: 0.5px;
             border-bottom: 1px solid #E2E8F0;
             white-space: nowrap;
-            /* CRÍTICO: Previene que el encabezado se rompa en 2 líneas */
         }
 
         td {
@@ -326,7 +257,6 @@
             color: var(--text-main);
             vertical-align: middle;
             white-space: nowrap;
-            /* CRÍTICO: Mantiene los datos en una sola línea */
         }
 
         tr:hover td {
@@ -439,7 +369,6 @@
             color: var(--success);
         }
 
-        /* --- OVERLAY PARA MENÚ --- */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -453,10 +382,7 @@
             display: block;
         }
 
-        /* ═══════════════════════════════════════════════════════ */
-        /* MEDIA QUERIES - OPTIMIZACIÓN MOBILE DEFINITIVA          */
-        /* ═══════════════════════════════════════════════════════ */
-
+        /* --- MOBILE QUERIES --- */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -475,12 +401,10 @@
                 padding: 15px;
                 width: 100%;
                 margin-top: 50px;
-                /* Espacio para el botón de menú */
             }
 
             .table-wrapper {
                 margin: 0;
-                /* Removidos márgenes negativos que rompían el layout */
                 padding: 0;
             }
 
@@ -508,12 +432,6 @@
                 font-size: 1.5rem;
             }
 
-            .metrics-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                gap: 15px;
-                margin-bottom: 25px;
-            }
-
             .panel {
                 padding: 15px;
                 margin-bottom: 20px;
@@ -529,7 +447,6 @@
             th,
             td {
                 padding: 12px 10px;
-                /* Padding más compacto pero legible */
                 font-size: 0.85rem;
             }
 
@@ -570,28 +487,16 @@
             }
         }
 
-        @media (max-width: 480px) {
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
         @keyframes slideIn {
             from {
                 transform: translateX(400px);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
             }
-        }
-
-        #modal-promo[style*="flex"],
-        #modal-reseller[style*="flex"] {
-            display: flex !important;
-            justify-content: center;
-            align-items: center;
         }
     </style>
 </head>
@@ -606,22 +511,24 @@
         <nav class="nav-menu">
             <div class="nav-item active" onclick="app.switchView('dashboard', this)" data-i18n="nav_dashboard"><i
                     class="fa-solid fa-chart-pie"></i> Vista General</div>
-            <div class="nav-item" onclick="app.switchView('orders', this)" data-i18n="nav_orders"><i class="fa-solid fa-receipt"></i> Ventas &
-                Envíos</div>
-            <div class="nav-item" onclick="app.switchView('inventory', this)" data-i18n="nav_inventory"><i class="fa-solid fa-calculator"></i>
-                Catálogo & Pricing</div>
-            <div class="nav-item" onclick="app.switchView('crm', this)" data-i18n="nav_crm"><i class="fa-solid fa-users"></i> CRM Clientes
-            </div>
-            <div class="nav-item" onclick="app.switchView('promos', this)" data-i18n="nav_promos"><i class="fa-solid fa-tags"></i> Cupones y Promos</div>
-            <div class="nav-item" onclick="app.switchView('resellers', this)" data-i18n="nav_resellers"><i class="fa-solid fa-handshake"></i> Resellers (Socios)</div>
+            <div class="nav-item" onclick="app.switchView('orders', this)" data-i18n="nav_orders"><i
+                    class="fa-solid fa-receipt"></i> Ventas & Envíos</div>
+            <div class="nav-item" onclick="app.switchView('inventory', this)" data-i18n="nav_inventory"><i
+                    class="fa-solid fa-calculator"></i> Catálogo & Pricing</div>
+            <div class="nav-item" onclick="app.switchView('crm', this)" data-i18n="nav_crm"><i
+                    class="fa-solid fa-users"></i> CRM Clientes</div>
+            <div class="nav-item" onclick="app.switchView('promos', this)" data-i18n="nav_promos"><i
+                    class="fa-solid fa-tags"></i> Cupones y Promos</div>
+            <div class="nav-item" onclick="app.switchView('resellers', this)" data-i18n="nav_resellers"><i
+                    class="fa-solid fa-handshake"></i> Resellers (Socios)</div>
 
             <div class="nav-divider"></div>
-            <div class="nav-item" onclick="window.location.href='index.html'" style="color: var(--brand-gold);" data-i18n="nav_store"><i
-                    class="fa-solid fa-store"></i> Volver a la Tienda</div>
+            <div class="nav-item" onclick="window.location.href='index.html'" style="color: var(--brand-gold);"
+                data-i18n="nav_store"><i class="fa-solid fa-store"></i> Volver a la Tienda</div>
         </nav>
         <div class="logout-container">
-            <button class="btn-logout" onclick="app.logout()" data-i18n="nav_logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar
-                Sesión</button>
+            <button class="btn-logout" onclick="app.logout()" data-i18n="nav_logout"><i
+                    class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</button>
         </div>
     </aside>
 
@@ -635,89 +542,159 @@
         <div class="top-header">
             <h1 id="page-title" data-i18n="nav_dashboard">Vista General</h1>
             <div class="user-profile">
-                <button onclick="app.toggleLanguage()" id="lang-toggle-btn" class="lang-toggle">
-                    🇬🇧 EN
-                </button>
+                <button onclick="app.toggleLanguage()" id="lang-toggle-btn" class="lang-toggle">🇬🇧 EN</button>
                 <i class="fa-solid fa-circle-user fa-2x" style="color: var(--brand-gold);"></i>
                 <span id="user-email-display" data-i18n="loading">Cargando...</span>
             </div>
         </div>
 
         <section id="view-dashboard" class="section active">
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <h4 data-i18n="metric_gross_sales">Ventas Brutas</h4>
-                        <h2 id="metric-gross-sales">0.00 €</h2>
-                    </div>
-                    <div class="metric-icon icon-blue"><i class="fa-solid fa-money-bill-wave"></i></div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <h4 data-i18n="metric_discounts">Descuentos Aplicados</h4>
-                        <h2 id="metric-discounts">0.00 €</h2>
-                    </div>
-                    <div class="metric-icon icon-red"><i class="fa-solid fa-percent"></i></div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <h4 data-i18n="metric_net_income">Ingresos Netos</h4>
-                        <h2 id="metric-net-income">0.00 €</h2>
-                    </div>
-                    <div class="metric-icon icon-green"><i class="fa-solid fa-euro-sign"></i></div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <h4 data-i18n="metric_tax">Impuestos (IGIC)</h4>
-                        <h2 id="metric-tax">0.00 €</h2>
-                    </div>
-                    <div class="metric-icon icon-gold"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <h4 data-i18n="metric_partner_commissions">Comisiones a Socios</h4>
-                        <h2 id="metric-commissions">0.00 €</h2>
-                    </div>
-                    <div class="metric-icon icon-green"><i class="fa-solid fa-handshake"></i></div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <h4 data-i18n="metric_orders">Pedidos Exitosos</h4>
-                        <h2 id="metric-orders">0</h2>
-                    </div>
-                    <div class="metric-icon icon-blue"><i class="fa-solid fa-clipboard-check"></i></div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <h4 data-i18n="metric_boxes_sold">Cajas Vendidas</h4>
-                        <h2 id="metric-boxes">0</h2>
-                    </div>
-                    <div class="metric-icon icon-blue"><i class="fa-solid fa-boxes-stacked"></i></div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <h4 data-i18n="metric_total_cogs">Coste Total (COGS)</h4>
-                        <h2 id="metric-cogs">0.00 €</h2>
-                    </div>
-                    <div class="metric-icon icon-red"><i class="fa-solid fa-chart-line"></i></div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <h4 data-i18n="metric_gross_margin">Margen Bruto</h4>
-                        <div style="display: flex; align-items: baseline; gap: 8px;">
-                            <h2 id="metric-margin-amount" style="margin: 0;">0.00 €</h2>
-                            <span id="metric-margin-percent" style="font-size: 0.9rem; color: var(--success); font-weight: 600;">0%</span>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-stone-100 p-5 flex flex-col justify-between h-full hover:shadow-md transition-shadow duration-200">
+                    <div class="flex items-start justify-between gap-2 mb-4">
+                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider line-clamp-2"
+                            data-i18n="metric_gross_sales">Ventas Brutas</h4>
+                        <div
+                            class="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-money-bill-wave"></i>
                         </div>
                     </div>
-                    <div class="metric-icon icon-green"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                    <div class="flex items-baseline gap-2 mt-auto">
+                        <h2 class="text-2xl lg:text-3xl font-bold text-stone-800" id="metric-gross-sales">0.00 €</h2>
+                    </div>
                 </div>
+
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-stone-100 p-5 flex flex-col justify-between h-full hover:shadow-md transition-shadow duration-200">
+                    <div class="flex items-start justify-between gap-2 mb-4">
+                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider line-clamp-2"
+                            data-i18n="metric_discounts">Descuentos</h4>
+                        <div
+                            class="flex-shrink-0 w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-percent"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2 mt-auto">
+                        <h2 class="text-2xl lg:text-3xl font-bold text-stone-800" id="metric-discounts">0.00 €</h2>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-stone-100 p-5 flex flex-col justify-between h-full hover:shadow-md transition-shadow duration-200">
+                    <div class="flex items-start justify-between gap-2 mb-4">
+                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider line-clamp-2"
+                            data-i18n="metric_net_income">Neto</h4>
+                        <div
+                            class="flex-shrink-0 w-10 h-10 rounded-lg bg-green-50 text-green-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-euro-sign"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2 mt-auto">
+                        <h2 class="text-2xl lg:text-3xl font-bold text-stone-800" id="metric-net-income">0.00 €</h2>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-stone-100 p-5 flex flex-col justify-between h-full hover:shadow-md transition-shadow duration-200">
+                    <div class="flex items-start justify-between gap-2 mb-4">
+                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider line-clamp-2"
+                            data-i18n="metric_tax">IGIC</h4>
+                        <div
+                            class="flex-shrink-0 w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2 mt-auto">
+                        <h2 class="text-2xl lg:text-3xl font-bold text-stone-800" id="metric-tax">0.00 €</h2>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-stone-100 p-5 flex flex-col justify-between h-full hover:shadow-md transition-shadow duration-200">
+                    <div class="flex items-start justify-between gap-2 mb-4">
+                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider line-clamp-2"
+                            data-i18n="metric_partner_commissions">Comisiones</h4>
+                        <div
+                            class="flex-shrink-0 w-10 h-10 rounded-lg bg-green-50 text-green-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-handshake"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2 mt-auto">
+                        <h2 class="text-2xl lg:text-3xl font-bold text-stone-800" id="metric-commissions">0.00 €</h2>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-stone-100 p-5 flex flex-col justify-between h-full hover:shadow-md transition-shadow duration-200">
+                    <div class="flex items-start justify-between gap-2 mb-4">
+                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider line-clamp-2"
+                            data-i18n="metric_orders">Pedidos</h4>
+                        <div
+                            class="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2 mt-auto">
+                        <h2 class="text-2xl lg:text-3xl font-bold text-stone-800" id="metric-orders">0</h2>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-stone-100 p-5 flex flex-col justify-between h-full hover:shadow-md transition-shadow duration-200">
+                    <div class="flex items-start justify-between gap-2 mb-4">
+                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider line-clamp-2"
+                            data-i18n="metric_boxes_sold">Cajas</h4>
+                        <div
+                            class="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2 mt-auto">
+                        <h2 class="text-2xl lg:text-3xl font-bold text-stone-800" id="metric-boxes">0</h2>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-stone-100 p-5 flex flex-col justify-between h-full hover:shadow-md transition-shadow duration-200">
+                    <div class="flex items-start justify-between gap-2 mb-4">
+                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider line-clamp-2"
+                            data-i18n="metric_total_cogs">COGS</h4>
+                        <div
+                            class="flex-shrink-0 w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2 mt-auto">
+                        <h2 class="text-2xl lg:text-3xl font-bold text-stone-800" id="metric-cogs">0.00 €</h2>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-stone-100 p-5 flex flex-col justify-between h-full hover:shadow-md transition-shadow duration-200">
+                    <div class="flex items-start justify-between gap-2 mb-4">
+                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider line-clamp-2"
+                            data-i18n="metric_gross_margin">Margen</h4>
+                        <div
+                            class="flex-shrink-0 w-10 h-10 rounded-lg bg-green-50 text-green-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-arrow-trend-up"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center flex-wrap gap-2 mt-auto">
+                        <h2 class="text-2xl lg:text-3xl font-bold text-stone-800" id="metric-margin-amount">0.00 €</h2>
+                        <span class="px-2 py-1 text-[11px] font-bold text-green-700 bg-green-100 rounded-md"
+                            id="metric-margin-percent">0%</span>
+                    </div>
+                </div>
+
             </div>
 
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 25px; margin-bottom: 40px;">
-                <!-- RECENT ORDERS: 2 columnas -->
                 <div class="panel">
                     <div class="panel-header">
-                        <h3 data-i18n="recent_orders_title"><i class="fa-solid fa-clock-rotate-left"></i> Últimos Pedidos Recibidos</h3>
+                        <h3 data-i18n="recent_orders_title"><i class="fa-solid fa-clock-rotate-left"></i> Últimos
+                            Pedidos Recibidos</h3>
                     </div>
                     <div class="table-wrapper">
                         <table>
@@ -740,10 +717,10 @@
                     </div>
                 </div>
 
-                <!-- TOP WINES: 1 columna -->
                 <div class="panel">
                     <div class="panel-header">
-                        <h3 data-i18n="top_wines_title"><i class="fa-solid fa-wine-glass"></i> Top Vinos Más Vendidos</h3>
+                        <h3 data-i18n="top_wines_title"><i class="fa-solid fa-wine-glass"></i> Top Vinos Más Vendidos
+                        </h3>
                     </div>
                     <div id="top-wines-body" style="padding: 20px;">
                         <div style="text-align: center; color: var(--text-muted);" data-i18n="loading">Cargando...</div>
@@ -778,9 +755,11 @@
         <section id="view-inventory" class="section">
             <div class="panel">
                 <div class="panel-header">
-                    <h3 data-i18n="inventory_title"><i class="fa-solid fa-calculator"></i> Desglose Financiero y Control de Stock</h3>
-                    <span style="font-size: 0.85rem; color: var(--text-muted);" data-i18n="inventory_subtitle">✅ Coste Real (price_cost_net) | Margen
-                        basado en (PVP/1.07 - Coste) | Stock Negativo = Pendiente de Reposición</span>
+                    <h3 data-i18n="inventory_title"><i class="fa-solid fa-calculator"></i> Desglose Financiero y Control
+                        de Stock</h3>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);" data-i18n="inventory_subtitle">✅ Coste
+                        Real (price_cost_net) | Margen basado en (PVP/1.07 - Coste) | Stock Negativo = Pendiente de
+                        Reposición</span>
                 </div>
                 <div class="table-wrapper">
                     <table style="min-width: 1400px;">
@@ -830,7 +809,8 @@
             <div class="panel">
                 <div class="panel-header">
                     <h3 data-i18n="promos_title"><i class="fa-solid fa-tags"></i> Cupones y Promociones</h3>
-                    <button class="btn-action" onclick="app.openPromoModal()" data-i18n="btn_new_promo" style="margin-left: auto; background: var(--brand-gold); color: var(--text-main); border: none; padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                    <button class="btn-action" onclick="app.openPromoModal()" data-i18n="btn_new_promo"
+                        style="margin-left: auto; background: var(--brand-gold); color: var(--text-main); border: none; padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
                         <i class="fa-solid fa-plus"></i> Nuevo Cupón
                     </button>
                 </div>
@@ -855,8 +835,10 @@
         <section id="view-resellers" class="section">
             <div class="panel">
                 <div class="panel-header">
-                    <h3 data-i18n="resellers_title"><i class="fa-solid fa-handshake"></i> Gestión de Resellers (Socios)</h3>
-                    <button class="btn-action" onclick="app.openResellerModal()" data-i18n="btn_new_reseller" style="margin-left: auto; background: var(--brand-gold); color: var(--text-main); border: none; padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                    <h3 data-i18n="resellers_title"><i class="fa-solid fa-handshake"></i> Gestión de Resellers (Socios)
+                    </h3>
+                    <button class="btn-action" onclick="app.openResellerModal()" data-i18n="btn_new_reseller"
+                        style="margin-left: auto; background: var(--brand-gold); color: var(--text-main); border: none; padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
                         <i class="fa-solid fa-plus"></i> Nuevo Socio
                     </button>
                 </div>
@@ -983,7 +965,7 @@
             changeLanguage: function (lang) {
                 this.currentLang = lang;
                 localStorage.setItem('admin_lang', lang);
-                
+
                 const btn = document.getElementById('lang-toggle-btn');
                 if (btn) {
                     btn.innerHTML = lang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
@@ -1239,7 +1221,7 @@
 
                 document.getElementById('inventory-body').innerHTML = products.map(p => {
                     const costNet = parseFloat(p.price_cost_net || 0);
-                    
+
                     // HORECA Calculations
                     const priceHorecaTotal = parseFloat(p.price_horeca || 0);
                     const netPriceHoreca = priceHorecaTotal / 1.07;
@@ -1260,14 +1242,12 @@
                         <td><strong>${p.name}</strong><br><small style="color: var(--text-muted)">${p.bodega || p.region}</small></td>
                         <td class="finance-value" style="color: var(--text-muted);">💰 ${costNet.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].cost_net_label}</small></td>
                         
-                        <!-- HORECA -->
                         <td class="finance-value" style="color: var(--text-muted);">🍽️ ${priceHorecaTotal.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].horeca_label}</small></td>
                         <td class="finance-value" style="color: var(--text-main);">
                             <span class="math-symbol">↗</span><span class="margin-percent">${marginPercentHoreca.toFixed(1)}%</span>${marginHoreca.toFixed(2)} €<br><small>Mg. HORECA</small>
                         </td>
                         <td class="finance-value" style="color: var(--tax-color);"><span class="math-symbol">+</span>${igicHoreca.toFixed(2)} €<br><small>IGIC HORECA</small></td>
 
-                        <!-- RETAIL -->
                         <td class="finance-value" style="color: var(--brand-gold);">🛍️ ${priceRetailTotal.toFixed(2)} €<br><small>${this.adminTranslations[this.currentLang].retail_label}</small></td>
                         <td class="finance-value" style="color: var(--text-main);">
                             <span class="math-symbol">↗</span><span class="margin-percent">${marginPercentRetail.toFixed(1)}%</span>${marginRetail.toFixed(2)} €<br><small>Mg. Retail</small>
@@ -1357,13 +1337,13 @@
                         const discountDisplay = p.type === 'percentage' ? `${p.discount_value}%` : `${p.discount_value}€`;
 
                         return `<tr>
-                            <td><strong>${p.code}</strong></td>
+                            <td><strong>${p.code || '(Automática)'}</strong></td>
                             <td>${p.type === 'percentage' ? 'Porcentaje' : 'Cantidad Fija'}</td>
                             <td>${discountDisplay}</td>
                             <td>${p.min_cart_amount ? p.min_cart_amount + '€' : 'Sin mínimo'}</td>
                             <td><span class="status-badge ${statusBadge}">${statusText}</span></td>
                             <td style="display: flex; gap: 6px; align-items: center;">
-                                <button class="btn-action" onclick="app.openPromoModal(${JSON.stringify(p).replace(/"/g, '&quot;')})" title="Editar" style="padding: 4px 8px; background: var(--brand-gold); border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                                <button class="btn-action" onclick='app.openPromoModal(${JSON.stringify(p).replace(/"/g, '&quot;')})' title="Editar" style="padding: 4px 8px; background: var(--brand-gold); border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
                                 <button class="btn-action" onclick="app.togglePromoStatus('${p.id}', ${!p.is_active})" title="Toggle" style="padding: 4px 8px; background: var(--sidebar-hover); border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
@@ -1436,7 +1416,7 @@
                             <td><strong style="color: var(--brand-gold);">${totalCommission.toFixed(2)} €</strong></td>
                             <td><span class="status-badge ${statusBadge}">${statusText}</span></td>
                             <td style="display: flex; gap: 6px; align-items: center;">
-                                <button class="btn-action" onclick="app.openResellerModal(${JSON.stringify(r).replace(/"/g, '&quot;')})" title="Editar" style="padding: 4px 8px; background: var(--brand-gold); border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                                <button class="btn-action" onclick='app.openResellerModal(${JSON.stringify(r).replace(/"/g, '&quot;')})' title="Editar" style="padding: 4px 8px; background: var(--brand-gold); border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
                                 <button class="btn-action" onclick="app.toggleResellerStatus('${r.id}', ${!r.is_active})" title="Toggle" style="padding: 4px 8px; background: var(--sidebar-hover); border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
@@ -1452,7 +1432,7 @@
                     document.getElementById('resellers-body').innerHTML = html;
                 } catch (err) {
                     console.error("Error cargando resellers:", err);
-                    document.getElementById('resellers-body').innerHTML = `<tr><td colspan="6" style="text-align:center;">${this.adminTranslations[this.currentLang].error_loading_data}</td></tr>`;
+                    document.getElementById('resellers-body').innerHTML = `<tr><td colspan="7" style="text-align:center;">${this.adminTranslations[this.currentLang].error_loading_data}</td></tr>`;
                 }
             },
 
@@ -1555,7 +1535,6 @@
                 const value = parseFloat(document.getElementById('promo-value').value);
                 const minCart = document.getElementById('promo-min-cart').value ? parseFloat(document.getElementById('promo-min-cart').value) : null;
 
-                // MOTOR DE REGLAS: Validar solo campos obligatorios (code es opcional)
                 if (!type || isNaN(value)) {
                     alert(this.adminTranslations[this.currentLang].error_promo_validation);
                     return;
@@ -1563,7 +1542,7 @@
 
                 try {
                     const payload = {
-                        code: code || null,  // Motor de Reglas: null si está vacío (promoción automática)
+                        code: code || null,
                         type,
                         discount_value: parseFloat(value),
                         min_cart_amount: minCart ? parseFloat(minCart) : null,
@@ -1719,22 +1698,32 @@
         document.addEventListener('DOMContentLoaded', () => app.start());
     </script>
 
-    <!-- Modal Promociones -->
-    <div id="modal-promo" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
-        <div style="background: white; border-radius: 12px; padding: 32px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
-            <h2 data-i18n="modal_promo_title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: #2B0710; font-family: 'Playfair Display', serif;">Gestionar Cupón</h2>
+    <div id="modal-promo"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+        <div
+            style="background: white; border-radius: 12px; padding: 32px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+            <h2 data-i18n="modal_promo_title"
+                style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: #2B0710; font-family: 'Playfair Display', serif;">
+                Gestionar Cupón</h2>
 
-            <form id="form-promo" onsubmit="app.savePromo(event)" style="display: flex; flex-direction: column; gap: 16px;">
+            <form id="form-promo" onsubmit="app.savePromo(event)"
+                style="display: flex; flex-direction: column; gap: 16px;">
                 <input type="hidden" id="promo-id">
 
                 <div style="display: flex; flex-direction: column;">
-                    <label data-i18n="label_promo_code" style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Código del Cupón</label>
-                    <input type="text" id="promo-code" style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; font-family: monospace;">
+                    <label data-i18n="label_promo_code"
+                        style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Código
+                        del Cupón</label>
+                    <input type="text" id="promo-code"
+                        style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; font-family: monospace;">
                 </div>
 
                 <div style="display: flex; flex-direction: column;">
-                    <label data-i18n="label_promo_type" style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Tipo de Descuento *</label>
-                    <select id="promo-type" required style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">
+                    <label data-i18n="label_promo_type"
+                        style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Tipo
+                        de Descuento *</label>
+                    <select id="promo-type" required
+                        style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">
                         <option value="" data-i18n="option_select_type">Seleccionar tipo...</option>
                         <option value="percentage" data-i18n="option_percentage">Porcentaje (%)</option>
                         <option value="fixed" data-i18n="option_fixed">Cantidad Fija (€)</option>
@@ -1742,20 +1731,28 @@
                 </div>
 
                 <div style="display: flex; flex-direction: column;">
-                    <label data-i18n="label_promo_value" style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Valor del Descuento *</label>
-                    <input type="number" id="promo-value" required step="0.01" min="0" style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">
+                    <label data-i18n="label_promo_value"
+                        style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Valor
+                        del Descuento *</label>
+                    <input type="number" id="promo-value" required step="0.01" min="0"
+                        style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">
                 </div>
 
                 <div style="display: flex; flex-direction: column;">
-                    <label data-i18n="label_promo_min_cart" style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Mínimo de Carrito (€)</label>
-                    <input type="number" id="promo-min-cart" step="0.01" min="0" style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">
+                    <label data-i18n="label_promo_min_cart"
+                        style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Mínimo
+                        de Carrito (€)</label>
+                    <input type="number" id="promo-min-cart" step="0.01" min="0"
+                        style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">
                 </div>
 
                 <div style="display: flex; gap: 12px; margin-top: 24px;">
-                    <button type="button" onclick="app.closeModals()" data-i18n="btn_cancel" style="flex: 1; padding: 12px; border: 2px solid #cbd5e1; background: transparent; border-radius: 8px; font-weight: 600; cursor: pointer; color: #64748b; transition: all 0.3s;">
+                    <button type="button" onclick="app.closeModals()" data-i18n="btn_cancel"
+                        style="flex: 1; padding: 12px; border: 2px solid #cbd5e1; background: transparent; border-radius: 8px; font-weight: 600; cursor: pointer; color: #64748b; transition: all 0.3s;">
                         Cancelar
                     </button>
-                    <button type="submit" data-i18n="btn_save" style="flex: 1; padding: 12px; background: #C89F5D; color: #2B0710; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                    <button type="submit" data-i18n="btn_save"
+                        style="flex: 1; padding: 12px; background: #C89F5D; color: #2B0710; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
                         Guardar
                     </button>
                 </div>
@@ -1763,34 +1760,49 @@
         </div>
     </div>
 
-    <!-- Modal Resellers -->
-    <div id="modal-reseller" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
-        <div style="background: white; border-radius: 12px; padding: 32px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
-            <h2 data-i18n="modal_reseller_title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: #2B0710; font-family: 'Playfair Display', serif;">Gestionar Socio</h2>
+    <div id="modal-reseller"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+        <div
+            style="background: white; border-radius: 12px; padding: 32px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+            <h2 data-i18n="modal_reseller_title"
+                style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: #2B0710; font-family: 'Playfair Display', serif;">
+                Gestionar Socio</h2>
 
-            <form id="form-reseller" onsubmit="app.saveReseller(event)" style="display: flex; flex-direction: column; gap: 16px;">
+            <form id="form-reseller" onsubmit="app.saveReseller(event)"
+                style="display: flex; flex-direction: column; gap: 16px;">
                 <input type="hidden" id="reseller-id">
 
                 <div style="display: flex; flex-direction: column;">
-                    <label data-i18n="label_reseller_code" style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Código del Socio *</label>
-                    <input type="text" id="reseller-code" required style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; font-family: monospace;">
+                    <label data-i18n="label_reseller_code"
+                        style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Código
+                        del Socio *</label>
+                    <input type="text" id="reseller-code" required
+                        style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; font-family: monospace;">
                 </div>
 
                 <div style="display: flex; flex-direction: column;">
-                    <label data-i18n="label_reseller_name" style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Nombre del Socio *</label>
-                    <input type="text" id="reseller-name" required style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">
+                    <label data-i18n="label_reseller_name"
+                        style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Nombre
+                        del Socio *</label>
+                    <input type="text" id="reseller-name" required
+                        style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">
                 </div>
 
                 <div style="display: flex; flex-direction: column;">
-                    <label data-i18n="label_reseller_commission" style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Comisión (%)</label>
-                    <input type="number" id="reseller-commission" step="0.01" min="0" max="100" style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">
+                    <label data-i18n="label_reseller_commission"
+                        style="font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Comisión
+                        (%)</label>
+                    <input type="number" id="reseller-commission" step="0.01" min="0" max="100"
+                        style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">
                 </div>
 
                 <div style="display: flex; gap: 12px; margin-top: 24px;">
-                    <button type="button" onclick="app.closeModals()" data-i18n="btn_cancel" style="flex: 1; padding: 12px; border: 2px solid #cbd5e1; background: transparent; border-radius: 8px; font-weight: 600; cursor: pointer; color: #64748b; transition: all 0.3s;">
+                    <button type="button" onclick="app.closeModals()" data-i18n="btn_cancel"
+                        style="flex: 1; padding: 12px; border: 2px solid #cbd5e1; background: transparent; border-radius: 8px; font-weight: 600; cursor: pointer; color: #64748b; transition: all 0.3s;">
                         Cancelar
                     </button>
-                    <button type="submit" data-i18n="btn_save" style="flex: 1; padding: 12px; background: #C89F5D; color: #2B0710; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                    <button type="submit" data-i18n="btn_save"
+                        style="flex: 1; padding: 12px; background: #C89F5D; color: #2B0710; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
                         Guardar
                     </button>
                 </div>
