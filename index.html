@@ -15,19 +15,6 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
 
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="De Altura Wines | Desde los Andes a Canarias">
-    <meta name="twitter:description" content="Vinos Argentinos de Altura directos a Islas Canarias.">
-    <meta name="twitter:image"
-        content="https://pzzbvinbyzaxrshlmlcn.supabase.co/storage/v1/object/public/product-images/banner-compartir.jpg">
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="De Altura Wines | Desde los Andes a Canarias">
-    <meta name="twitter:description"
-        content="El prestigio mundial del vino argentino, desde la inmensidad de los Andes directo a Islas Canarias.">
-    <meta name="twitter:image"
-        content="https://images.unsplash.com/photo-1506377247377-2a5b3b0ca7df?auto=format&fit=crop&q=80&w=1200">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -44,7 +31,6 @@
             TAXES: { IGIC_CANARIAS: 0.07 }
         };
 
-        // MAPEO CORRECTO: Buenos Aires es una bodega que produce en Mendoza.
         const BODEGA_PROVINCIA_MAP = {
             'Viñas en Flor': 'Salta', 'The Llama': 'Salta', 'Bodega Yacochuya': 'Salta',
             'Coquena': 'Salta', 'Agustín Lanús Wines': 'Salta', 'Agustin Lanus Wines': 'Salta',
@@ -53,7 +39,7 @@
             'Paso a Paso': 'Mendoza', 'Paso a Paso Wines': 'Mendoza',
             'Huentala Wines': 'Mendoza', 'Colosso Wines': 'Mendoza', 'Coloso Wines': 'Mendoza',
             'Buenos Aires': 'Mendoza',
-            'Bodega del Desierto': 'La Pampa'
+            'Bodega del Desierto': 'Patagonia' // CAMBIO: De La Pampa a Patagonia
         };
 
         const getProvinciaBodega = (bodega) => BODEGA_PROVINCIA_MAP[bodega] || 'Desconocida';
@@ -70,7 +56,6 @@
                     }
                     await new Promise(r => setTimeout(r, 50));
                 }
-                console.error('Error Crítico: Supabase no cargó.');
                 return false;
             };
 
@@ -80,23 +65,16 @@
                         const ready = await waitForSupabase();
                         if (!ready) return [];
                     }
-
                     try {
                         const { data, error } = await supabase.from('products').select('*');
                         if (error) throw error;
-
                         return (data || [])
                             .map(wine => ({ ...wine, provincia: getProvinciaBodega(wine.bodega) }))
                             .sort((a, b) => {
-                                // 1º PRIORIDAD ABSOLUTA: Bodega 'Buenos Aires' va primero en todo
                                 if (a.bodega === 'Buenos Aires' && b.bodega !== 'Buenos Aires') return -1;
                                 if (b.bodega === 'Buenos Aires' && a.bodega !== 'Buenos Aires') return 1;
-
-                                // 2º ORDEN: Por Bodega (para agrupar los vinos de la misma familia)
                                 const bOrder = (a.bodega || '').localeCompare(b.bodega || '');
                                 if (bOrder !== 0) return bOrder;
-
-                                // 3º ORDEN: Por Precio ascendente (dentro de la misma bodega)
                                 return (a.price_retail || a.price || 0) - (b.price_retail || b.price || 0);
                             });
                     } catch (error) {
@@ -152,14 +130,8 @@
             transform: translateX(0) !important;
         }
 
-        #cart-overlay {
-            transition: opacity 0.3s ease;
-        }
-
         .wine-row:hover {
             background-color: #FFFFFF;
-            z-index: 10;
-            position: relative;
             border-radius: 0.5rem;
         }
 
@@ -197,7 +169,7 @@
 
     <div class="canary-stripe h-2.5 w-full fixed top-0 z-[100] shadow-md"></div>
     <div
-        class="fixed top-6 right-6 z-[110] flex bg-white/90 backdrop-blur-md p-1 rounded-full shadow-lg border border-stone-200 transition-all hover:shadow-xl">
+        class="fixed top-6 right-6 z-[110] flex bg-white/90 backdrop-blur-md p-1 rounded-full shadow-lg border border-stone-200">
         <button id="btn-lang-es" onclick="setLanguage('es')"
             class="px-4 py-1.5 text-xs font-bold rounded-full bg-wine-900 text-white transition-all shadow-sm">ES</button>
         <button id="btn-lang-en" onclick="setLanguage('en')"
@@ -224,17 +196,13 @@
                 <span lang="en" class="text-[10px] font-bold text-gold-500 tracking-[0.2em] uppercase">100% Argentine
                     Wine · Export to Canary Islands</span>
             </div>
-
             <h1 class="text-6xl md:text-7xl lg:text-8xl font-serif text-white mb-8 tracking-tight drop-shadow-lg">De
                 Altura Wines</h1>
-
-            <div
-                class="flex flex-col w-56 md:w-64 h-3 md:h-4 mb-10 rounded-sm overflow-hidden opacity-100 shadow-[0_4px_14px_rgba(0,0,0,0.3)] border border-white/10">
+            <div class="flex flex-col w-56 md:w-64 h-3 md:h-4 mb-10 rounded-sm overflow-hidden border border-white/10">
                 <div class="h-1/3 w-full bg-[#74ACDF]"></div>
                 <div class="h-1/3 w-full bg-white"></div>
                 <div class="h-1/3 w-full bg-[#74ACDF]"></div>
             </div>
-
             <p
                 class="text-2xl md:text-3xl text-stone-100 font-light max-w-3xl mx-auto leading-relaxed mb-10 italic drop-shadow-md">
                 <span lang="es">El prestigio mundial del vino argentino, desde la inmensidad de los Andes directo a
@@ -242,19 +210,8 @@
                 <span lang="en">The global prestige of Argentine wine, from the immensity of the Andes straight to the
                     Canary Islands.</span>
             </p>
-
-            <p class="text-sm md:text-base text-stone-300 font-light max-w-2xl mx-auto leading-relaxed mb-12">
-                <span lang="es">Un catálogo diseñado para llevar la máxima calidad y autenticidad a <strong
-                        class="text-white font-semibold">compradores directos</strong> y profesionales <strong
-                        class="text-white font-semibold">HORECA</strong> en todo el archipiélago.</span>
-                <span lang="en">A catalog designed to bring the highest quality to <strong
-                        class="text-white font-semibold">direct buyers</strong> and <strong
-                        class="text-white font-semibold">HORECA</strong> professionals throughout the
-                    archipelago.</span>
-            </p>
-
             <a href="#catalog"
-                class="bg-gold-500 hover:bg-gold-600 text-wine-900 font-bold px-10 py-5 rounded-sm transition-colors duration-300 uppercase tracking-widest text-xs shadow-xl">
+                class="bg-gold-500 hover:bg-gold-600 text-wine-900 font-bold px-10 py-5 rounded-sm transition-colors uppercase tracking-widest text-xs shadow-xl">
                 <span lang="es">Explorar Catálogo</span><span lang="en">Explore Catalog</span>
             </a>
         </div>
@@ -269,13 +226,6 @@
                 <p class="text-stone-500 mt-2 font-medium"><span lang="es">Venta exclusiva por cajas
                         completas.</span><span lang="en">Exclusive sales by full boxes.</span></p>
             </div>
-            <div class="mt-4 md:mt-0 text-right">
-                <span
-                    class="inline-block bg-white text-stone-500 text-[10px] font-bold px-3 py-1.5 rounded shadow-sm border border-stone-200 uppercase tracking-widest">
-                    <span lang="es">* Precios Netos (IGIC no incl.)</span><span lang="en">* Net Prices (IGIC not
-                        incl.)</span>
-                </span>
-            </div>
         </div>
 
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
@@ -285,28 +235,21 @@
                         lang="es">Todos</span><span lang="en">All</span></button>
                 <div class="w-px h-6 bg-stone-300 mx-1 hidden sm:block self-center"></div>
                 <button onclick="toggleFilter('tinto', 'type')" data-value="tinto" data-category="type"
-                    class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors"><span
+                    class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 transition-colors"><span
                         lang="es">Tintos</span><span lang="en">Reds</span></button>
                 <button onclick="toggleFilter('blanco', 'type')" data-value="blanco" data-category="type"
-                    class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors"><span
+                    class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 transition-colors"><span
                         lang="es">Blancos</span><span lang="en">Whites</span></button>
                 <button onclick="toggleFilter('rosado', 'type')" data-value="rosado" data-category="type"
-                    class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors"><span
+                    class="filter-btn bg-white text-stone-600 border-stone-200 border px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 transition-colors"><span
                         lang="es">Rosados</span><span lang="en">Rosés</span></button>
             </div>
-
             <div class="flex flex-wrap gap-3 w-full lg:w-auto">
                 <select id="sort-price"
-                    class="bg-white text-stone-600 border border-stone-200 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-md shadow-sm focus:outline-none focus:border-wine-700 transition-colors w-full sm:w-auto appearance-none cursor-pointer truncate">
-                    <option value="default" data-i18n="sort_price">Ordenar por precio</option>
-                    <option value="asc" data-i18n="sort_asc">Precio: Menor a Mayor</option>
-                    <option value="desc" data-i18n="sort_desc">Precio: Mayor a Menor</option>
-                </select>
-                <select id="filter-box"
-                    class="bg-white text-stone-600 border border-stone-200 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-md shadow-sm focus:outline-none focus:border-wine-700 transition-colors w-full sm:w-auto appearance-none cursor-pointer truncate">
-                    <option value="all" data-i18n="filter_box_all">Todos los formatos</option>
-                    <option value="6" data-i18n="filter_box_6">Cajas de 6</option>
-                    <option value="12" data-i18n="filter_box_12">Cajas de 12</option>
+                    class="bg-white text-stone-600 border border-stone-200 px-4 py-2.5 text-[10px] font-bold uppercase rounded-md shadow-sm focus:outline-none w-full sm:w-auto">
+                    <option value="default">Ordenar por precio</option>
+                    <option value="asc">Precio: Menor a Mayor</option>
+                    <option value="desc">Precio: Mayor a Menor</option>
                 </select>
             </div>
         </div>
@@ -315,98 +258,58 @@
             <div class="text-xs font-bold uppercase text-stone-400 tracking-widest py-2.5 pr-2"><span
                     lang="es">Provincia:</span><span lang="en">Province:</span></div>
             <button onclick="toggleFilter('todas_prov', 'provincia')" data-value="todas_prov" data-category="provincia"
-                class="filter-btn bg-wine-900 text-white border-wine-900 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm transition-colors"><span
+                class="filter-btn bg-wine-900 text-white border-wine-900 border px-4 py-2 text-[10px] font-bold uppercase rounded-full transition-colors"><span
                     lang="es">Todas</span><span lang="en">All</span></button>
             <button onclick="toggleFilter('Mendoza', 'provincia')" data-value="Mendoza" data-category="provincia"
-                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Mendoza</button>
+                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase rounded-full">Mendoza</button>
             <button onclick="toggleFilter('San Juan', 'provincia')" data-value="San Juan" data-category="provincia"
-                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">San
+                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase rounded-full">San
                 Juan</button>
             <button onclick="toggleFilter('Salta', 'provincia')" data-value="Salta" data-category="provincia"
-                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Salta</button>
+                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase rounded-full">Salta</button>
             <button onclick="toggleFilter('Jujuy', 'provincia')" data-value="Jujuy" data-category="provincia"
-                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">Jujuy</button>
-            <button onclick="toggleFilter('La Pampa', 'provincia')" data-value="La Pampa" data-category="provincia"
-                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors">La
-                Pampa</button>
+                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase rounded-full">Jujuy</button>
+            <button onclick="toggleFilter('Patagonia', 'provincia')" data-value="Patagonia" data-category="provincia"
+                class="filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase rounded-full">Patagonia</button>
         </div>
 
         <section id="section-cuyo" class="region-section">
-            <div class="mb-6">
-                <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]"><span lang="es">Corazón
-                        Enológico</span><span lang="en">Oenological Heart</span></span>
-                <h3 class="text-3xl font-serif text-stone-900 mt-1"><span lang="es">Región de Cuyo</span><span
-                        lang="en">Cuyo Region</span></h3>
-                <p class="text-sm text-stone-500 mt-2 italic"><span lang="es">Mendoza y San Juan - Valle de Uco, Maipú y
-                        Calingasta (900m - 1.500m)</span><span lang="en">Mendoza & San Juan - Uco Valley, Maipu &
-                        Calingasta (900m - 1.500m)</span></p>
-            </div>
+            <h3 class="text-3xl font-serif text-stone-900 mb-6"><span lang="es">Región de Cuyo</span><span
+                    lang="en">Cuyo Region</span></h3>
             <div id="container-cuyo" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </section>
 
         <section id="section-norte" class="region-section mt-16">
-            <div class="mb-6">
-                <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]"><span lang="es">Altitud
-                        Extrema</span><span lang="en">Extreme Altitude</span></span>
-                <h3 class="text-3xl font-serif text-stone-900 mt-1"><span lang="es">Norte Argentino</span><span
-                        lang="en">Northern Argentina</span></h3>
-                <p class="text-sm text-stone-500 mt-2 italic"><span lang="es">Salta y Jujuy - Valles Calchaquíes y
-                        Quebrada de Humahuaca (1.700m - 2.800m)</span><span lang="en">Salta & Jujuy - Calchaqui Valleys
-                        & Quebrada de Humahuaca (1.700m - 2.800m)</span></p>
-            </div>
+            <h3 class="text-3xl font-serif text-stone-900 mb-6"><span lang="es">Norte Argentino</span><span
+                    lang="en">Northern Argentina</span></h3>
             <div id="container-norte" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </section>
 
         <section id="section-patagonia" class="region-section mt-16">
-            <div class="mb-6">
-                <span class="text-gold-600 font-bold text-xs uppercase tracking-[0.2em]"><span lang="es">El Sur
-                        Extremo</span><span lang="en">The Extreme South</span></span>
-                <h3 class="text-3xl font-serif text-stone-900 mt-1"><span lang="es">Patagonia Argentina</span><span
-                        lang="en">Argentine Patagonia</span></h3>
-                <p class="text-sm text-stone-500 mt-2 italic"><span lang="es">La Pampa - Alto Valle del Río Colorado
-                        (300m)</span><span lang="en">La Pampa - Colorado River High Valley (300m)</span></p>
-            </div>
+            <h3 class="text-3xl font-serif text-stone-900 mb-6"><span lang="es">Patagonia Argentina</span><span
+                    lang="en">Argentine Patagonia</span></h3>
             <div id="container-patagonia" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </section>
 
-        <div id="no-results" class="hidden py-16 text-center text-stone-400 italic" data-i18n="not_found">No se
-            encontraron vinos.</div>
+        <div id="no-results" class="hidden py-16 text-center text-stone-400 italic">No se encontraron vinos.</div>
 
         <div
-            class="mt-12 text-center text-sm text-stone-500 flex flex-col md:flex-row items-center justify-center gap-3 bg-stone-50 py-5 px-6 rounded-lg border border-stone-200 shadow-sm">
+            class="mt-12 text-center text-sm text-stone-500 bg-stone-50 py-5 px-6 rounded-lg border border-stone-200 shadow-sm flex items-center justify-center gap-3">
             <svg class="w-6 h-6 text-stone-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <p class="leading-relaxed text-[13px] md:text-sm">
                 <span lang="es"><strong>Nota:</strong> Los tiempos de logística y entrega pueden variar según la isla de
-                    destino y disponibilidad. Las condiciones exactas serán confirmadas durante el proceso de
-                    compra.</span>
+                    destino.</span>
                 <span lang="en"><strong>Note:</strong> Logistics and delivery times may vary depending on the
-                    destination island and availability. Exact conditions will be confirmed during checkout.</span>
+                    destination island.</span>
             </p>
         </div>
     </main>
 
-    <section class="bg-stone-900 text-stone-300 py-20 px-6 border-t-4 border-wine-800">
-        <div class="max-w-4xl mx-auto text-center">
-            <svg class="w-12 h-12 mx-auto text-gold-500 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
-                </path>
-            </svg>
-            <h2 class="text-3xl md:text-4xl font-serif text-white mb-6">Atención HORECA en Canarias</h2>
-            <p class="text-lg font-light leading-relaxed max-w-2xl mx-auto mb-10">Condiciones exclusivas y asesoría
-                especializada para la confección de su carta.</p>
-            <a href="https://wa.me/34633706676" target="_blank"
-                class="inline-flex items-center gap-3 px-8 py-4 border border-stone-600 hover:border-gold-500 hover:text-white rounded-sm transition-colors uppercase tracking-widest text-xs font-bold shadow-lg bg-white/5">
-                <span lang="es">Contacta un asesor</span><span lang="en">Contact an Advisor</span>
-            </a>
-        </div>
-    </section>
-
     <button onclick="toggleCart()"
-        class="fixed bottom-6 right-6 z-50 bg-wine-900 hover:bg-wine-800 text-white w-16 h-16 rounded-full shadow-float flex items-center justify-center transition-transform duration-300 hover:scale-105 border border-wine-700 group">
+        class="fixed bottom-6 right-6 z-50 bg-wine-900 hover:bg-wine-800 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 border border-wine-700 group">
         <svg class="w-6 h-6 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
@@ -416,35 +319,28 @@
     </button>
 
     <div id="cart-overlay" onclick="toggleCart()"
-        class="fixed inset-0 bg-stone-900/70 backdrop-blur-sm z-[60] opacity-0 pointer-events-none"></div>
+        class="fixed inset-0 bg-stone-900/70 backdrop-blur-sm z-[60] opacity-0 pointer-events-none transition-opacity">
+    </div>
     <aside id="cart-drawer"
         class="fixed top-0 right-0 w-full max-w-md h-full bg-stone-50 z-[70] shadow-2xl flex flex-col translate-x-full">
         <div class="px-6 py-5 border-b border-stone-200 bg-white flex justify-between items-center">
             <h2 class="text-2xl font-serif text-wine-900"><span lang="es">Su Pedido</span><span lang="en">Your
                     Order</span></h2>
-            <button onclick="toggleCart()"
-                class="text-stone-400 hover:text-wine-900 transition-colors p-2 bg-stone-100 rounded-full">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button onclick="toggleCart()" class="text-stone-400 hover:text-wine-900 p-2 bg-stone-100 rounded-full"><svg
+                    class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                     </path>
-                </svg>
-            </button>
+                </svg></button>
         </div>
-
         <div id="cart-items" class="flex-1 overflow-y-auto px-6 py-6 space-y-4"></div>
-
-        <div class="px-6 py-6 bg-white border-t border-stone-200 shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
+        <div class="px-6 py-6 bg-white border-t border-stone-200">
             <div class="flex justify-between items-end mb-6">
-                <div>
-                    <span class="block text-xs uppercase tracking-widest text-stone-400 font-bold mb-1"
-                        data-i18n="subtotal_net">Subtotal Neto</span>
-                    <span class="text-[10px] text-stone-400" data-i18n="taxes_hint">Impuestos a calcular en el
-                        pago</span>
-                </div>
+                <div><span class="block text-xs uppercase tracking-widest text-stone-400 font-bold mb-1">Total
+                        Pedido</span></div>
                 <div class="text-3xl font-serif text-wine-900 font-bold" id="cart-total">0,00 €</div>
             </div>
             <button onclick="processCheckout()"
-                class="w-full bg-wine-900 hover:bg-wine-800 text-white font-bold py-4 rounded-sm transition-colors flex items-center justify-center gap-2 uppercase tracking-widest text-xs shadow-lg">
+                class="w-full bg-wine-900 hover:bg-wine-800 text-white font-bold py-4 rounded-sm transition-colors uppercase tracking-widest text-xs shadow-lg">
                 <span lang="es">Ir a Pagar</span><span lang="en">Checkout</span>
             </button>
         </div>
@@ -452,142 +348,108 @@
 
     <script>
         const siteTranslations = {
-            es: {
-                sort_price: 'Ordenar por precio', sort_asc: 'Precio: Menor a Mayor', sort_desc: 'Precio: Mayor a Menor',
-                filter_box_all: 'Todos los formatos', filter_box_6: 'Cajas de 6', filter_box_12: 'Cajas de 12',
-                not_found: 'No se encontraron vinos.', cart_empty: 'El carrito está vacío',
-                subtotal_net: 'Subtotal Neto', taxes_hint: 'Impuestos a calcular en el pago'
-            },
-            en: {
-                sort_price: 'Sort by price', sort_asc: 'Price: Low to High', sort_desc: 'Price: High to Low',
-                filter_box_all: 'All formats', filter_box_6: 'Boxes of 6', filter_box_12: 'Boxes of 12',
-                not_found: 'No wines found.', cart_empty: 'The cart is empty',
-                subtotal_net: 'Net Subtotal', taxes_hint: 'Taxes calculated at checkout'
-            }
+            es: { cart_empty: 'El carrito está vacío', unit_price: 'Precio Unidad', box_of: 'Caja ({n} u.)', inc_tax: '(IGIC incl.)' },
+            en: { cart_empty: 'The cart is empty', unit_price: 'Unit Price', box_of: 'Box ({n} u.)', inc_tax: '(IGIC incl.)' }
         };
 
         let catalogData = [];
         let cart = {};
-        let activeFilters = { type: new Set(), provincia: new Set(), box: new Set() };
+        let activeFilters = { type: new Set(), provincia: new Set() };
 
         async function initCatalog() {
             try {
                 const wines = await APIModule.getWines();
                 if (wines && wines.length > 0) {
-                    catalogData = wines.map(wine => {
-                        const pvpConIgic = wine.price_retail || wine.price || 0;
-                        const precioNeto = pvpConIgic / 1.07;
-
-                        return {
-                            id: wine.uuid || wine.id,
-                            type: wine.type,
-                            region: wine.region,
-                            provincia: wine.provincia,
-                            box: wine.box_size || wine.box,
-                            price: precioNeto,
-                            bodega: wine.bodega,
-                            name: wine.name,
-                            notes_es: wine.notes_es,
-                            notes_en: wine.notes_en,
-                            image_url: wine.image_url
-                        };
-                    });
+                    catalogData = wines.map(wine => ({
+                        id: wine.uuid || wine.id,
+                        type: wine.type,
+                        region: wine.region,
+                        provincia: wine.provincia,
+                        box: wine.box_size || wine.box,
+                        price: (wine.price_retail || wine.price || 0) / 1.07, // Almacenamos neto para lógica checkout
+                        bodega: wine.bodega,
+                        name: wine.name,
+                        notes_es: wine.notes_es,
+                        notes_en: wine.notes_en,
+                        image_url: wine.image_url
+                    }));
                     renderCatalog();
                 }
-            } catch (error) {
-                console.error('Error loading wines:', error);
-            }
+            } catch (error) { console.error('Error:', error); }
         }
 
         function setLanguage(lang) {
             document.body.className = `antialiased relative lang-${lang}`;
             document.getElementById('btn-lang-es').className = lang === 'es' ? 'px-4 py-1.5 text-xs font-bold rounded-full bg-wine-900 text-white shadow-sm' : 'px-4 py-1.5 text-xs font-bold rounded-full text-stone-500 hover:text-wine-900';
             document.getElementById('btn-lang-en').className = lang === 'en' ? 'px-4 py-1.5 text-xs font-bold rounded-full bg-wine-900 text-white shadow-sm' : 'px-4 py-1.5 text-xs font-bold rounded-full text-stone-500 hover:text-wine-900';
-
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                const translation = siteTranslations[lang][key];
-                if (translation) { el.textContent = translation; }
-            });
-
-            renderCart();
-            renderCatalog();
+            renderCatalog(); renderCart();
         }
 
         function renderCatalog() {
-            if (!catalogData || catalogData.length === 0) return;
-
-            const boxFilter = document.getElementById('filter-box').value;
+            const currentLang = document.body.classList.contains('lang-en') ? 'en' : 'es';
             const sortPrice = document.getElementById('sort-price').value;
 
-            // Filtros acumulativos
             let filtered = catalogData.filter(w => {
                 if (activeFilters.type.size > 0 && !activeFilters.type.has(w.type)) return false;
                 if (activeFilters.provincia.size > 0 && !activeFilters.provincia.has(w.provincia)) return false;
-                if (boxFilter !== 'all' && w.box.toString() !== boxFilter) return false;
                 return true;
             });
 
-            if (sortPrice === 'asc') {
-                filtered.sort((a, b) => a.price - b.price);
-            } else if (sortPrice === 'desc') {
-                filtered.sort((a, b) => b.price - a.price);
-            }
-
-            // Reparto exacto de secciones según su región
-            const cuyo = filtered.filter(w => w.region === 'cuyo');
-            const norte = filtered.filter(w => w.region === 'norte');
-            const patagonia = filtered.filter(w => w.region === 'patagonia');
+            if (sortPrice === 'asc') filtered.sort((a, b) => a.price - b.price);
+            else if (sortPrice === 'desc') filtered.sort((a, b) => b.price - a.price);
 
             const generateHtml = (wines) => {
-                const currentLang = document.body.classList.contains('lang-en') ? 'en' : 'es';
-
                 return wines.map(w => {
-                    const total = (w.price * w.box).toFixed(2).replace('.', ',');
-                    const price = w.price.toFixed(2).replace('.', ',');
-                    const inCartCls = cart[w.id] ? 'ring-2 ring-gold-500' : '';
+                    // CÁLCULO PRECIOS CON IGIC (NETO * 1.07)
+                    const unitGross = (w.price * 1.07).toFixed(2).replace('.', ',');
+                    const totalGross = (w.price * 1.07 * w.box).toFixed(2).replace('.', ',');
+
                     const cartQty = cart[w.id] ? cart[w.id].qty : 0;
+                    const inCartCls = cart[w.id] ? 'ring-2 ring-gold-500' : '';
 
-                    let notes = w.notes_es || '';
-                    if (currentLang === 'en' && w.notes_en) { notes = w.notes_en; }
+                    // SEPARACIÓN DE FRASES
+                    let notes = (currentLang === 'en' ? w.notes_en : w.notes_es) || '';
+                    notes = notes.split('. ').join('.\n');
 
-                    const imgSrc = w.image_url ? `${w.image_url}?v=1.1` : 'https://images.unsplash.com/photo-1510850402719-e4c670846019?auto=format&fit=crop&q=80&w=800';
+                    // LÓGICA SIN STOCK
+                    const noStockNames = ['Pasacana', 'Orange', 'Bonarda'];
+                    const isOutOfStock = noStockNames.some(name => w.name.includes(name));
 
                     return `
-                        <article class="flex flex-col bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-stone-100 overflow-hidden h-full ${inCartCls}" data-wine-id="${w.id}">
-                            <div class="h-72 bg-stone-50 relative overflow-hidden group flex items-center justify-center p-6">
-                                <img src="${imgSrc}" alt="${w.name}" class="w-full h-full object-contain drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
-                                <div class="absolute top-3 right-3 flex flex-col gap-2 z-10">
-                                    <span class="bg-wine-900/90 text-white text-[9px] font-bold px-3 py-1 rounded-full backdrop-blur-sm uppercase tracking-widest border border-white/10">Caja de ${w.box}</span>
-                                    <span class="bg-white/90 text-wine-900 text-[9px] font-bold px-3 py-1 rounded-full backdrop-blur-sm shadow-sm uppercase tracking-widest border border-stone-100">${w.region}</span>
+                        <article class="flex flex-col bg-white rounded-xl shadow-sm hover:shadow-lg transition-all border border-stone-100 overflow-hidden h-full ${inCartCls} ${isOutOfStock ? 'opacity-75' : ''}">
+                            <div class="h-72 bg-stone-50 relative flex items-center justify-center p-6">
+                                <img src="${w.image_url || 'https://images.unsplash.com/photo-1510850402719-e4c670846019'}" class="w-full h-full object-contain drop-shadow-xl">
+                                <div class="absolute top-3 right-3 flex flex-col gap-2">
+                                    <span class="bg-wine-900/90 text-white text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Caja de ${w.box}</span>
+                                    ${isOutOfStock ? '<span class="bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">SIN STOCK</span>' : ''}
                                 </div>
                             </div>
                             <div class="p-5 flex flex-col flex-grow">
-                                <div class="flex flex-col mb-2">
-                                    <span class="text-[10px] font-bold uppercase text-stone-400 tracking-wider mb-0.5">${w.bodega || ''}</span>
-                                    <span class="text-[9px] text-stone-500 font-medium">${w.provincia}, <span lang="es">Argentina</span><span lang="en">Argentina</span></span>
+                                <div class="mb-2">
+                                    <span class="text-[10px] font-bold uppercase text-stone-400">${w.bodega}</span>
+                                    <span class="block text-[9px] text-stone-500 font-medium">${w.provincia}, Argentina</span>
                                 </div>
-                                <h4 class="text-xl font-serif font-bold text-wine-900 mb-2 leading-tight">${w.name}</h4>
-                                <p class="text-sm text-stone-600 line-clamp-3 mb-4 leading-relaxed">${notes}</p>
+                                <h4 class="text-xl font-serif font-bold text-wine-900 mb-2">${w.name}</h4>
+                                <p class="text-sm text-stone-600 mb-4 leading-relaxed whitespace-pre-line">${notes}</p>
                                 <div class="mt-auto border-t border-stone-100 pt-5">
                                     <div class="flex justify-between items-end mb-4">
                                         <div class="flex flex-col">
-                                            <span class="text-[10px] text-stone-400 uppercase font-bold mb-0.5" data-i18n="subtotal_net">Precio Neto</span>
-                                            <div class="text-2xl font-serif font-bold text-wine-900">${total} €</div>
+                                            <span class="text-[10px] text-stone-400 uppercase font-bold mb-0.5">${siteTranslations[currentLang].unit_price}</span>
+                                            <div class="text-2xl font-serif font-bold text-wine-900">${unitGross} € <span class="text-[10px] font-sans text-stone-400 font-normal">${siteTranslations[currentLang].inc_tax}</span></div>
                                         </div>
-                                        <div class="text-right">
-                                            <span class="text-xs text-stone-400 underline decoration-gold-500/30 font-medium">${price} € <span class="text-[9px]">/bot</span></span>
+                                        <div class="text-right flex flex-col items-end">
+                                            <span class="text-[10px] text-stone-400 uppercase font-bold mb-0.5">${siteTranslations[currentLang].box_of.replace('{n}', w.box)}</span>
+                                            <div class="text-[15px] font-bold text-wine-800">${totalGross} €</div>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-3">
-                                        <div class="flex items-center bg-stone-100 rounded-lg border border-stone-200 overflow-hidden h-11 shrink-0">
-                                            <button onclick="updateQty('${w.id}', -1)" class="w-10 h-full flex items-center justify-center text-stone-500 hover:text-wine-800 hover:bg-stone-200 transition-colors btn-pop font-bold">−</button>
-                                            <span class="w-8 text-center text-sm font-bold text-wine-900">${cartQty}</span>
-                                            <button onclick="updateQty('${w.id}', 1)" class="w-10 h-full flex items-center justify-center text-stone-500 hover:text-wine-800 hover:bg-stone-200 transition-colors btn-pop font-bold">+</button>
+                                        <div class="flex items-center bg-stone-100 rounded-lg h-11">
+                                            <button onclick="updateQty('${w.id}', -1)" class="w-10 font-bold" ${isOutOfStock ? 'disabled' : ''}>-</button>
+                                            <span class="w-8 text-center text-sm font-bold">${cartQty}</span>
+                                            <button onclick="updateQty('${w.id}', 1)" class="w-10 font-bold" ${isOutOfStock ? 'disabled' : ''}>+</button>
                                         </div>
-                                        <button onclick="updateQty('${w.id}', 1)" class="flex-grow bg-wine-900 hover:bg-wine-800 text-white font-bold h-11 rounded-lg transition-colors flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] shadow-sm">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                                            <span lang="es">Añadir</span><span lang="en">Add</span>
+                                        <button onclick="updateQty('${w.id}', 1)" class="flex-grow bg-wine-900 text-white font-bold h-11 rounded-lg text-[10px] uppercase tracking-widest ${isOutOfStock ? 'bg-stone-300 cursor-not-allowed' : 'hover:bg-wine-800'}" ${isOutOfStock ? 'disabled' : ''}>
+                                            ${isOutOfStock ? 'No Disponible' : 'Añadir al Carrito'}
                                         </button>
                                     </div>
                                 </div>
@@ -597,111 +459,61 @@
                 }).join('');
             };
 
-            document.getElementById('container-cuyo').innerHTML = generateHtml(cuyo);
-            document.getElementById('container-norte').innerHTML = generateHtml(norte);
-            document.getElementById('container-patagonia').innerHTML = generateHtml(patagonia);
-
-            document.getElementById('section-cuyo').style.display = cuyo.length > 0 ? 'block' : 'none';
-            document.getElementById('section-norte').style.display = norte.length > 0 ? 'block' : 'none';
-            document.getElementById('section-patagonia').style.display = patagonia.length > 0 ? 'block' : 'none';
-
-            const totalVinos = cuyo.length + norte.length + patagonia.length;
-            document.getElementById('no-results').classList.toggle('hidden', totalVinos > 0);
+            document.getElementById('container-cuyo').innerHTML = generateHtml(filtered.filter(w => w.region === 'cuyo'));
+            document.getElementById('container-norte').innerHTML = generateHtml(filtered.filter(w => w.region === 'norte'));
+            document.getElementById('container-patagonia').innerHTML = generateHtml(filtered.filter(w => w.region === 'patagonia'));
         }
 
         function toggleFilter(value, category) {
-            if (value === 'all') {
-                activeFilters.type.clear();
-            } else if (value === 'todas_prov') {
-                activeFilters.provincia.clear();
-            } else {
-                const targetSet = activeFilters[category];
-                targetSet.has(value) ? targetSet.delete(value) : targetSet.add(value);
-            }
-
+            if (value === 'all') activeFilters.type.clear();
+            else if (value === 'todas_prov') activeFilters.provincia.clear();
+            else { const s = activeFilters[category]; s.has(value) ? s.delete(value) : s.add(value); }
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                const val = btn.dataset.value;
-                const cat = btn.dataset.category;
-                let isActive = false;
-
-                if (cat === 'type') {
-                    if (val === 'all' && activeFilters.type.size === 0) isActive = true;
-                    if (activeFilters.type.has(val)) isActive = true;
-                } else if (cat === 'provincia') {
-                    if (val === 'todas_prov' && activeFilters.provincia.size === 0) isActive = true;
-                    if (activeFilters.provincia.has(val)) isActive = true;
-                }
-
-                if (isActive) {
-                    btn.className = "filter-btn bg-wine-900 text-white border-wine-900 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm transition-colors";
-                } else {
-                    btn.className = "filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm hover:border-wine-700 hover:text-wine-700 transition-colors";
-                }
+                const isActive = (btn.dataset.value === 'all' && activeFilters.type.size === 0) ||
+                    (btn.dataset.value === 'todas_prov' && activeFilters.provincia.size === 0) ||
+                    activeFilters[btn.dataset.category]?.has(btn.dataset.value);
+                btn.className = isActive ? "filter-btn bg-wine-900 text-white border-wine-900 border px-4 py-2 text-[10px] font-bold uppercase rounded-full shadow-sm"
+                    : "filter-btn bg-white text-stone-600 border-stone-200 border px-4 py-2 text-[10px] font-bold uppercase rounded-full hover:border-wine-700";
             });
             renderCatalog();
         }
 
         function updateQty(id, change) {
             const wine = catalogData.find(w => w.id === id);
-            let currentQty = cart[id] ? cart[id].qty : 0;
-            let newQty = Math.max(0, currentQty + change);
-
-            if (newQty > 0) { cart[id] = { ...wine, qty: newQty }; }
-            else { delete cart[id]; }
-
-            const badge = document.getElementById('cart-badge');
-            badge.classList.remove('animate-pop');
-            void badge.offsetWidth;
-            badge.classList.add('animate-pop');
-
-            renderCatalog();
-            renderCart();
+            let qty = (cart[id] ? cart[id].qty : 0) + change;
+            if (qty > 0) cart[id] = { ...wine, qty }; else delete cart[id];
+            renderCatalog(); renderCart();
         }
 
         function renderCart() {
             const container = document.getElementById('cart-items');
             const totalEl = document.getElementById('cart-total');
             const badge = document.getElementById('cart-badge');
-
-            const isEs = document.body.classList.contains('lang-es');
-            const langBox = isEs ? 'Caja(s)' : 'Box(es)';
-
             let total = 0, count = 0;
-            const keys = Object.keys(cart);
 
+            const keys = Object.keys(cart);
             if (keys.length === 0) {
-                container.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-stone-400 italic mt-10"><p>${siteTranslations[isEs ? 'es' : 'en'].cart_empty}</p></div>`;
-                badge.style.display = 'none';
-                totalEl.innerText = '0,00 €';
-                return;
+                container.innerHTML = `<p class="text-center text-stone-400 italic mt-10">${siteTranslations[document.body.classList.contains('lang-es') ? 'es' : 'en'].cart_empty}</p>`;
+                badge.style.display = 'none'; totalEl.innerText = '0,00 €'; return;
             }
 
             container.innerHTML = keys.map(id => {
                 const item = cart[id];
-                const itemTotal = item.qty * item.price * item.box;
-                total += itemTotal;
-                count += item.qty;
-                return `
-                    <div class="flex justify-between items-start p-4 bg-white border border-stone-200 rounded-lg shadow-sm mb-3">
-                        <div class="pr-3">
-                            <h5 class="text-sm font-bold text-wine-900 leading-tight mb-1">${item.name}</h5>
-                            <div class="text-xs text-stone-500 font-medium"><span class="text-gold-600 font-bold">${item.qty} ${langBox}</span></div>
-                        </div>
-                        <div class="text-right text-base font-serif font-bold text-wine-900 whitespace-nowrap">${itemTotal.toFixed(2).replace('.', ',')} €</div>
-                    </div>`;
+                const itemTotal = item.qty * item.price * 1.07 * item.box; // Usamos precio con IGIC para el total del carrito
+                total += itemTotal; count += item.qty;
+                return `<div class="flex justify-between p-4 bg-white border rounded-lg shadow-sm mb-3">
+                    <div><h5 class="text-sm font-bold text-wine-900">${item.name}</h5><div class="text-xs text-stone-500">${item.qty} Caja(s)</div></div>
+                    <div class="font-bold text-wine-900">${itemTotal.toFixed(2).replace('.', ',')} €</div>
+                </div>`;
             }).join('');
-
             totalEl.innerText = total.toFixed(2).replace('.', ',') + ' €';
-            badge.innerText = count;
-            badge.style.display = 'flex';
+            badge.innerText = count; badge.style.display = 'flex';
         }
 
         function toggleCart() {
-            const drawer = document.getElementById('cart-drawer');
-            const overlay = document.getElementById('cart-overlay');
-            drawer.classList.toggle('drawer-open');
-            overlay.classList.toggle('opacity-0');
-            overlay.classList.toggle('pointer-events-none');
+            document.getElementById('cart-drawer').classList.toggle('drawer-open');
+            document.getElementById('cart-overlay').classList.toggle('opacity-0');
+            document.getElementById('cart-overlay').classList.toggle('pointer-events-none');
         }
 
         function processCheckout() {
@@ -710,12 +522,9 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const savedCart = localStorage.getItem('deAlturaCart');
-            if (savedCart) { try { cart = JSON.parse(savedCart); } catch (e) { cart = {}; } }
-
+            const saved = localStorage.getItem('deAlturaCart');
+            if (saved) cart = JSON.parse(saved);
             document.getElementById('sort-price').addEventListener('change', renderCatalog);
-            document.getElementById('filter-box').addEventListener('change', renderCatalog);
-
             initCatalog().then(() => renderCart());
         });
     </script>
