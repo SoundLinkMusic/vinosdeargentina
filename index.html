@@ -39,7 +39,7 @@
             'Paso a Paso': 'Mendoza', 'Paso a Paso Wines': 'Mendoza',
             'Huentala Wines': 'Mendoza', 'Colosso Wines': 'Mendoza', 'Coloso Wines': 'Mendoza',
             'Buenos Aires': 'Mendoza',
-            'Bodega del Desierto': 'Patagonia' // CAMBIO: De La Pampa a Patagonia
+            'Bodega del Desierto': 'Patagonia'
         };
 
         const getProvinciaBodega = (bodega) => BODEGA_PROVINCIA_MAP[bodega] || 'Desconocida';
@@ -308,6 +308,48 @@
         </div>
     </main>
 
+    <section class="bg-stone-900 text-stone-300 py-20 px-6 border-t-4 border-wine-800">
+        <div class="max-w-4xl mx-auto text-center">
+            <svg class="w-12 h-12 mx-auto text-gold-500 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                </path>
+            </svg>
+            <h2 class="text-3xl md:text-4xl font-serif text-white mb-6">Atención HORECA en Canarias</h2>
+            <p class="text-lg font-light leading-relaxed max-w-2xl mx-auto mb-10">Condiciones exclusivas y asesoría
+                especializada para la confección de su carta.</p>
+            <a href="https://wa.me/34633706676" target="_blank"
+                class="inline-flex items-center gap-3 px-8 py-4 border border-stone-600 hover:border-gold-500 hover:text-white rounded-sm transition-colors uppercase tracking-widest text-xs font-bold shadow-lg bg-white/5">
+                <span lang="es">Contacta un asesor</span><span lang="en">Contact an Advisor</span>
+            </a>
+        </div>
+    </section>
+
+    <footer class="bg-wine-900 pt-16 pb-12 px-6 border-t border-wine-800 relative z-10">
+        <div class="max-w-4xl mx-auto text-center flex flex-col items-center">
+            <h2
+                class="text-xl md:text-2xl lg:text-3xl font-serif text-white tracking-wide mb-6 drop-shadow-md leading-relaxed">
+                Vinos de Altura <span class="text-gold-500 mx-2 hidden md:inline">·</span><br class="md:hidden">
+                Canarias <span class="text-gold-500 mx-2">·</span> Lanzarote <span class="text-gold-500 mx-2">·</span>
+                Islas Canarias
+            </h2>
+
+            <div class="w-24 h-px bg-gold-500/30 mb-8"></div>
+
+            <p class="text-stone-400 text-xs font-light mb-4">© 2026 De Altura Wines. Todos los derechos reservados.</p>
+
+            <a href="https://www.doyo.pro/" target="_blank" rel="noopener noreferrer"
+                class="text-stone-500 hover:text-gold-500 transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 group mt-2">
+                Powered by Doyo
+                <svg class="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3">
+                    </path>
+                </svg>
+            </a>
+        </div>
+    </footer>
+
     <button onclick="toggleCart()"
         class="fixed bottom-6 right-6 z-50 bg-wine-900 hover:bg-wine-800 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 border border-wine-700 group">
         <svg class="w-6 h-6 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -366,7 +408,7 @@
                         region: wine.region,
                         provincia: wine.provincia,
                         box: wine.box_size || wine.box,
-                        price: (wine.price_retail || wine.price || 0) / 1.07, // Almacenamos neto para lógica checkout
+                        price: (wine.price_retail || wine.price || 0) / 1.07,
                         bodega: wine.bodega,
                         name: wine.name,
                         notes_es: wine.notes_es,
@@ -400,18 +442,14 @@
 
             const generateHtml = (wines) => {
                 return wines.map(w => {
-                    // CÁLCULO PRECIOS CON IGIC (NETO * 1.07)
                     const unitGross = (w.price * 1.07).toFixed(2).replace('.', ',');
                     const totalGross = (w.price * 1.07 * w.box).toFixed(2).replace('.', ',');
-
                     const cartQty = cart[w.id] ? cart[w.id].qty : 0;
                     const inCartCls = cart[w.id] ? 'ring-2 ring-gold-500' : '';
 
-                    // SEPARACIÓN DE FRASES
                     let notes = (currentLang === 'en' ? w.notes_en : w.notes_es) || '';
                     notes = notes.split('. ').join('.\n');
 
-                    // LÓGICA SIN STOCK
                     const noStockNames = ['Pasacana', 'Orange', 'Bonarda'];
                     const isOutOfStock = noStockNames.some(name => w.name.includes(name));
 
@@ -499,7 +537,7 @@
 
             container.innerHTML = keys.map(id => {
                 const item = cart[id];
-                const itemTotal = item.qty * item.price * 1.07 * item.box; // Usamos precio con IGIC para el total del carrito
+                const itemTotal = item.qty * item.price * 1.07 * item.box;
                 total += itemTotal; count += item.qty;
                 return `<div class="flex justify-between p-4 bg-white border rounded-lg shadow-sm mb-3">
                     <div><h5 class="text-sm font-bold text-wine-900">${item.name}</h5><div class="text-xs text-stone-500">${item.qty} Caja(s)</div></div>
