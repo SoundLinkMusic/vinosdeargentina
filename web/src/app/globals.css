@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-wine-900: #2b0710;
+  --color-wine-800: #3e0c18;
+  --color-wine-700: #5a1224;
+  --color-wine-600: #7a1832;
+
+  --color-gold-500: #c89f5d;
+  --color-gold-600: #a67f43;
+
+  --color-stone-50: #faf9f7;
+  --color-stone-100: #f2f0eb;
+  --color-stone-800: #2d2b2a;
+  --color-stone-900: #1a1918;
+
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Montserrat", sans-serif;
+}
+
+body {
+  background-color: var(--color-stone-50);
+  color: var(--color-stone-800);
+}
+
+.canary-stripe {
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #ffffff 33.33%,
+    #00a1e4 33.33%,
+    #00a1e4 66.66%,
+    #fcd116 66.66%,
+    #fcd116 100%
+  );
+}
+
+.btn-pop:active {
+  transform: scale(0.92);
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-pop {
+  animation: pop 0.3s ease-out forwards;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

@@ -1,0 +1,45 @@
+{
+  "badge": "100% Argentine Wine · Export to Canary Islands",
+  "heroTitle": "De Altura Wines",
+  "heroSubtitle": "The global prestige of Argentine wine, from the immensity of the Andes straight to the Canary Islands.",
+  "exploreCatalog": "Explore Catalog",
+  "catalogTitle": "2026 Catalog",
+  "catalogSubtitle": "Exclusive sales by full boxes.",
+  "filters": {
+    "all": "All",
+    "tinto": "Reds",
+    "blanco": "Whites",
+    "rosado": "Rosés",
+    "provincia": "Province:",
+    "todas": "All"
+  },
+  "sort": {
+    "default": "Sort by price",
+    "asc": "Price: Low to High",
+    "desc": "Price: High to Low"
+  },
+  "region": {
+    "cuyo": "Mendoza / Cuyo Region",
+    "norte": "Northern Argentina",
+    "patagonia": "Argentine Patagonia"
+  },
+  "noResults": "No wines found.",
+  "logisticsNoteStrong": "Note:",
+  "logisticsNote": "Logistics and delivery times may vary depending on the destination island.",
+  "horecaTitle": "HORECA Attention in the Canary Islands",
+  "horecaSubtitle": "Exclusive conditions and specialized advice for building your wine list.",
+  "horecaCta": "Contact an Advisor",
+  "footerCopyright": "© 2026 De Altura Wines. All rights reserved.",
+  "poweredBy": "Powered by Doyo",
+  "unitPrice": "Unit Price",
+  "incTax": "(IGIC incl.)",
+  "boxOf": "Box ({n} u.)",
+  "addToCart": "Add to Cart",
+  "notAvailable": "Not Available",
+  "cartEmpty": "The cart is empty",
+  "cartTitle": "Your Cart",
+  "cartTotal": "Total",
+  "checkout": "Proceed to Payment",
+  "boxLabel": "Box of {n}",
+  "boxesUnit": "Box(es)"
+}

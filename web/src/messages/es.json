@@ -1,0 +1,45 @@
+{
+  "badge": "100% Vino Argentino · Exportación a Canarias",
+  "heroTitle": "De Altura Wines",
+  "heroSubtitle": "El prestigio mundial del vino argentino, desde la inmensidad de los Andes directo a Islas Canarias.",
+  "exploreCatalog": "Explorar Catálogo",
+  "catalogTitle": "Catálogo 2026",
+  "catalogSubtitle": "Venta exclusiva por cajas completas.",
+  "filters": {
+    "all": "Todos",
+    "tinto": "Tintos",
+    "blanco": "Blancos",
+    "rosado": "Rosados",
+    "provincia": "Provincia:",
+    "todas": "Todas"
+  },
+  "sort": {
+    "default": "Ordenar por precio",
+    "asc": "Precio: Menor a Mayor",
+    "desc": "Precio: Mayor a Menor"
+  },
+  "region": {
+    "cuyo": "Mendoza / Región de Cuyo",
+    "norte": "Norte Argentino",
+    "patagonia": "Patagonia Argentina"
+  },
+  "noResults": "No se encontraron vinos.",
+  "logisticsNoteStrong": "Nota:",
+  "logisticsNote": "Los tiempos de logística y entrega pueden variar según la isla de destino.",
+  "horecaTitle": "Atención HORECA en Canarias",
+  "horecaSubtitle": "Condiciones exclusivas y asesoría especializada para la confección de su carta.",
+  "horecaCta": "Contacta un asesor",
+  "footerCopyright": "© 2026 De Altura Wines. Todos los derechos reservados.",
+  "poweredBy": "Powered by Doyo",
+  "unitPrice": "Precio Unitario",
+  "incTax": "(IGIC incl.)",
+  "boxOf": "Caja de {n}",
+  "addToCart": "Añadir al Carrito",
+  "notAvailable": "No Disponible",
+  "cartEmpty": "El carrito está vacío",
+  "cartTitle": "Tu Carrito",
+  "cartTotal": "Total",
+  "checkout": "Proceder al Pago",
+  "boxLabel": "Caja de {n}",
+  "boxesUnit": "Caja(s)"
+}
