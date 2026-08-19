@@ -17,5 +17,5 @@ deployed separately in `supabase/functions/` at the repo root and is called as-i
 
 ## Deploy
 
-Auto-deployed by Vercel on every push to `feature/nextjs-migration`
-(Root Directory: `web`, Production Branch: `feature/nextjs-migration`).
+Auto-deployed by Vercel on every push (Root Directory: `web`). Pushes to
+`feature/nextjs-migration` land as Preview deployments.
